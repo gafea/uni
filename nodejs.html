@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<link rel="shortcut icon" type="image/ico" href="%favicon%">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="HandheldFriendly" content="True">
+	<script>
+		const rootdomain = `%rootdomain%`
+		const resourceNETpath = `%resourceNETpath%`
+		var gAdsScript = `<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5793117294007322" data-ad-slot="7961358298" data-ad-format="auto" data-full-width-responsive="true"></ins>`
+		var rendergAds = () => {(adsbygoogle = window.adsbygoogle || []).push({})}
+		gAdsScript = ``
+		rendergAds = () => {}
+	</script>
+	%script%
+	%gscript%
+</head>
+
+<body>
+
+	<div class="no_css">
+		<div id="no_css_x"></div>
+		<style>body{margin:0} .no_css{display:flex;flex-flow:column;justify-content:center;align-items:center;width:100%;height:100vh} #no_css_x{border-radius:50%;animation:1.25s linear infinite spinner;border:solid 0.25em rgba(128,128,128,.5);border-top-color:#888;height:1em;width:1em;will-change:transform} @keyframes spinner { 0% {transform:rotate(0deg)} 100% {transform:rotate(360deg)}} @media (prefers-color-scheme: dark) {body{background-color:#0f0c09}}</style>
+		<script>document.getElementsByClassName("no_css")[0].id = "no_css";setTimeout(function() {document.getElementById("no_css_x").style.borderTopColor = 'red';document.getElementById("no_css").innerHTML += `<div style="margin:1em 0.5em;background-color:rgba(128,128,128,.2);color:grey;padding:1em;border-radius:1em;text-align:center;font-family: AppleSDGothicNeo-Regular, PingFangHK-Regular, Calibri, Microsoft JhengHei, verdana">some components are still loading<br>ignore them and show the page first?</div><button onclick="document.getElementById('no_css').innerHTML = '<style>.content{opacity:1!important;height:auto!important;overflow:unset!important}</style>';document.getElementById('no_css').style.display = 'none!important'">ignore</button>`}, 6000)</script>
+	</div>
+	
+	<div class="content" tabindex="-1" id="core" style="opacity:0;height:0;overflow:hidden">
+
+		<div class="b flx">
+			<div class="x flx">
+				<div class="p">
+					<h1><b>Unable to load content</b></h1><br>
+					<p1 style="opacity:0.8"><b>Your browser is too old to display this page, or we messed something up.</b></p1>
+				</div>
+				<img alt="Unable to load content" class="i" src="%resourceNETpath%image/nojs.png">
+			</div>
+		</div>
+
+		<style>
+			body{overflow-y:hidden;background-color:black;font-family:AppleSDGothicNeo-Regular, PingFangHK-Regular, Calibri, Microsoft JhengHei, verdana}
+			h1{font-size:1.375em;margin:0;vertical-align:middle;display:inline} p1{font-size:0.975em}
+			.b{color:white;justify-content:space-between;position:fixed;bottom:0;left:0;right:0;border-top:0.15em solid #3f3c39;padding:0.75em;padding:0.75em calc(0.75em + env(safe-area-inset-right)) calc(0.75em + env(safe-area-inset-bottom)) calc(0.75em + env(safe-area-inset-left))}
+			.i{object-fit:contain;height:3.25em} .p, .i, .aobh{margin:0.25em} .x, .i{order:1} .y, .p{order:2}
+			.s{display:inline;border-radius:0.25em;background-color:#008000;padding:0.1em 0.25em;margin:0.25em 0.375em 0.25em 0}
+			.flx{flex-flow:wrap;display:flex;align-items:center} .flx div{vertical-align:middle}
+			a{text-decoration:none;color:#3993ff} a:hover{color:#5bb5ff}
+			.aobh{transition-duration:0.1s;border-radius:0.5em;padding:0.5em;user-select:none;cursor:pointer}
+			.aobh:hover{background:rgba(255,255,255,.05)}
+			.aobh:active{background:rgba(255,255,255,.1)}
+			.aobh:hover:active{transform:scale(0.95)}
+			@media print{.no_print{display:none!important} body, .s{background-color:white} .s{border:1px solid black} .b{color:black} .i{filter:brightness(0.2)}}
+		</style>
+
+	</div>
+
+	<div id="bottomBar"></div>
+
+	<div id="cover_screen"></div>
+
+	<div id="OverlayWrp" style="display:none"><div id="OverlayBg"></div><div id="OverlayContent" tabindex="-1"></div></div>
+
+	<script src="/init.js"></script>
+	<script src="%resourceNETpath%boot.js"></script>
+
+	<noscript>
+		<div class="b flx">
+			<a href="" class="y aobh no_print"><p1><b>Reload</b></p1></a>
+			<div class="x flx">
+				<div class="p">
+					<h1><b>Unable to load content</b></h1><br>
+					<p1 style="opacity:0.8"><b>Please enable Javascript and reload the page.</b></p1>
+				</div>
+				<img alt="Unable to load content" class="i" src="%resourceNETpath%image/nojs.png">
+			</div>
+		</div>
+		<style>.no_css{display:none!important}</style>
+	</noscript>
+
+</body>
+
+</html>

@@ -1,0 +1,79 @@
+@media (prefers-color-scheme: light) {body{background-color:#f8fcff}}
+button{color:black;border:none;padding:1em;border-radius:1em;margin:0;cursor:pointer;font-size:13.25px}
+select, #myInput{color: black; cursor: pointer; font-size: 16px; border: 0.15em solid rgba(128,128,128,.3); background: white; text-overflow: ellipsis; padding: 0.5em; flex-grow: 1; border-radius: 0.5em; max-width: 100%}
+
+.selbox:hover{z-index:3}
+.flxb{flex-flow:wrap;display:flex;justify-content:space-between}
+.LR_Right, #iL1{width:calc( 100% - 19em )}
+.LR_Left, #iR1{padding:0.5em;pointer-events:none;position:sticky;top:0.75em;left:0;z-index:3;width:17em;overflow-y:auto;height:fit-content}
+.LR_Right{height:fit-content;overflow:clip;padding:0;background-color:var(--gbw)}
+.LR_Left{pointer-events:unset}
+.ugpgbox{padding:0.5em;border-radius:1.5em;background-color:var(--gbw)} .ugpgbox > button {cursor:pointer;padding:0.25em 1em;border-radius:1em;background:var(--bw);transition-duration:0.05s}
+#myInput{width:calc(100% - 1.3em);margin:0.5em 0;cursor:text;outline:none}
+#myDropdown > button {flex-grow:1;border-radius:0}
+#courses_detail_content .edge2edge, #courses_detail_content .edge2edge_page{padding:1em 2em}
+.course_sel{flex-grow:1;max-width:calc(50% - 1em)}
+.course_sel, .picbox_inner{min-height:8.5em;min-width:12.5em}
+.picbox_inner{color:white;align-items:flex-end;position:relative;background-color: rgba(0,0,0,.7); background: linear-gradient(180deg, rgba(0,0,0,.3) 0%, rgba(0,0,0,.6) 50%, rgba(0,0,0,.75) 100%); padding: 1em; border-radius: 1em}
+.picbox_inner_up{position: absolute; top: 0.6em;right: 1em;}
+
+@media (min-width:2500px) {
+    .unicoursewrap{display:flex}
+    #courses_select_wrp, #courses_specific_wrp{width:calc(50% - 4em)!important;padding:0;flex-grow:1;max-height:100vh;overflow-y:scroll!important;display:block!important}
+    #divheadbuffer{display:none} #wideheadbuffer{height:calc(5vh + 4.5em)}
+}
+
+@media (max-width:2500px) {
+    #courses_specific_wrp{display:none;position:sticky; top: 0; bottom: 0; left: 0; right: 0; z-index: 9999;background-color:var(--twtb);height:100vh;overflow-y:scroll}
+}
+
+.courses_specific_close{position:sticky;top:1.5em;top:calc(1.5em + env(safe-area-inset-top));text-align:right;padding-right:calc(5% + 2em);padding-right:calc(5% + 2em + env(safe-area-inset-right));z-index:10000}
+.courses_specific_close > button {padding:0;margin:0;border:none;border-radius:50%;transition-duration:0.05s;background:rgba(128,128,128,.25);opacity:0.8}
+.courses_specific_close > button:hover {background:rgba(128,128,128,.5);opacity:1}
+.courses_specific_close > button:hover:active {transform:scale(0.9)}
+.courses_specific_close > button, .courses_specific_close > button > img {width:3em;height:3em}
+
+.dpv_ytemb{width:min-content;margin:0 1em 0.5em 0;scroll-snap-align:start}
+.dpv_carrier{scroll-snap-type:x mandatory;scroll-padding:calc(5% + 5em);padding-top:1em!important;padding-bottom:1.5em!important;overflow-x:auto;flex-flow:row!important;scrollbar-width:thin;scrollbar-color:dark;justify-content:flex-start!important}
+
+.uniroomgrid{display:grid;grid-auto-rows:1fr;grid-auto-columns:1fr;grid-template-columns:auto 1fr}
+.uniroomweek{margin-left:0.675em;padding:0.25em 0.75em;position:sticky;top:0.5em;background-color:var(--bw);z-index:5;height:min-content;width:min-content;border-radius:1em}
+.uniroomtime{opacity:0.6;text-align:right;padding-right:1em}
+
+.lessonbox{border:0.1em dotted rgba(128,128,128,.5);padding:1em;border-radius:1em;max-width:100%;word-wrap:break-word}
+
+.chart-container{position: relative; width:100%; height:52.5vh}
+
+@media (prefers-color-scheme: dark) {
+    button{color:#eee;background-color:#3f3c39}
+    select, #myInput{color:#eee;background:#3f3c39}
+    .courses_specific_close > button > img{filter:invert(1)}
+}
+
+@media (max-width:1280px) {
+    .uniroomweek span {display:none}
+    .dpv_carrier{scroll-padding:calc(16px + 1em)}
+    .courses_specific_close{top:1.25em;top:calc(1.25em + env(safe-area-inset-top));padding-right:1.25em;padding-right:calc(1.25em + env(safe-area-inset-right))}
+    .LR_Left, #iR1{top:0.5em}
+}
+
+@media (max-width:1020px) {
+    .LR_Right, #iL1{margin-left:0;margin-right:0} .LR_Left, #iR1, .LR_Right, #iL1{width:100%}
+    .LR_Left, #iR1{position:initial;height:auto;padding:0}
+    .chart-container{width:100%; height:55vh}
+    .course_sel, .picbox_inner{min-height:8em}
+    .course_sel{max-width:unset}
+}
+
+@media (max-width:750px) {
+    .uniroomtime{display:none}
+    .uniroomgrid{display:block}
+    .chart-container{width:100%; height:70vh}
+}
+
+@media (max-width:520px) {
+    .dpv_ytemb{margin:0.5em 0; width:calc(100% - 2em)}
+    .dpv_carrier{display:block}
+    .courses_specific_close > button, .courses_specific_close > button > img {width:2.75em;height:2.75em}
+    #courses_detail_content .edge2edge, #courses_detail_content .edge2edge_page{padding:1em}
+}
