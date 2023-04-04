@@ -42,7 +42,7 @@ function init(path) {
             <div id="courses_specific_wrp">
                 <div class="courses_specific_close no_widescreen">
                     <button type="button" title="Close" onclick="hideCourseSpecificPage()">
-                        <img alt="Close" loading="lazy" style="max-width:3em;max-height:3em" draggable="false" src="https://gafea.net/cdn/image/circle-cross.png">
+                        <img alt="Close" loading="lazy" style="max-width:3em;max-height:3em" draggable="false" src="` + resourceNETpath + `image/circle-cross.png">
                     </button>
                 </div>
                 <div id="courses_specific"></div>
@@ -60,7 +60,7 @@ function init(path) {
             <div id="courses_specific_wrp">
                 <div class="courses_specific_close no_widescreen">
                     <button type="button" title="Close" onclick="hideCourseSpecificPage()">
-                        <img alt="Close" loading="lazy" style="max-width:3em;max-height:3em" draggable="false" src="https://gafea.net/cdn/image/circle-cross.png">
+                        <img alt="Close" loading="lazy" style="max-width:3em;max-height:3em" draggable="false" src="` + resourceNETpath + `image/circle-cross.png">
                     </button>
                 </div>
                 <div id="courses_specific"></div>
@@ -78,7 +78,7 @@ function init(path) {
             <div id="courses_specific_wrp">
                 <div class="courses_specific_close no_widescreen">
                     <button type="button" title="Close" onclick="hideCourseSpecificPage()">
-                        <img alt="Close" loading="lazy" style="max-width:3em;max-height:3em" draggable="false" src="https://gafea.net/cdn/image/circle-cross.png">
+                        <img alt="Close" loading="lazy" style="max-width:3em;max-height:3em" draggable="false" src="` + resourceNETpath + `image/circle-cross.png">
                     </button>
                 </div>
                 <div id="courses_specific"></div>
@@ -206,13 +206,30 @@ function wait_allSems(cb, path, title) {
     if (allSemsF.length) { allSems = JSON.parse(JSON.stringify(allSemsF)); cb(path); return }
 
     fetch("/!course/").then(r => r.json()).then(r => {
-        if (r.status != 200) { document.getElementById("core").innerHTML = "failed to contact server"; return }
+        if (r.status != 200 || !r.resp.length) {
+            document.getElementById("core").innerHTML = `
+            <div class="edge2edge_page">
+                <h2>Oops</h2><br>
+                <p3>It seems that there are nothing we can show to you at the moment. Try coming back later.</p3><br><br>
+                <div class="box">
+                    <h4>Technical Information</h4>
+                    <p3>wait_allSems failed, possibly due to no data in cache or other server error.<br>Run <b>/!course_fetch/</b> and <b>/!course_cache/</b> on the internal API, or check server status.</p3>
+                </div>
+            </div>
+            `
+            return 
+        }
         allSemsF = r.resp
         allSems = JSON.parse(JSON.stringify(allSemsF))
         cb(path)
     }).catch(error => {
         console.log(error)
-        document.getElementById("core").innerHTML = "failed to contact server or script crashed"
+        document.getElementById("core").innerHTML = `
+        <div class="edge2edge_page">
+            <h2>Oops</h2><br>
+            <p3>Connect to the internet, and then refresh the page.</p3>
+        </div>
+        `
     })
 
 }
@@ -660,7 +677,7 @@ function render_people(path) {
 
         if (ustTimeToString(target_time) === '----') { html.innerHTML = `the url is not in a valid format`; return }
         if (parseInt(target_time) > maxSem) { html.innerHTML = `i hope i can know what courses would exist in the future too 👀`; return }
-        if (signinlevel === 0 && parseInt(target_time) < peopleMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.gafea.net/">sign in</a> now to get access to this page`; return }
+        if (signinlevel === 0 && parseInt(target_time) < peopleMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.` + rootdomain + `/">sign in</a> now to get access to this page`; return }
         if ((!skippeopleRestriction && parseInt(target_time) < peopleMinSem) || parseInt(target_time) < 1200) { html.innerHTML = `we don't have data for semesters that are too old :(`; return }
 
         fetch("/!people/" + target_people + "/" + target_time + "/").then(r => r.json()).then(r => {
@@ -775,7 +792,7 @@ function render_room(path) {
 
         if (ustTimeToString(target_time) === '----') { html.innerHTML = `the url is not in a valid format`; return }
         if (parseInt(target_time) > maxSem) { html.innerHTML = `i hope i can know what courses would exist in the future too 👀`; return }
-        if (signinlevel === 0 && parseInt(target_time) < roomMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.gafea.net/">sign in</a> now to get access to this page`; return }
+        if (signinlevel === 0 && parseInt(target_time) < roomMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.` + rootdomain + `/">sign in</a> now to get access to this page`; return }
         if ((!skipRoomRestriction && parseInt(target_time) < roomMinSem) || parseInt(target_time) < 1200) { html.innerHTML = `we don't have data for semesters that are too old :(`; return }
 
         fetch("/!room/" + target_room + "/" + target_time + "/").then(r => r.json()).then(r => {

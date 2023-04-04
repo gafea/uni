@@ -42,7 +42,7 @@ uni is a service that scrape the HKUST Class Schedule & Quota system and perform
 
 ## Usage
 
-There are several nodejs scripts that has its filename ending with ```_node.js``` in this repo and they serve different perposes. They could be run according to your needs by running ```node [filename]``` in the command prompt/terminal.
+There are several nodejs scripts that has its filename ending with ```_node.js``` in this repo and they serve different purposes. They could be run according to your needs by running ```node [filename]``` in the command prompt/terminal.
 
 ### uni_node.js
 
