@@ -383,92 +383,7 @@ const server = http.createServer((req, res) => {
                 })
 
             } else if (servar.deployed && req.url.startsWith('/!acc/')) {
-                const accSum = acc.getAccSummary(req.cookies.cToken, body.pToken, servar.domain)
-
-                if (req.url === '/!acc/') {
-                    res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                    try { delete accSum['usrpath']; delete accSum['check']['usrpath'] } catch (e) { }
-                    res.end(JSON.stringify({ status: 200, summary: accSum }))
-                    return
-                }
-
-                if (accSum.signinlevel != 2 && req.url === '/!acc/uniplus.js') {
-                    res.writeHead(200, { 'Content-Type': "application/javascript; charset=utf-8", 'Server': 'joutou', 'Cache-Control': 'max-age=0' })
-                    res.end("//this is 100% an empty file\n//if you found ways bypassing the checks, please send me an email 👀\n//gafea [at] icloud [dot] com")
-                    return
-                }
-
-                if (!accSum.valid) {
-                    res.writeHead(401, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                    res.end(JSON.stringify({ status: 401, msg: "bad-token", cTokenOnly: accSum.check.cTokenOnly }))
-                    return
-                }
-                const usrpath = accSum.usrpath
-
-                if (req.url === '/!acc/name' || req.url === '/!acc/name/') {
-                    res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                    res.end(JSON.stringify({ status: 200, name: accSum.name }))
-                    return
-                }
-
-                if (accSum.signinlevel === 2) {
-
-                    if (req.url === '/!acc/uniplus.js') {
-                        res.writeHead(200, { 'Content-Type': 'application/javascript', 'Server': 'joutou', 'Cache-Control': 'max-age=300' })
-                        fs.readFile('' + __dirname + path.sep + 'uniplus.js', 'utf8', (err, data) => { (err) ? res.end("") : res.end(data) })
-                        return
-                    }
-
-                    if (req.url === '/!acc/uniplus.css') {
-                        res.writeHead(200, { 'Content-Type': 'text/css', 'Server': 'joutou', 'Cache-Control': 'max-age=300' })
-                        fs.readFile('' + __dirname + path.sep + 'uniplus.css', 'utf8', (err, data) => { (err) ? res.end("") : res.end(data) })
-                        return
-                    }
-
-                    if (req.url.startsWith("/!acc/_")) {
-                        switch (req.url.substring(7).toLowerCase()) {
-                            case "courses":
-                                res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                                res.end(JSON.stringify({ status: 200, resp: courses }))
-                                break;
-
-                            case "diffs":
-                                res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                                res.end(JSON.stringify({ status: 200, resp: diffs }))
-                                break;
-
-                            case "peoples":
-                                res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                                res.end(JSON.stringify({ status: 200, resp: peoples }))
-                                break;
-
-                            case "rooms":
-                                res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                                res.end(JSON.stringify({ status: 200, resp: rooms }))
-                                break;
-
-                            case "sems":
-                                res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                                res.end(JSON.stringify({ status: 200, resp: sems }))
-                                break;
-
-                            case "insems":
-                                res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                                res.end(JSON.stringify({ status: 200, resp: insems }))
-                                break;
-
-                            default:
-                                res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                                res.end(JSON.stringify({ status: 404 }))
-                                break;
-                        }
-                        return
-                    }
-
-                }
-
-                sharedfx.returnErr(res, 404, 'no-such-fx', true)
-                return
+                acc.handle(req, res, body, servar)
 
             } else if (req.url.toLowerCase() === '/init.js') {
                 res.writeHead(200, { 'Content-Type': 'application/javascript', 'Server': 'joutou', 'Cache-Control': 'max-age=7200' })
@@ -484,7 +399,11 @@ const server = http.createServer((req, res) => {
 
             } else {
                 res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8', 'Server': 'joutou' })
-                res.end(sharedfx.envar.indexHTML.replace("%script%", `<script src="https://` + sharedfx.envar.root_domain + `/chartjs/dist/chart.umd.js"></script><script src="https://` + sharedfx.envar.root_domain + `/chartjsanno/dist/chartjs-plugin-annotation.min.js"></script>`).replace("%gscript%", sharedfx.envar.gscript))
+                res.end(sharedfx.envar.indexHTML.replace("%script%", `
+                <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chart.umd.js"></script>
+                <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chartjs-plugin-annotation.min.js"></script>
+                <script src="` + sharedfx.envar.cdnNETpath + `pkg\\anime.min.js"></script>
+                `).replace("%gscript%", sharedfx.envar.gscript))
 
             }
 

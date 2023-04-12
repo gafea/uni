@@ -2,6 +2,7 @@ var script1 = document.createElement('script'); script1.src = '/!acc/uniplus.js'
 
 const bottombarbuttons = [
     'Courses,/course/,course,' + resourceNETpath + 'image/nullicon.png',
+    'Minor,/minor/,minor,' + resourceNETpath + 'image/nullicon.png',
     'Instructors,/people/,people,' + resourceNETpath + 'image/nullicon.png',
     'Rooms,/room/,room,' + resourceNETpath + 'image/nullicon.png',
     'About,/about/,about,' + resourceNETpath + 'image/info.png'
@@ -50,6 +51,9 @@ function init(path) {
                 <div id="divheadbuffer"></div>
             </div>
             </div>` + renderBottomBar('course')
+
+        } else if (path.toLowerCase().startsWith("/minor/")) { //minor page
+            return `<div class="edge2edge_page">minor</div>` + renderBottomBar('minor')
 
         } else if (path.toLowerCase().startsWith("/people/")) { //people page
             return `<div class="unicoursewrap">
