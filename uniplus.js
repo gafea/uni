@@ -1,1 +1,0 @@
-installCSS("uniplus.css", "/!acc/")
