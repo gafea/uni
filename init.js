@@ -1,8 +1,8 @@
 var script1 = document.createElement('script'); script1.src = '/!acc/uniplus.js'; document.head.appendChild(script1);
 
 const bottombarbuttons = [
+    'Me,/me/,me,' + resourceNETpath + 'image/nullicon.png',
     'Courses,/course/,course,' + resourceNETpath + 'image/nullicon.png',
-    'Minor,/minor/,minor,' + resourceNETpath + 'image/nullicon.png',
     'Instructors,/people/,people,' + resourceNETpath + 'image/nullicon.png',
     'Rooms,/room/,room,' + resourceNETpath + 'image/nullicon.png',
     'About,/about/,about,' + resourceNETpath + 'image/info.png'
@@ -30,8 +30,8 @@ function init(path) {
                         <div class="flx">
                             <h2>Courses</h2>
                             <p5><b><div class="ugpgbox flx">
-                                <button id="ugbtn" onclick="studprog = 'ug'; render_courses(window.location.pathname.substring(8), false, true)" title="Undergraduate Courses">UG</button>
-                                <button id="pgbtn" onclick="studprog = 'pg'; render_courses(window.location.pathname.substring(8), false, true)" title="Postgraduate Courses">PG</button>
+                                <button id="ugbtn" onclick="studprog = 'ug'; accConfig['studprog'] = 'ug'; update_accConfig('studprog', 'ug'); render_courses(window.location.pathname.substring(8), false, true)" title="Undergraduate Courses">UG</button>
+                                <button id="pgbtn" onclick="studprog = 'pg'; accConfig['studprog'] = 'pg'; update_accConfig('studprog', 'pg'); render_courses(window.location.pathname.substring(8), false, true)" title="Postgraduate Courses">PG</button>
                             </div></b></p5>
                         </div>
                         <div class="box" id="courses_side" style="margin:0.5em 0"></div>
@@ -52,8 +52,15 @@ function init(path) {
             </div>
             </div>` + renderBottomBar('course')
 
-        } else if (path.toLowerCase().startsWith("/minor/")) { //minor page
-            return `<div class="edge2edge_page">minor</div>` + renderBottomBar('minor')
+        } else if (path.toLowerCase().startsWith("/me/")) { //me page
+            return `
+            <div class="edge2edge_page">
+                <h3>Courses Enrolled</h3>
+            </div>
+            <div id="my_courses">
+                
+            </div>
+            ` + renderBottomBar('me')
 
         } else if (path.toLowerCase().startsWith("/people/")) { //people page
             return `<div class="unicoursewrap">
@@ -204,6 +211,8 @@ function exe(path) {
         } else {
             exe_room(path.substring(6))
         }
+    } else if (path.toLowerCase().startsWith("/me/")) {
+        exe_me()
     } else if (path.toLowerCase().startsWith("/about/")) {
         exe_about()
     } else if (false && path.startsWith('/!') && !(path === '/!404' || path.startsWith('/!404/'))) {
@@ -224,9 +233,74 @@ function exe_about() {
 const exe_courses = (path) => wait_allSems(render_courses, path, "Courses - uni")
 const exe_people = (path) => wait_allSems(render_people, path, "Instructors - uni")
 const exe_room = (path) => wait_allSems(render_room, path, "Rooms - uni")
+const exe_me = (path) => wait_allSems(render_me, path, "Me - uni")
+
+function render_me() {
+    document.title = "Me - uni"
+
+    let my_courses = document.getElementById("my_courses")
+    if (signinlevel <= 0) {
+        my_courses.innerHTML = `<div class="edge2edge"><p2>Please sign in first!</p2></div>`
+    } else {
+        if (typeof accConfig.courses === "undefined") {
+            my_courses.innerHTML = `<div class="edge2edge"><p2>No courses found!</p2></div>`
+        } else {
+            let htmld = ""
+            Object.keys(accConfig.courses).forEach(sem => {
+                htmld += `<div class="edge2edge"><h3>` + ustTimeToString(sem) + `</h3><div class="flx">`
+                accConfig.courses[sem].forEach(course => {
+                    htmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="render_courses_specific('` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', true)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
+                    <div class="picbox_inner_up"><h5 style="opacity:0.85">` + course.split(" (")[1].split(")")[0] + `</h5></div>
+                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.split(" (")[0].replace(course.split(" (")[0].split(" - ")[0] + " - ", "") + `</h5></div></div></div>`
+                })
+                htmld += `</div></div>`
+            })
+            my_courses.innerHTML = htmld
+        }
+    }
+}
 
 var studprog = "ug"
 var listMode = "card"
+
+var accConfig = {}
+
+function update_accConfig(newKey = "", newVal = "", cb = (err) => { }) {
+    if (!newKey && !newVal) {
+        fetch("/!acc/config/").then(r => r.json()).then(r => {
+            if (r.status === 200) {
+                accConfig = r.resp
+                apply_config()
+            }
+            cb()
+        }).catch(error => {
+            console.log(error)
+            cb(err)
+        })
+    } else {
+        let newKeyVal = {}
+        newKeyVal[newKey] = newVal
+        post("/!acc/config/", newKeyVal).then(r => r.json()).then(r => {
+            if (r.status === 200) {
+                accConfig = r.resp
+                apply_config()
+            }
+            cb()
+        }).catch(error => {
+            console.log(error)
+            cb(err)
+        })
+    }
+}
+
+function apply_config() {
+    if (typeof accConfig.studprog != "undefined") {
+        studprog = accConfig.studprog
+    }
+    if (typeof accConfig.listMode != "undefined") {
+        listMode = accConfig.listMode
+    }
+}
 
 var allSems = []
 var allSemsF = []
@@ -250,11 +324,21 @@ function wait_allSems(cb, path, title) {
                 </div>
             </div>
             `
-            return 
+            return
         }
         allSemsF = r.resp
         allSems = JSON.parse(JSON.stringify(allSemsF))
-        cb(path)
+
+        fetch("/!acc/config/").then(r => r.json()).then(r => {
+            if (r.status === 200) {
+                accConfig = r.resp
+            }
+            cb(path)
+        }).catch(error => {
+            console.log(error)
+            cb(path)
+        })
+
     }).catch(error => {
         console.log(error)
         document.getElementById("core").innerHTML = `
@@ -287,8 +371,8 @@ function hideCourseSpecificPage() {
     document.body.style.height = 'auto'
     document.body.style.overflowY = 'auto'
     if (document.getElementById('courses_specific_wrp')) document.getElementById('courses_specific_wrp').style.display = 'none'
-    if (wasInsideCoursePage) { 
-        history.pushState({ plate: courseSpecificReturnURL }, window.title, courseSpecificReturnURL) 
+    if (wasInsideCoursePage) {
+        history.pushState({ plate: courseSpecificReturnURL }, window.title, courseSpecificReturnURL)
         document.title = "" + courseSpecificReturnURL.split("/")[3] + " - " + ustTimeToString(courseSpecificReturnURL.split("/")[2]) + " - uni"
     }
 }
@@ -296,6 +380,32 @@ function hideCourseSpecificPage() {
 let alwaysExecSetLoadingStatusImmediately = true
 let chartx = ''
 let wasInsideCoursePage = false
+
+function enroll_course(sem, course, make_switch = false) {
+    let btn = document.getElementById("course_enroll_btn")
+    let newConfig = JSON.parse(JSON.stringify(accConfig))
+    if (typeof newConfig.courses === "undefined") newConfig.courses = {}
+    if (typeof newConfig.courses[sem] === "undefined") newConfig.courses[sem] = []
+    if (make_switch) {
+        if (newConfig.courses[sem].includes(course)) {
+            newConfig.courses[sem] = newConfig.courses[sem].filter(function (item) {
+                return item !== course
+            })
+            update_accConfig("courses", newConfig.courses)
+            btn.innerText = "Enroll"
+        } else {
+            newConfig.courses[sem].push(course)
+            update_accConfig("courses", newConfig.courses)
+            btn.innerText = "✅ Enrolled"
+        }
+    } else {
+        if (newConfig.courses[sem].includes(course)) {
+            btn.innerText = "✅ Enrolled"
+        } else {
+            btn.innerText = "Enroll"
+        }
+    }
+}
 
 function render_courses_specific(path, insideCoursePage = false) {
     document.body.style.height = '100vh'
@@ -309,122 +419,128 @@ function render_courses_specific(path, insideCoursePage = false) {
         if (r.status != 200) { shtml.innerHTML = "failed to contact server"; return }
 
         let html_draft = ""
-        Object.keys(r.resp).forEach((course, ix) => {
+        let course = Object.keys(r.resp)[0]
 
-            wasInsideCoursePage = insideCoursePage
-            if (insideCoursePage) {
-                if (parseInt(course[5]) > 0 && parseInt(course[5]) < 5 && studprog != "ug") {
-                    studprog = "ug"
-                    render_courses(path)
-                    return
-                } else if (parseInt(course[5]) >= 5 && studprog != "pg") {
-                    studprog = "pg"
-                    render_courses(path)
-                    return
-                }
-
-                history.pushState({ plate: "/course/" + path }, window.title, "/course/" + path)
-                document.title = "" + course.split(" - ")[0] + " - " + ustTimeToString(path.split("/")[0]) + " - uni"
+        wasInsideCoursePage = insideCoursePage
+        if (insideCoursePage) {
+            if (parseInt(course[5]) > 0 && parseInt(course[5]) < 5 && studprog != "ug") {
+                studprog = "ug"
+                render_courses(path)
+                return
+            } else if (parseInt(course[5]) >= 5 && studprog != "pg") {
+                studprog = "pg"
+                render_courses(path)
+                return
             }
 
-            html_draft += `<div class="edge2edge"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `">
-            <div class="box"><div class="flx"><h4>` + course + `</h4></div><p2>` + r.resp[course].attr.DESCRIPTION + `</p2><br><br>
-            <div class="flx" style="justify-content:flex-start;gap:0.5em"><p4>Also offered in: </p4><div id="alsoOfferedIn"><div id="d_loading"></div></div></div></div>`
-            let attrHTML = renderCourseAttr(r.resp[course].attr, course)
-            if (attrHTML) html_draft += `<div class="box"><h4>📚 Course Attributes</h4>` + attrHTML + `</div>`
-            html_draft += `</div>`
+            history.pushState({ plate: "/course/" + path }, window.title, "/course/" + path)
+            document.title = "" + course.split(" - ")[0] + " - " + ustTimeToString(path.split("/")[0]) + " - uni"
+        }
 
-            if (typeof r.resp[course].exam != "undefined") {
-                html_draft += `<div class="box"><h4>🎓 Exam Schedule</h4><div class="flx" style="justify-content:flex-start">`
-                Object.keys(r.resp[course].exam).forEach(key => {
-                    html_draft += `<div class="box" style="box-shadow:0 0.5em 1em rgba(0,0,0,.1);border:0.1em solid rgba(128,128,128,.2);padding-top:0.85em">
+        html_draft += `<div class="edge2edge"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `">
+            <div class="box"><div class="flx"><h4>` + course + `</h4></div><p2>` + r.resp[course].attr.DESCRIPTION + `</p2><br><br>
+            <div class="flx" style="gap:0.5em">
+                <div class="flx" style="justify-content:flex-start;gap:0.5em">
+                    <p4>Also offered in: </p4><div id="alsoOfferedIn"><div id="d_loading"></div></div>
+                </div>
+                <button id="course_enroll_btn" onclick="enroll_course('` + path.split("/")[0] + `','` + course + `', true)">Enroll</button>
+            </div></div>`
+        let attrHTML = renderCourseAttr(r.resp[course].attr, course)
+        if (attrHTML) html_draft += `<div class="box"><h4>📚 Course Attributes</h4>` + attrHTML + `</div>`
+        html_draft += `</div>`
+
+        if (typeof r.resp[course].exam != "undefined") {
+            html_draft += `<div class="box"><h4>🎓 Exam Schedule</h4><div class="flx" style="justify-content:flex-start">`
+            Object.keys(r.resp[course].exam).forEach(key => {
+                html_draft += `<div class="box" style="box-shadow:0 0.5em 1em rgba(0,0,0,.1);border:0.1em solid rgba(128,128,128,.2);padding-top:0.85em">
                     <div style="border-bottom:0.1em dotted #888;padding-bottom:0.25em;margin-bottom:0.5em">
                     <h4>` + key + `</h4></div><div><p2>`
-                    if (typeof r.resp[course].exam[key].Remarks != "undefined") {
-                        if (r.resp[course].exam[key].Remarks == "No Final Exam") {
-                            html_draft += "❌ No Final Exam"
-                        } else {
-                            html_draft += JSON.stringify(r.resp[course].exam[key])
-                        }
+                if (typeof r.resp[course].exam[key].Remarks != "undefined") {
+                    if (r.resp[course].exam[key].Remarks == "No Final Exam") {
+                        html_draft += "❌ No Final Exam"
                     } else {
                         html_draft += JSON.stringify(r.resp[course].exam[key])
                     }
-                    html_draft += `</p2></div></div>`
-                })
-                html_draft += `</div></div>`
+                } else {
+                    html_draft += JSON.stringify(r.resp[course].exam[key])
+                }
+                html_draft += `</p2></div></div>`
+            })
+            html_draft += `</div></div>`
+        }
+
+        if (parseInt(path.split("/")[0]) >= 2230) html_draft += `<div class="box"><div id="charts"><h4>📈 Enrollment History</h4></div></div>`
+
+        let htmls = { lec: [], lab: [], tut: [], rsh: [], otr: [] }
+
+        Object.keys(r.resp[course].section).forEach(sectionName => {
+            let attrs = JSON.parse(JSON.stringify(r.resp[course].section[sectionName][Object.keys(r.resp[course].section[sectionName])[0]]))
+            let htmlsd = `<div class="dpv_ytemb lessonbox"><h4>` + sectionName + `</h4>`
+
+            if (typeof attrs["Remarks"] != "undefined") {
+                htmlsd += "<p2>Remarks: " + attrs["Remarks"] + "</p2><br><br>"
+                delete attrs["Remarks"]
             }
 
-            if (parseInt(path.split("/")[0]) >= 2230) html_draft += `<div class="box"><div id="charts"><h4>📈 Enrollment History</h4></div></div>`
+            //not needed if dynrender
+            delete attrs["Section"]
+            delete attrs["Date & Time"]
+            delete attrs["Room"]
+            delete attrs["Instructor"]
+            //
 
-            let htmls = { lec: [], lab: [], tut: [], rsh: [], otr: [] }
+            htmlsd += JSON.stringify(attrs) + `<br>`
+            let resp = {}
+            Object.keys(r.resp[course].section[sectionName]).forEach(time => {
+                resp[time] = { Room: r.resp[course].section[sectionName][time].Room, Instructor: r.resp[course].section[sectionName][time].Instructor }
+            })
+            htmlsd += `` + renderTimetableGrid(resp, "courseDetail") + `</div>`
 
-            Object.keys(r.resp[course].section).forEach(sectionName => {
-                let attrs = JSON.parse(JSON.stringify(r.resp[course].section[sectionName][Object.keys(r.resp[course].section[sectionName])[0]]))
-                let htmlsd = `<div class="dpv_ytemb lessonbox"><h4>` + sectionName + `</h4>`
+            htmls[lessonToType(sectionName)].push(htmlsd)
+        })
 
-                if (typeof attrs["Remarks"] != "undefined") {
-                    htmlsd += "<p2>Remarks: " + attrs["Remarks"] + "</p2><br><br>"
-                    delete attrs["Remarks"]
+        html_draft += `</div>`
+        Object.keys(htmls).forEach(type => {
+            if (htmls[type].length) {
+                html_draft += `<div class="edge2edge flx" style="justify-content:flex-start"><h3>` + type + `</h3><h5><span class="uniroomweek" style="border:0.15em solid rgba(128,128,128,.5)">` + htmls[type].length + `</span></h5></div></div><div class="flx edge2edge dpv_carrier" style="padding-top:0!important" id="` + type + `">`
+                htmls[type].forEach(h => html_draft += h)
+                html_draft += `</div>`
+            }
+        })
+
+        html_draft += `<style>#courses_specific .uniroomtime{display:none} #courses_specific .uniroomweek{position:unset;margin-top:1em} #courses_specific .uniroomgrid{display:block}</style></div>`
+
+        fetch("/!insem/" + course.split(" ")[0] + course.split(" ")[1] + "/").then(r => r.json()).then(u => {
+            if (u.status != 200) { document.getElementById("alsoOfferedIn").innerHTML = "failed to contact server or script crashed"; return }
+
+            u.resp.sort()
+            u.resp.reverse()
+            let draft = `<select style="width:100%" name="timeidx" id="timeidx" title="Select Semester" onchange="render_courses_specific('' + document.getElementById('timeidx').value + '/' + '` + course.split(" ")[0] + `' + '/' + '` + course.split(" ")[0] + course.split(" ")[1] + `' + '/', ` + insideCoursePage + `)">`
+            let prevSem = "----"
+            u.resp.forEach(sem => {
+                let thisSem = ustTimeToString(sem)
+                if (thisSem.split(" ")[0] != prevSem) {
+                    if (prevSem != '----') draft += `</optgroup>`
+                    draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
+                    prevSem = thisSem.split(" ")[0]
                 }
-
-                //not needed if dynrender
-                delete attrs["Section"]
-                delete attrs["Date & Time"]
-                delete attrs["Room"]
-                delete attrs["Instructor"]
-                //
-
-                htmlsd += JSON.stringify(attrs) + `<br>`
-                let resp = {}
-                Object.keys(r.resp[course].section[sectionName]).forEach(time => {
-                    resp[time] = { Room: r.resp[course].section[sectionName][time].Room, Instructor: r.resp[course].section[sectionName][time].Instructor }
-                })
-                htmlsd += `` + renderTimetableGrid(resp, "courseDetail") + `</div>`
-
-                htmls[lessonToType(sectionName)].push(htmlsd)
-            })
-
-            html_draft += `</div>`
-            Object.keys(htmls).forEach(type => {
-                if (htmls[type].length) {
-                    html_draft += `<div class="edge2edge flx" style="justify-content:flex-start"><h3>` + type + `</h3><h5><span class="uniroomweek" style="border:0.15em solid rgba(128,128,128,.5)">` + htmls[type].length + `</span></h5></div></div><div class="flx edge2edge dpv_carrier" style="padding-top:0!important" id="` + type + `">`
-                    htmls[type].forEach(h => html_draft += h)
-                    html_draft += `</div>`
+                draft += `<option value="` + sem + `"`
+                if (sem == path.split("/")[0]) {
+                    draft += " selected"
                 }
+                draft += `>` + ustTimeToString(sem) + `</option>`
             })
+            draft += `</optgroup></select>`
 
-            html_draft += `<style>#courses_specific .uniroomtime{display:none} #courses_specific .uniroomweek{position:unset;margin-top:1em} #courses_specific .uniroomgrid{display:block}</style></div>`
-        
-            fetch("/!insem/" + course.split(" ")[0] + course.split(" ")[1] + "/").then(r => r.json()).then(u => {
-                if (u.status != 200) { document.getElementById("alsoOfferedIn").innerHTML = "failed to contact server or script crashed"; return }
-    
-                u.resp.sort()
-                u.resp.reverse()
-                let draft = `<select style="width:100%" name="timeidx" id="timeidx" title="Select Semester" onchange="render_courses_specific('' + document.getElementById('timeidx').value + '/' + '` + course.split(" ")[0] + `' + '/' + '` + course.split(" ")[0] + course.split(" ")[1] + `' + '/', ` + insideCoursePage + `)">`
-                let prevSem = "----"
-                u.resp.forEach(sem => {
-                    let thisSem = ustTimeToString(sem)
-                    if (thisSem.split(" ")[0] != prevSem) {
-                        if (prevSem != '----') draft += `</optgroup>`
-                        draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
-                        prevSem = thisSem.split(" ")[0]
-                    }
-                    draft += `<option value="` + sem + `"`
-                    if (sem == path.split("/")[0]) {
-                        draft += " selected"
-                    }
-                    draft += `>` + ustTimeToString(sem) + `</option>`
-                })
-                draft += `</optgroup></select>`
-    
-                document.getElementById("alsoOfferedIn").innerHTML = draft
-            }).catch(error => {
-                console.log(error)
-                document.getElementById("alsoOfferedIn").innerHTML = "failed to contact server or script crashed"
-            })
+            document.getElementById("alsoOfferedIn").innerHTML = draft
+        }).catch(error => {
+            console.log(error)
+            document.getElementById("alsoOfferedIn").innerHTML = "failed to contact server or script crashed"
         })
 
         shtml.innerHTML = html_draft
+
+        setTimeout(enroll_course, 50, path.split("/")[0], course)
 
         if (parseInt(path.split("/")[0]) >= 2230) {
             fetch("/!diff/" + path.split('/')[2].toUpperCase() + "/" + ((path.split("/")[0] != allSemsF[0]) ? ("" + path.split("/")[0] + "/") : "")).then(r => r.json()).then(rChart => {
@@ -482,11 +598,11 @@ function render_courses_details(path, scrollIntoView = false) {
         if (listMode === "card") {
             html_draft += `<p5><b><div class="ugpgbox flx">
                 <button id="cardbtn" style="background:rgba(64,160,255,.4);cursor:default" title="Card View">📇</button>
-                <button id="detailbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'detail'; render_courses(window.location.pathname.substring(8), true, true)" title="Detail View">🧾</button>
+                <button id="detailbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'detail'; accConfig['listMode'] = 'detail'; update_accConfig('listMode', 'detail'); render_courses(window.location.pathname.substring(8), true, true)" title="Detail View">🧾</button>
                 </div></b></p5></div></div><div class="flx" style="margin-top:0.5em">`
         } else {
             html_draft += `<p5><b><div class="ugpgbox flx">
-                <button id="cardbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'card'; render_courses(window.location.pathname.substring(8), true, true)" title="Card View">📇</button>
+                <button id="cardbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'card'; accConfig['listMode'] = 'card'; update_accConfig('listMode', 'card'); render_courses(window.location.pathname.substring(8), true, true)" title="Card View">📇</button>
                 <button id="detailbtn" style="background:rgba(64,160,255,.4);cursor:default" title="Detail View">🧾</button>
                 </div></b></p5></div></div>`
         }
@@ -516,6 +632,7 @@ function render_courses_details(path, scrollIntoView = false) {
 
 function render_courses(path, scrollIntoView = false, doNotCheckUGPG = false) {
 
+    apply_config()
     render_UGPG_switch()
     hideCourseSpecificPage()
 
