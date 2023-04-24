@@ -96,7 +96,7 @@ Object.keys(xcourses).forEach(courseKey => {
             }
 
             lesson = xcourses[courseKey][semKey][lessonKey]
-            if (typeof lesson["section"] != "undefined") {
+            if (typeof lesson["section"] != "undefined" && lesson["section"] && Object.keys(lesson["section"])) {
                 Object.keys(lesson["section"]).forEach(sectionKey => {
                     Object.keys(lesson["section"][sectionKey]).forEach(dateKey => {
                         date = lesson["section"][sectionKey][dateKey]
@@ -148,6 +148,8 @@ Object.keys(xcourses).forEach(courseKey => {
                         }
                     })
                 })
+            } else if (typeof lesson["section"] != "undefined" && !(lesson["section"] && Object.keys(lesson["section"]))) {
+                delete xcourses[courseKey][semKey][lessonKey]["section"]
             }
         })
     })

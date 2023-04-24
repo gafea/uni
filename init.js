@@ -19,7 +19,7 @@ function init(path) {
 
         prev_call = path
 
-        if (path == '/' || path == '') { //home page, nnot decided what to do yet so redir to /course/ ;)
+        if (path == '/' || path == '') { //home page, not decided what to do yet so redir to /course/ ;)
             return `<meta http-equiv="refresh" content="0;URL=/course/">`
 
         } else if (path.toLowerCase().startsWith("/course/")) { //course page
@@ -106,9 +106,9 @@ function init(path) {
             <p3><br>
                 uni.gafea.net is not affiliated with the Hong Kong University of Science and Technology (HKUST).
             <br>
-                This project would not be possible without the <a target="_blank" href="https://w5.ab.ust.hk/wcq/cgi-bin/">HKUST Class Schedule & Quota</a> system, which was first adapted from a student contribution in 2011-12 Fall.
+                This project would not be possible without the <a target="_blank" href="https://w5.ab.ust.hk/wcq/cgi-bin/">HKUST Class Schedule & Quota</a> and <a target="_blank" href="https://w5.ab.ust.hk/wex/cgi-bin/">HKUST Final Examination Schedule</a> system, which was first adapted from a student contribution in 2011-12 Fall.
             <br>
-                Some of the class data comes from the <a target="_blank" href="https://web.archive.org/">Wayback Machine</a>.
+                Some of the class data comes from the <a target="_blank" href="https://web.archive.org/">Wayback Machine</a> and <a target="_blank" href="https://ust.space/">ust.space</a>.
             </p3>
 
             <br><br><h3>Licenses</h3>
@@ -249,7 +249,7 @@ function render_me() {
             Object.keys(accConfig.courses).forEach(sem => {
                 htmld += `<div class="edge2edge"><h3>` + ustTimeToString(sem) + `</h3><div class="flx">`
                 accConfig.courses[sem].forEach(course => {
-                    htmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="render_courses_specific('` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', true)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
+                    htmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" not_class="course_sel selbox picbox" class="course_sel box picbox" not_onclick="render_courses_specific('` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', true)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
                     <div class="picbox_inner_up"><h5 style="opacity:0.85">` + course.split(" (")[1].split(")")[0] + `</h5></div>
                     <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.split(" (")[0].replace(course.split(" (")[0].split(" - ")[0] + " - ", "") + `</h5></div></div></div>`
                 })
@@ -383,29 +383,37 @@ let wasInsideCoursePage = false
 
 function enroll_course(sem, course, make_switch = false) {
     let btn = document.getElementById("course_enroll_btn")
-    let newConfig = JSON.parse(JSON.stringify(accConfig))
-    if (typeof newConfig.courses === "undefined") newConfig.courses = {}
-    if (typeof newConfig.courses[sem] === "undefined") newConfig.courses[sem] = []
-    if (make_switch) {
-        if (newConfig.courses[sem].includes(course)) {
-            newConfig.courses[sem] = newConfig.courses[sem].filter(function (item) {
-                return item !== course
-            })
-            update_accConfig("courses", newConfig.courses)
-            btn.innerText = "Enroll"
-        } else {
-            newConfig.courses[sem].push(course)
-            update_accConfig("courses", newConfig.courses)
-            btn.innerText = "✅ Enrolled"
+    if (btn) {
+        if (make_switch && !(signinlevel > 0)) {
+            alert("Please signin first!")
+            return
         }
-    } else {
-        if (newConfig.courses[sem].includes(course)) {
-            btn.innerText = "✅ Enrolled"
+        let newConfig = JSON.parse(JSON.stringify(accConfig))
+        if (typeof newConfig.courses === "undefined") newConfig.courses = {}
+        if (typeof newConfig.courses[sem] === "undefined") newConfig.courses[sem] = []
+        if (make_switch) {
+            if (newConfig.courses[sem].includes(course)) {
+                newConfig.courses[sem] = newConfig.courses[sem].filter(function (item) {
+                    return item !== course
+                })
+                update_accConfig("courses", newConfig.courses)
+                btn.innerText = "Enroll"
+            } else {
+                newConfig.courses[sem].push(course)
+                update_accConfig("courses", newConfig.courses)
+                btn.innerText = "✅ Enrolled"
+            }
         } else {
-            btn.innerText = "Enroll"
+            if (newConfig.courses[sem].includes(course)) {
+                btn.innerText = "✅ Enrolled"
+            } else {
+                btn.innerText = "Enroll"
+            }
         }
     }
 }
+
+let disableSigninRequirement = true;
 
 function render_courses_specific(path, insideCoursePage = false) {
     document.body.style.height = '100vh'
@@ -443,7 +451,7 @@ function render_courses_specific(path, insideCoursePage = false) {
                 <div class="flx" style="justify-content:flex-start;gap:0.5em">
                     <p4>Also offered in: </p4><div id="alsoOfferedIn"><div id="d_loading"></div></div>
                 </div>
-                <button id="course_enroll_btn" onclick="enroll_course('` + path.split("/")[0] + `','` + course + `', true)">Enroll</button>
+                <button id="course_enroll_btn" ` + ((true || signinlevel > 0) ? "" : `style="display:none" `) + `onclick="enroll_course('` + path.split("/")[0] + `','` + course + `', true)">Enroll</button>
             </div></div>`
         let attrHTML = renderCourseAttr(r.resp[course].attr, course)
         if (attrHTML) html_draft += `<div class="box"><h4>📚 Course Attributes</h4>` + attrHTML + `</div>`
@@ -473,31 +481,33 @@ function render_courses_specific(path, insideCoursePage = false) {
 
         let htmls = { lec: [], lab: [], tut: [], rsh: [], otr: [] }
 
-        Object.keys(r.resp[course].section).forEach(sectionName => {
-            let attrs = JSON.parse(JSON.stringify(r.resp[course].section[sectionName][Object.keys(r.resp[course].section[sectionName])[0]]))
-            let htmlsd = `<div class="dpv_ytemb lessonbox"><h4>` + sectionName + `</h4>`
+        if (typeof r.resp[course].section != "undefined" && r.resp[course].section && Object.keys(r.resp[course].section)) {
+            Object.keys(r.resp[course].section).forEach(sectionName => {
+                let attrs = JSON.parse(JSON.stringify(r.resp[course].section[sectionName][Object.keys(r.resp[course].section[sectionName])[0]]))
+                let htmlsd = `<div class="dpv_ytemb lessonbox"><h4>` + sectionName + `</h4>`
 
-            if (typeof attrs["Remarks"] != "undefined") {
-                htmlsd += "<p2>Remarks: " + attrs["Remarks"] + "</p2><br><br>"
-                delete attrs["Remarks"]
-            }
+                if (typeof attrs["Remarks"] != "undefined") {
+                    htmlsd += "<p2>Remarks: " + attrs["Remarks"] + "</p2><br><br>"
+                    delete attrs["Remarks"]
+                }
 
-            //not needed if dynrender
-            delete attrs["Section"]
-            delete attrs["Date & Time"]
-            delete attrs["Room"]
-            delete attrs["Instructor"]
-            //
+                //not needed if dynrender
+                delete attrs["Section"]
+                delete attrs["Date & Time"]
+                delete attrs["Room"]
+                delete attrs["Instructor"]
+                //
 
-            htmlsd += JSON.stringify(attrs) + `<br>`
-            let resp = {}
-            Object.keys(r.resp[course].section[sectionName]).forEach(time => {
-                resp[time] = { Room: r.resp[course].section[sectionName][time].Room, Instructor: r.resp[course].section[sectionName][time].Instructor }
+                htmlsd += JSON.stringify(attrs) + `<br>`
+                let resp = {}
+                Object.keys(r.resp[course].section[sectionName]).forEach(time => {
+                    resp[time] = { Room: r.resp[course].section[sectionName][time].Room, Instructor: r.resp[course].section[sectionName][time].Instructor }
+                })
+                htmlsd += `` + renderTimetableGrid(resp, "courseDetail") + `</div>`
+
+                htmls[lessonToType(sectionName)].push(htmlsd)
             })
-            htmlsd += `` + renderTimetableGrid(resp, "courseDetail") + `</div>`
-
-            htmls[lessonToType(sectionName)].push(htmlsd)
-        })
+        }
 
         html_draft += `</div>`
         Object.keys(htmls).forEach(type => {
@@ -797,7 +807,7 @@ function render_people(path) {
                 html_draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
                 prevSem = thisSem.split(" ")[0]
             }
-            if (noSigninAdDisplayed && (signinlevel === 0) && time < peopleMinSem) { html_draft += `<option disabled>↓ Signin Required ↓</option>`; noSigninAdDisplayed = false }
+            if (!disableSigninRequirement) { if (noSigninAdDisplayed && (signinlevel === 0) && time < peopleMinSem) { html_draft += `<option disabled>↓ Signin Required ↓</option>`; noSigninAdDisplayed = false } }
             html_draft += `<option value="` + time + `"`
             if (!peopleAvilSems.includes(time)) {
                 html_draft += " disabled"
@@ -827,11 +837,11 @@ function render_people(path) {
 
         if (ustTimeToString(target_time) === '----') { html.innerHTML = `the url is not in a valid format`; return }
         if (parseInt(target_time) > maxSem) { html.innerHTML = `i hope i can know what courses would exist in the future too 👀`; return }
-        if (signinlevel === 0 && parseInt(target_time) < peopleMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.` + rootdomain + `/">sign in</a> now to get access to this page`; return }
+        if (!disableSigninRequirement) { if (signinlevel === 0 && parseInt(target_time) < peopleMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.` + rootdomain + `/">sign in</a> now to get access to this page`; return } }
         if ((!skippeopleRestriction && parseInt(target_time) < peopleMinSem) || parseInt(target_time) < 1200) { html.innerHTML = `we don't have data for semesters that are too old :(`; return }
 
         fetch("/!people/" + target_people + "/" + target_time + "/").then(r => r.json()).then(r => {
-            if (r.status === 404) { html.innerHTML = `there are no lessons in this semester`; return }
+            if (r.status === 404) { html.innerHTML = `there are no lessons in this semester` + ((target_time < 2200) ? ("<br>...or maybe not, we are not sure since we only started collecting data extensively from 2022-23 :(") : ("")); return }
             if (r.status != 200 && r.status != 404) { html.innerHTML = "failed to contact server"; return }
 
             html_draft = ''
@@ -912,7 +922,7 @@ function render_room(path) {
                 html_draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
                 prevSem = thisSem.split(" ")[0]
             }
-            if (noSigninAdDisplayed && (signinlevel === 0) && time < roomMinSem) { html_draft += `<option disabled>↓ Signin Required ↓</option>`; noSigninAdDisplayed = false }
+            if (!disableSigninRequirement) { if (noSigninAdDisplayed && (signinlevel === 0) && time < roomMinSem) { html_draft += `<option disabled>↓ Signin Required ↓</option>`; noSigninAdDisplayed = false } }
             html_draft += `<option value="` + time + `"`
             if (!roomAvilSems.includes(time)) {
                 html_draft += " disabled"
@@ -942,11 +952,11 @@ function render_room(path) {
 
         if (ustTimeToString(target_time) === '----') { html.innerHTML = `the url is not in a valid format`; return }
         if (parseInt(target_time) > maxSem) { html.innerHTML = `i hope i can know what courses would exist in the future too 👀`; return }
-        if (signinlevel === 0 && parseInt(target_time) < roomMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.` + rootdomain + `/">sign in</a> now to get access to this page`; return }
+        if (!disableSigninRequirement) { if (signinlevel === 0 && parseInt(target_time) < roomMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.` + rootdomain + `/">sign in</a> now to get access to this page`; return } }
         if ((!skipRoomRestriction && parseInt(target_time) < roomMinSem) || parseInt(target_time) < 1200) { html.innerHTML = `we don't have data for semesters that are too old :(`; return }
 
         fetch("/!room/" + target_room + "/" + target_time + "/").then(r => r.json()).then(r => {
-            if (r.status === 404) { html.innerHTML = `there are no lessons in this semester`; return }
+            if (r.status === 404) { html.innerHTML = `there are no lessons in this semester` + ((target_time < 2200) ? ("<br>...or maybe not, we are not sure since we only started collecting data extensively from 2022-23 :(") : ("")); return }
             if (r.status != 200 && r.status != 404) { html.innerHTML = "failed to contact server"; return }
 
             html_draft = ''
