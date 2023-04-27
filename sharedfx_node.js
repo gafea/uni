@@ -10,25 +10,12 @@ const envar = {
     favicon: fs.readFileSync('.\\favicon.ico'),
     cToken_vaild_time_ms: 90*24*60*60*1000,
     userdb: '[redacted]',
-    //google_recaptcha_client_key: '[redacted]',
-    google_recaptcha_server_key: '[redacted]',
-    mail_adr: 'gafea@icloud.com',
-    mail_psw: '[redacted]',
     cdn_path: ".\\cdn\\",
     cdnNETpath: "/!cdn/",
     course_path: ".\\course\\",
     course_temp_path: ".\\course_temp\\",
     course_backup_path: false,
-    gscript: `<script async src="https://www.googletagmanager.com/gtag/js?id=G-GKD9YZVX39"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'G-GKD9YZVX39');
-    </script>
-
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5793117294007322" crossorigin="anonymous"></script>`
+    gscript: ``
 
 }; Object.freeze(envar)
 

@@ -5,6 +5,7 @@ const bottombarbuttons = [
     'Courses,/course/,course,' + resourceNETpath + 'image/nullicon.png',
     'Instructors,/people/,people,' + resourceNETpath + 'image/nullicon.png',
     'Rooms,/room/,room,' + resourceNETpath + 'image/nullicon.png',
+    'Search,/search/,search,' + resourceNETpath + 'image/search.png',
     'About,/about/,about,' + resourceNETpath + 'image/info.png'
 ]
 
@@ -97,6 +98,10 @@ function init(path) {
                 <div id="divheadbuffer"></div>
             </div>
             </div>` + renderBottomBar('room')
+
+        } else if (path.toLowerCase().startsWith("/search/")) { //search page
+            wasInsideCoursePage = false
+            return `<div class="edge2edge_page">search</div>` + renderBottomBar('search')
 
         } else if (path.toLowerCase().startsWith("/about/")) { //about page
             wasInsideCoursePage = false
@@ -213,6 +218,8 @@ function exe(path) {
         }
     } else if (path.toLowerCase().startsWith("/me/")) {
         exe_me()
+    } else if (path.toLowerCase().startsWith("/search/")) {
+        exe_search()
     } else if (path.toLowerCase().startsWith("/about/")) {
         exe_about()
     } else if (false && path.startsWith('/!') && !(path === '/!404' || path.startsWith('/!404/'))) {
@@ -234,6 +241,11 @@ const exe_courses = (path) => wait_allSems(render_courses, path, "Courses - uni"
 const exe_people = (path) => wait_allSems(render_people, path, "Instructors - uni")
 const exe_room = (path) => wait_allSems(render_room, path, "Rooms - uni")
 const exe_me = (path) => wait_allSems(render_me, path, "Me - uni")
+const exe_search = (path) => wait_allSems(render_search, path, "Search - uni")
+
+function render_search() {
+    document.title = "Search - uni"
+}
 
 function render_me() {
     document.title = "Me - uni"
@@ -862,29 +874,57 @@ function render_people(path) {
 
 }
 
+var roomx = "LTA"
+var room_show_textbox = false
+
 function render_room(path) {
 
     hideCourseSpecificPage()
 
-    let html_draft = `<div class="card" style="padding:1em;padding-top:0.5em" id="card3"><div style="margin:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)"><div class="flxb"><div id="iR1"><div style="pointer-events:all">
-    <h2>Rooms</h2><div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0"><select name="roomid" id="roomid" title="Select Room" onchange="exe('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/')">`
+    let html_draft = ""
     let path_hv_room_match = false
     let target_room = "LTA"
-    rooms.forEach(room => {
-        html_draft += `<option value="` + room + `"`
-        if (decodeURI(path.split("/")[0]) != "" && room === decodeURI(path.split("/")[0])) {
-            target_room = decodeURI(path.split("/")[0])
-            document.title = "" + target_room + " - uni"
-            html_draft += " selected"
-            path_hv_room_match = true
+
+    if (room_show_textbox) {
+        html = document.getElementById("room")
+        html_draft = `<div class="card" style="padding:1em;padding-top:0.5em" id="card3"><div style="margin:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)"><div class="flxb"><div id="iR1"><div style="pointer-events:all">
+        <h2>Rooms</h2><div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0">`
+        let hdraft = ""
+        rooms.forEach(room => {
+            hdraft += `<button onclick="roomx='` + room + `';render_room('` + room + `/' + document.getElementById('timeid').value + '/')" style="display:none;`
+            if (decodeURI(path.split("/")[0]) != "" && room === decodeURI(path.split("/")[0])) {
+                target_room = decodeURI(path.split("/")[0])
+                document.title = "" + target_room + " - uni"
+                hdraft += ` background:rgba(255,255,0,.4)`
+                path_hv_room_match = true
+            }
+            hdraft += `">` + room + `</button>`
+        })
+        hdraft += `</div>`
+        if (!path_hv_room_match) {
+            html_draft = html_draft.replace(`<option value="LTA">`, `<option value="LTA" selected>`)
+            document.title = "LTA - uni"
         }
-        html_draft += `>` + room + `</option>`
-    })
-    if (!path_hv_room_match) {
-        html_draft = html_draft.replace(`<option value="LTA">`, `<option value="LTA" selected>`)
-        document.title = "LTA - uni"
+        html_draft += `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" placeholder="Search.." id="myInput" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_room + `">` + hdraft + `</select>`
+    } else {
+        html_draft = `<div class="card" style="padding:1em;padding-top:0.5em" id="card3"><div style="margin:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)"><div class="flxb"><div id="iR1"><div style="pointer-events:all">
+        <h2>Rooms</h2><div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0"><select name="roomid" id="roomid" title="Select Room" onchange="exe('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/')">`
+        rooms.forEach(room => {
+            html_draft += `<option value="` + room + `"`
+            if (decodeURI(path.split("/")[0]) != "" && room === decodeURI(path.split("/")[0])) {
+                target_room = decodeURI(path.split("/")[0])
+                document.title = "" + target_room + " - uni"
+                html_draft += " selected"
+                path_hv_room_match = true
+            }
+            html_draft += `>` + room + `</option>`
+        })
+        if (!path_hv_room_match) {
+            html_draft = html_draft.replace(`<option value="LTA">`, `<option value="LTA" selected>`)
+            document.title = "LTA - uni"
+        }
+        html_draft += `</select>`
     }
-    html_draft += `</select>`
 
     fetch("/!room/" + target_room + "/").then(r => r.json()).then(r => {
         if (r.status != 200) { html.innerHTML = "failed to contact server"; return }
@@ -900,7 +940,11 @@ function render_room(path) {
         } else {
             allSems = roomAvilSems.filter(n => parseInt(n) > roomMinSem)
         }
-        html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="exe('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/')">`
+        if (room_show_textbox) {
+            html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="exe('/room/' + roomx + '/' + document.getElementById('timeid').value + '/')">`
+        } else {
+            html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="exe('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/')">`
+        }
         if (path.split("/")[1] && ((!skipRoomRestriction && parseInt(decodeURI(path.split("/")[1])) < roomMinSem) || ustTimeToString(decodeURI(path.split("/")[1])) === '----')) {
             html_draft += `<option value="1009" selected disabled hidden>` + ustTimeToString(decodeURI(path.split("/")[1])) + `</option>`
             history.replaceState(null, window.title, "/room/" + target_room + "/" + decodeURI(path.split("/")[1]) + "/")
