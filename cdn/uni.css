@@ -6,28 +6,17 @@ select, #myInput{color: black; cursor: pointer; font-size: 16px; border: 0.15em 
 .flxb{flex-flow:wrap;display:flex;justify-content:space-between}
 .LR_Right, #iL1{width:calc( 100% - 19em )}
 .LR_Left, #iR1{padding:0.5em;pointer-events:none;position:sticky;top:0.75em;left:0;z-index:3;width:17em;overflow-y:auto;height:fit-content}
-.LR_Right{height:fit-content;overflow:clip;padding:0;background-color:var(--gbw)}
+.LR_Right{height:fit-content;overflow:clip;padding:0}
 .LR_Left{pointer-events:unset}
 .ugpgbox{padding:0.5em;border-radius:1.5em;background-color:var(--gbw)} .ugpgbox > button {cursor:pointer;padding:0.25em 1em;border-radius:1em;background:var(--bw);transition-duration:0.05s}
 #myInput{width:calc(100% - 1.3em);margin:0.5em 0;cursor:text;outline:none}
 #myDropdown > button {flex-grow:1;border-radius:0}
-#courses_detail_content .edge2edge, #courses_detail_content .edge2edge_page{padding:1em 2em}
 .course_sel{flex-grow:1;max-width:calc(50% - 1em)}
 .course_sel, .picbox_inner{min-height:8.5em;min-width:12.5em}
 .picbox_inner{color:white;align-items:flex-end;position:relative;background-color: rgba(0,0,0,.7); background: linear-gradient(180deg, rgba(0,0,0,.3) 0%, rgba(0,0,0,.6) 50%, rgba(0,0,0,.75) 100%); padding: 1em; border-radius: 1em}
 .picbox_inner_up{position: absolute; top: 0.6em;right: 1em;}
 
-@media (min-width:2500px) {
-    .unicoursewrap{display:flex}
-    #courses_select_wrp, #courses_specific_wrp{width:calc(50% - 4em)!important;padding:0;flex-grow:1;max-height:100vh;overflow-y:scroll!important;display:block!important}
-    #divheadbuffer{display:none} #wideheadbuffer{height:calc(5vh + 4.5em)}
-}
-
-@media (max-width:2500px) {
-    #courses_specific_wrp{display:none;position:sticky; top: 0; bottom: 0; left: 0; right: 0; z-index: 9999;background-color:var(--twtb);height:100vh;overflow-y:scroll}
-}
-
-.courses_specific_close{position:sticky;top:1.5em;top:calc(1.5em + env(safe-area-inset-top));text-align:right;padding-right:calc(5% + 2em);padding-right:calc(5% + 2em + env(safe-area-inset-right));z-index:10000}
+.courses_specific_close {position:sticky;top:1.5em;top:calc(1.5em + env(safe-area-inset-top));text-align:right;padding-right:calc(5% + 2em);padding-right:calc(5% + 2em + env(safe-area-inset-right));z-index:10000}
 .courses_specific_close > button {padding:0;margin:0;border:none;border-radius:50%;transition-duration:0.05s;background:rgba(128,128,128,.25);opacity:0.8}
 .courses_specific_close > button:hover {background:rgba(128,128,128,.5);opacity:1}
 .courses_specific_close > button:hover:active {transform:scale(0.9)}

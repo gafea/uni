@@ -1,13 +1,24 @@
 var script1 = document.createElement('script'); script1.src = '/!acc/uniplus.js'; document.head.appendChild(script1);
 
 const bottombarbuttons = [
-    'Me,/me/,me,' + resourceNETpath + 'image/nullicon.png',
-    'Courses,/course/,course,' + resourceNETpath + 'image/nullicon.png',
-    'Instructors,/people/,people,' + resourceNETpath + 'image/nullicon.png',
-    'Rooms,/room/,room,' + resourceNETpath + 'image/nullicon.png',
-    'Search,/search/,search,' + resourceNETpath + 'image/search.png',
-    'About,/about/,about,' + resourceNETpath + 'image/info.png'
+    'Me,/me/,me,' + resourceNETpath + 'image/nullicon.png,1',
+    'Courses,/course/,course,' + resourceNETpath + 'image/nullicon.png,2',
+    'About,/about/,about,' + resourceNETpath + 'image/info.png,0'
 ]
+
+function bootID_mapper(path = "") {
+    if (!path || path == "/") {
+        return -1
+    } else if (path.toLowerCase().startsWith("/about/")) {
+        return 0
+    } else if (path.toLowerCase().startsWith("/me/")) {
+        return 1
+    } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/") || path.toLowerCase().startsWith("/search/")) {
+        return 2
+    } else {
+        return -1
+    }
+} 
 
 function getPageHTML_404() {
     return `<meta http-equiv="refresh" content="0;URL=/!404/">`
@@ -23,36 +34,6 @@ function init(path) {
         if (path == '/' || path == '') { //home page, not decided what to do yet so redir to /course/ ;)
             return `<meta http-equiv="refresh" content="0;URL=/course/">`
 
-        } else if (path.toLowerCase().startsWith("/course/")) { //course page
-            return `<div class="unicoursewrap">
-            <div id="courses_select_wrp">
-                <div class="edge2edge flxb" id="courses_select">
-                    <div class="LR_Left">
-                        <div class="flx">
-                            <h2>Courses</h2>
-                            <p5><b><div class="ugpgbox flx">
-                                <button id="ugbtn" onclick="studprog = 'ug'; accConfig['studprog'] = 'ug'; update_accConfig('studprog', 'ug'); render_courses(window.location.pathname.substring(8), false, true)" title="Undergraduate Courses">UG</button>
-                                <button id="pgbtn" onclick="studprog = 'pg'; accConfig['studprog'] = 'pg'; update_accConfig('studprog', 'pg'); render_courses(window.location.pathname.substring(8), false, true)" title="Postgraduate Courses">PG</button>
-                            </div></b></p5>
-                        </div>
-                        <div class="box" id="courses_side" style="margin:0.5em 0"></div>
-                    </div>
-                    <div class="LR_Right box" id="courses_detail"></div>
-                </div>
-                <div id="wideheadbuffer"></div>
-            </div>
-            <div id="courses_specific_wrp">
-                <div class="courses_specific_close no_widescreen">
-                    <button type="button" title="Close" onclick="hideCourseSpecificPage()">
-                        <img alt="Close" loading="lazy" style="max-width:3em;max-height:3em" draggable="false" src="` + resourceNETpath + `image/circle-cross.png">
-                    </button>
-                </div>
-                <div id="courses_specific"></div>
-                <div id="wideheadbuffer"></div>
-                <div id="divheadbuffer"></div>
-            </div>
-            </div>` + renderBottomBar('course')
-
         } else if (path.toLowerCase().startsWith("/me/")) { //me page
             return `
             <div class="edge2edge_page">
@@ -63,45 +44,23 @@ function init(path) {
             </div>
             ` + renderBottomBar('me')
 
-        } else if (path.toLowerCase().startsWith("/people/")) { //people page
-            return `<div class="unicoursewrap">
-            <div id="courses_select_wrp">
-                <div id="people"></div>
-                <div id="wideheadbuffer"></div>
-            </div>
-            <div id="courses_specific_wrp">
-                <div class="courses_specific_close no_widescreen">
-                    <button type="button" title="Close" onclick="hideCourseSpecificPage()">
-                        <img alt="Close" loading="lazy" style="max-width:3em;max-height:3em" draggable="false" src="` + resourceNETpath + `image/circle-cross.png">
-                    </button>
-                </div>
-                <div id="courses_specific"></div>
-                <div id="wideheadbuffer"></div>
-                <div id="divheadbuffer"></div>
-            </div>
-            </div>` + renderBottomBar('people')
+        } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/") || path.toLowerCase().startsWith("/search/")) { //course + people + room + search
 
-        } else if (path.toLowerCase().startsWith("/room/")) { //room page
-            return `<div class="unicoursewrap">
-            <div id="courses_select_wrp">
-                <div id="room"></div>
-                <div id="wideheadbuffer"></div>
-            </div>
-            <div id="courses_specific_wrp">
-                <div class="courses_specific_close no_widescreen">
-                    <button type="button" title="Close" onclick="hideCourseSpecificPage()">
-                        <img alt="Close" loading="lazy" style="max-width:3em;max-height:3em" draggable="false" src="` + resourceNETpath + `image/circle-cross.png">
-                    </button>
+            return `<div id="courses_select_wrp">
+                <div class="edge2edge flxb" id="courses_select_main" style="transition-timing-function:cubic-bezier(.65,.05,.36,1);transition-duration:0.6s">
+                    <div class="LR_Left" id="courses_select_left">
+                        <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0">
+                            <button onclick="boot('/course/', false, 2)">course</button>
+                            <button onclick="boot('/people/', false, 2)">people</button>
+                            <button onclick="boot('/room/', false, 2)">room</button>
+                            <!-- <button onclick="boot('/search/', false, 2)">search</button> -->
+                        </div>
+                        <div id="courses_select_left_top"></div>
+                        <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
+                    </div>
+                    <div class="LR_Right" id="courses_select_right"></div>
                 </div>
-                <div id="courses_specific"></div>
-                <div id="wideheadbuffer"></div>
-                <div id="divheadbuffer"></div>
-            </div>
-            </div>` + renderBottomBar('room')
-
-        } else if (path.toLowerCase().startsWith("/search/")) { //search page
-            wasInsideCoursePage = false
-            return `<div class="edge2edge_page">search</div>` + renderBottomBar('search')
+            </div>` + renderBottomBar('course')
 
         } else if (path.toLowerCase().startsWith("/about/")) { //about page
             wasInsideCoursePage = false
@@ -184,12 +143,13 @@ var peoples = []
 
 function exe(path) {
 
-    if (path === 'cleanup') { hideCourseSpecificPage(); return }
+    if (path === 'cleanup') { return }
 
     if (path.toLowerCase().startsWith("/course/")) {
         exe_courses(path.substring(8))
     } else if (path.toLowerCase().startsWith("/people/")) {
-        html = document.getElementById("people")
+        document.getElementById('courses_select_main').classList.add('edge2edge_wide')
+        html = document.getElementById("courses_select_right")
         if (peoples.length === 0) {
             fetch("/!people/").then(r => r.json()).then(r => {
                 if (r.status != 200) { html.innerHTML = "failed to contact server"; return }
@@ -203,7 +163,8 @@ function exe(path) {
             exe_people(path.substring(8))
         }
     } else if (path.toLowerCase().startsWith("/room/")) {
-        html = document.getElementById("room")
+        document.getElementById('courses_select_main').classList.add('edge2edge_wide')
+        html = document.getElementById("courses_select_right")
         if (rooms.length === 0) {
             fetch("/!room/").then(r => r.json()).then(r => {
                 if (r.status != 200) { html.innerHTML = "failed to contact server"; return }
@@ -219,6 +180,7 @@ function exe(path) {
     } else if (path.toLowerCase().startsWith("/me/")) {
         exe_me()
     } else if (path.toLowerCase().startsWith("/search/")) {
+        document.getElementById('courses_select_main').classList.remove('edge2edge_wide')
         exe_search()
     } else if (path.toLowerCase().startsWith("/about/")) {
         exe_about()
@@ -379,17 +341,7 @@ function filterFunction(hideListIfEmpty = false) {
     }
 }
 
-function hideCourseSpecificPage() {
-    document.body.style.height = 'auto'
-    document.body.style.overflowY = 'auto'
-    if (document.getElementById('courses_specific_wrp')) document.getElementById('courses_specific_wrp').style.display = 'none'
-    if (wasInsideCoursePage) {
-        history.pushState({ plate: courseSpecificReturnURL }, window.title, courseSpecificReturnURL)
-        document.title = "" + courseSpecificReturnURL.split("/")[3] + " - " + ustTimeToString(courseSpecificReturnURL.split("/")[2]) + " - uni"
-    }
-}
-
-let alwaysExecSetLoadingStatusImmediately = true
+let alwaysExecSetLoadingStatusImmediately = false
 let chartx = ''
 let wasInsideCoursePage = false
 
@@ -415,6 +367,7 @@ function enroll_course(sem, course, make_switch = false) {
                 update_accConfig("courses", newConfig.courses)
                 btn.innerText = "✅ Enrolled"
             }
+            setLoadingStatus("success")
         } else {
             if (newConfig.courses[sem].includes(course)) {
                 btn.innerText = "✅ Enrolled"
@@ -428,15 +381,19 @@ function enroll_course(sem, course, make_switch = false) {
 let disableSigninRequirement = true;
 
 function render_courses_specific(path, insideCoursePage = false) {
-    document.body.style.height = '100vh'
-    document.body.style.overflowY = "hidden"
-    document.getElementById("courses_specific_wrp").style.display = "block"
 
-    let shtml = document.getElementById("courses_specific")
-    shtml.innerHTML = `<br><br><center><div id="d_loading"></div></center>`
+    document.getElementById("course_detail_topbar_specialStyles").innerHTML = `<style>
+    #courses_select_main{padding:0}
+    #courses_select_left{padding:0; max-width:0; width:0; height:0; opacity:0; overflow:clip}
+    #courses_select_right{width:100%}
+    </style>`
+    document.getElementById('courses_select_main').classList.add('edge2edge_wide')
+    document.getElementById("btn_back").style.display = "inline-block"
+
+    setLoadingStatus("show")
 
     fetch("/!course/" + path).then(r => r.json()).then(r => {
-        if (r.status != 200) { shtml.innerHTML = "failed to contact server"; return }
+        if (r.status != 200) { setLoadingStatus("error", false, "failed to contact server"); return }
 
         let html_draft = ""
         let course = Object.keys(r.resp)[0]
@@ -453,11 +410,11 @@ function render_courses_specific(path, insideCoursePage = false) {
                 return
             }
 
-            history.pushState({ plate: "/course/" + path }, window.title, "/course/" + path)
+            history.replaceState(null, window.title, "/course/" + path)
             document.title = "" + course.split(" - ")[0] + " - " + ustTimeToString(path.split("/")[0]) + " - uni"
         }
 
-        html_draft += `<div class="edge2edge"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `">
+        html_draft += `<div class="edge2edge_page"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `">
             <div class="box"><div class="flx"><h4>` + course + `</h4></div><p2>` + r.resp[course].attr.DESCRIPTION + `</p2><br><br>
             <div class="flx" style="gap:0.5em">
                 <div class="flx" style="justify-content:flex-start;gap:0.5em">
@@ -530,14 +487,14 @@ function render_courses_specific(path, insideCoursePage = false) {
             }
         })
 
-        html_draft += `<style>#courses_specific .uniroomtime{display:none} #courses_specific .uniroomweek{position:unset;margin-top:1em} #courses_specific .uniroomgrid{display:block}</style></div>`
+        html_draft += `<style>#courses_detail_content .uniroomtime{display:none} #courses_detail_content .uniroomweek{position:unset;margin-top:1em} #courses_detail_content .uniroomgrid{display:block}</style></div>`
 
         fetch("/!insem/" + course.split(" ")[0] + course.split(" ")[1] + "/").then(r => r.json()).then(u => {
             if (u.status != 200) { document.getElementById("alsoOfferedIn").innerHTML = "failed to contact server or script crashed"; return }
 
             u.resp.sort()
             u.resp.reverse()
-            let draft = `<select style="width:100%" name="timeidx" id="timeidx" title="Select Semester" onchange="render_courses_specific('' + document.getElementById('timeidx').value + '/' + '` + course.split(" ")[0] + `' + '/' + '` + course.split(" ")[0] + course.split(" ")[1] + `' + '/', ` + insideCoursePage + `)">`
+            let draft = `<select style="width:100%" name="timeidx" id="timeidx" title="Select Semester" onchange="boot('/course/' + document.getElementById('timeidx').value + '/' + '` + course.split(" ")[0] + `' + '/' + '` + course.split(" ")[0] + course.split(" ")[1] + `' + '/', false, 2)">`
             let prevSem = "----"
             u.resp.forEach(sem => {
                 let thisSem = ustTimeToString(sem)
@@ -560,7 +517,7 @@ function render_courses_specific(path, insideCoursePage = false) {
             document.getElementById("alsoOfferedIn").innerHTML = "failed to contact server or script crashed"
         })
 
-        shtml.innerHTML = html_draft
+        document.getElementById("courses_detail_content").innerHTML = html_draft
 
         setTimeout(enroll_course, 50, path.split("/")[0], course)
 
@@ -590,23 +547,29 @@ function render_courses_specific(path, insideCoursePage = false) {
                 document.getElementById("charts").innerHTML = "failed to contact server or script crashed"
             })
         }
+
+        setLoadingStatus("hide")
+        document.getElementById("topbar_title").innerText = path.split("/")[2].substring(0, 4) + " " + path.split("/")[2].replace(path.split("/")[2].substring(0, 4), "")
+        document.getElementById("topbar_subtitle").innerText = ustTimeToString(path.split("/")[0])
     }).catch(error => {
         console.log(error)
-        shtml.innerHTML = "failed to contact server or script crashed"
+        setLoadingStatus("error", false, "failed to contact server or script crashed")
     })
 }
 
 let courseSpecificReturnURL = ''
 
 function render_courses_details(path, scrollIntoView = false) {
+    setLoadingStatus("show")
+    document.getElementById('courses_select_main').classList.remove('edge2edge_wide')
+    document.getElementById("btn_back").style.display = "none"
     courseSpecificReturnURL = "/course/" + path.slice(0, path.lastIndexOf("/") + 1)
-    document.getElementById("courses_detail").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]), "", false, "", !!(path.split("/")[2])) + `<style>.topbar{z-index:9999!important} @media (min-width: 1280px) {.topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}}</style><div id="courses_detail_content"></div>`
+    document.getElementById("course_detail_topbar_specialStyles").innerHTML = `<style>.topbar{z-index:9999!important} @media (min-width: 1280px) {.topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}}</style>`
     html = document.getElementById("courses_detail_content")
     let withinCourseListPage = (path.split('/').length == 2 || (path.split('/').length == 3 && path.split('/')[2] == ""))
     let withinCourseDetailPage = false
     if (!withinCourseListPage) withinCourseDetailPage = (path.split('/').length == 3 || (path.split('/').length == 4 && path.split('/')[3] == ""))
     if (withinCourseDetailPage) {
-        render_courses_specific(path, true)
         if (path.endsWith("/")) path = path.slice(0, path.length - 1)
         render_courses_details(path.slice(0, path.lastIndexOf("/") + 1))
         return
@@ -614,28 +577,31 @@ function render_courses_details(path, scrollIntoView = false) {
 
     fetch("/!course/" + path).then(r => r.json()).then(r => {
         setLoadingStatus("hide")
+        document.getElementById("topbar_title").innerText = path.split("/")[1]
+        document.getElementById("topbar_subtitle").innerText = ustTimeToString(path.split("/")[0])
+
         if (r.status != 200) { html.innerHTML = "failed to contact server"; return }
 
         let html_draft = `<style>.uniroomtime{display:none} .uniroomweek{position:unset;margin-top:1em} .uniroomgrid{display:block} .LR_Right{background:none}</style><br><div class="flx"><br><div class="flx" style="gap:0.5em"><p4>View Mode: </p4>`
         if (listMode === "card") {
             html_draft += `<p5><b><div class="ugpgbox flx">
                 <button id="cardbtn" style="background:rgba(64,160,255,.4);cursor:default" title="Card View">📇</button>
-                <button id="detailbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'detail'; accConfig['listMode'] = 'detail'; update_accConfig('listMode', 'detail'); render_courses(window.location.pathname.substring(8), true, true)" title="Detail View">🧾</button>
+                <button id="detailbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'detail'; accConfig['listMode'] = 'detail'; update_accConfig('listMode', 'detail'); scrollIntoView = true, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Detail View">🧾</button>
                 </div></b></p5></div></div><div class="flx" style="margin-top:0.5em">`
         } else {
             html_draft += `<p5><b><div class="ugpgbox flx">
-                <button id="cardbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'card'; accConfig['listMode'] = 'card'; update_accConfig('listMode', 'card'); render_courses(window.location.pathname.substring(8), true, true)" title="Card View">📇</button>
+                <button id="cardbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'card'; accConfig['listMode'] = 'card'; update_accConfig('listMode', 'card'); scrollIntoView = true, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Card View">📇</button>
                 <button id="detailbtn" style="background:rgba(64,160,255,.4);cursor:default" title="Detail View">🧾</button>
                 </div></b></p5></div></div>`
         }
         Object.keys(r.resp).forEach((course, ix) => {
             if ((studprog === "ug" && parseInt(course[5]) > 0 && parseInt(course[5]) < 5) || (studprog === "pg" && parseInt(course[5]) >= 5)) {
                 if (listMode === "card") {
-                    html_draft += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="render_courses_specific('` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', true)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + "\n\n" + r.resp[course].attr.DESCRIPTION.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
+                    html_draft += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="boot('/course/` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + "\n\n" + r.resp[course].attr.DESCRIPTION.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
                     <div class="picbox_inner_up"><h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.split(" (")[1].split(")")[0] : r.resp[course].attr["VECTOR"]) + `</h5></div>
                     <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.split(" (")[0].replace(course.split(" (")[0].split(" - ")[0] + " - ", "") + `</h5></div></div></div>`
                 } else {
-                    html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="render_courses_specific('` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', true)"><div><div><h4>` + course + `</h4><p2 class="no_mobile">` + r.resp[course].attr.DESCRIPTION + `</p2></div>
+                    html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)"><div><div><h4>` + course + `</h4><p2 class="no_mobile">` + r.resp[course].attr.DESCRIPTION + `</p2></div>
                     <div class="no_mobile">` + renderCourseAttr(r.resp[course].attr, course) + `</div></div></div></div>`
                 }
             }
@@ -644,7 +610,7 @@ function render_courses_details(path, scrollIntoView = false) {
         if (listMode === "card") html_draft += `</div><div style="padding:0.5em 1em"><p3>The above pictures were generated using AI for illustration purposes only. It does not represent the actual course contents and/or learning outcomes.</p3></div>`
         html.innerHTML = html_draft
 
-        if (scrollIntoView) { if ((Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) <= 520)) { document.getElementById("courses_detail").scrollIntoView() } else { document.body.scrollIntoView() } }
+        if (scrollIntoView) { if ((Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) <= 520)) { document.getElementById("courses_select_right").scrollIntoView() } else { document.body.scrollIntoView() } }
 
     }).catch(error => {
         console.log(error)
@@ -652,15 +618,24 @@ function render_courses_details(path, scrollIntoView = false) {
     })
 }
 
-function render_courses(path, scrollIntoView = false, doNotCheckUGPG = false) {
+var scrollIntoView = false, doNotCheckUGPG = false
+function render_courses(path) {
+
+    document.getElementById("courses_select_left_top").innerHTML = `
+    <div class="flx">
+    <h2>Courses</h2>
+    <p5><b><div class="ugpgbox flx">
+        <button id="ugbtn" onclick="studprog = 'ug'; accConfig['studprog'] = 'ug'; update_accConfig('studprog', 'ug'); scrollIntoView = false, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Undergraduate Courses">UG</button>
+        <button id="pgbtn" onclick="studprog = 'pg'; accConfig['studprog'] = 'pg'; update_accConfig('studprog', 'pg'); scrollIntoView = false, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Postgraduate Courses">PG</button>
+    </div></b></p5>
+    </div>`
 
     apply_config()
     render_UGPG_switch()
-    hideCourseSpecificPage()
 
-    html = document.getElementById("courses_side")
+    html = document.getElementById("courses_select_left_optionBox")
     let semx = ((ustTimeToString(decodeURI(path.split("/")[0])) != '----') ? decodeURI(path.split("/")[0]) : allSems[0])
-    let html_draft = `<select style="width:100%" name="timeid" id="timeid" title="Select Semester" onchange="render_courses('' + document.getElementById('timeid').value + '/' + deptx + '/')">`
+    let html_draft = `<select style="width:100%" name="timeid" id="timeid" title="Select Semester" onchange="boot('/course/' + document.getElementById('timeid').value + '/' + deptx + '/', false, 2)">`
     let prevSem = "----"
     allSemsF.forEach(sem => {
         let thisSem = ustTimeToString(sem)
@@ -680,7 +655,7 @@ function render_courses(path, scrollIntoView = false, doNotCheckUGPG = false) {
 
     if (parseInt(semx) > parseInt(allSems[0])) {
         alert('i hope i can know what courses would exist in the future too 👀')
-        setTimeout(() => { boot("/") }, 1)
+        setTimeout(() => { boot("/", true, 2) }, 1)
         return
     }
 
@@ -716,11 +691,13 @@ function render_courses(path, scrollIntoView = false, doNotCheckUGPG = false) {
             deptx = depts[0]
         }
 
+        if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]), "", false, "", true) + `<div id="course_detail_topbar_specialStyles"><style>.topbar{z-index:9999!important} @media (min-width: 1280px) {.topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}}</style></div><style>.topbar, #courses_select_main, #courses_select_left, #courses_select_right{transition-timing-function: cubic-bezier(.65,.05,.36,1);transition-duration: 0.6s}</style><div id="courses_detail_content"></div>`
+
         let coursex = ((path.split("/").length > 2 && path.split("/")[2]) ? decodeURI(path) : "" + semx + "/" + deptx + "/")
 
         html_draft += `<div id="myDropdown" class="flx"><input type="text" placeholder="Filter..." id="myInput" onkeyup="filterFunction()">`
         depts.forEach(dept => {
-            html_draft += `<button onclick="render_courses('' + document.getElementById('timeid').value + '/` + dept + `/', true)"`
+            html_draft += `<button onclick="scrollIntoView = true, doNotCheckUGPG = false; boot('/course/' + document.getElementById('timeid').value + '/` + dept + `/', false, 2)"`
             if (dept == deptx) {
                 document.title = "" + deptx + " - " + ustTimeToString(semx) + " - uni"
                 history.replaceState(null, window.title, "/course/" + semx + "/" + deptx + "/")
@@ -732,7 +709,11 @@ function render_courses(path, scrollIntoView = false, doNotCheckUGPG = false) {
 
         html.innerHTML = html_draft
 
-        render_courses_details(coursex, scrollIntoView)
+        if ((path.split('/').length <= 2 || (path.split('/').length == 3 && path.split('/')[2] == ""))) {
+            render_courses_details(coursex, scrollIntoView)
+        } else {
+            render_courses_specific(path, true)
+        }
 
     }).catch(error => {
         console.log(error)
@@ -757,17 +738,16 @@ var peoplex = "LAM, Gibson"
 
 function render_people(path) {
 
-    hideCourseSpecificPage()
+    document.getElementById("courses_select_left_top").innerHTML = `<h2>Instructors</h2>`
 
-    let html_draft = `<div class="card" style="padding:1em;padding-top:0.5em" id="card3"><div style="margin:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)"><div class="flxb"><div id="iR1"><div style="pointer-events:all">
-        <h2>Instructors</h2><div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0">`
+    let html_draft = ""
     let path_hv_people_match = false
     let target_people = "LAM, Gibson"
-    html = document.getElementById("people")
+    html = document.getElementById("courses_select_left_optionBox")
 
     let hdraft = ""
     peoples.forEach(people => {
-        hdraft += `<button onclick="peoplex='` + people + `';render_people('` + people + `/' + document.getElementById('timeid').value + '/')" style="display:none;`
+        hdraft += `<button onclick="peoplex='` + people + `';boot('/people/` + people + `/' + document.getElementById('timeid').value + '/', false, 2)" style="display:none;`
         if (decodeURI(path.split("/")[0]) != "" && people === decodeURI(path.split("/")[0])) {
             target_people = decodeURI(path.split("/")[0])
             document.title = "" + target_people + " - uni"
@@ -797,7 +777,7 @@ function render_people(path) {
         } else {
             allSems = peopleAvilSems.filter(n => parseInt(n) > peopleMinSem)
         }
-        html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="exe('/people/' + peoplex + '/' + document.getElementById('timeid').value + '/')">`
+        html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="boot('/people/' + peoplex + '/' + document.getElementById('timeid').value + '/', false, 2)">`
         if (path.split("/")[1] && ((!skippeopleRestriction && parseInt(decodeURI(path.split("/")[1])) < peopleMinSem) || ustTimeToString(decodeURI(path.split("/")[1])) === '----')) {
             html_draft += `<option value="1009" selected disabled hidden>` + ustTimeToString(decodeURI(path.split("/")[1])) + `</option>`
             history.replaceState(null, window.title, "/people/" + target_people + "/" + decodeURI(path.split("/")[1]) + "/")
@@ -840,11 +820,14 @@ function render_people(path) {
             html_draft += `>` + thisSem + `</option>`
             return true
         })
-        html_draft += `</optgroup></select></div>` + gAdsScript + `</div></div><div id="iL1">
-                <div id="peopleinfo"><center><div id="d_loading"></div></center></div></div></div></div>`
+        html_draft += `</optgroup></select></div>` 
+        html.innerHTML = html_draft
 
+        html = document.getElementById("courses_select_right")
+        html_draft = `<div id="peopleinfo"><center><div id="d_loading"></div></center></div>`
         html.innerHTML = html_draft
         html = document.getElementById("peopleinfo")
+
         html_draft = ""
 
         if (ustTimeToString(target_time) === '----') { html.innerHTML = `the url is not in a valid format`; return }
@@ -879,19 +862,17 @@ var room_show_textbox = false
 
 function render_room(path) {
 
-    hideCourseSpecificPage()
+    document.getElementById("courses_select_left_top").innerHTML = `<h2>Rooms</h2>`
 
     let html_draft = ""
     let path_hv_room_match = false
     let target_room = "LTA"
+    html = document.getElementById("courses_select_left_optionBox")
 
     if (room_show_textbox) {
-        html = document.getElementById("room")
-        html_draft = `<div class="card" style="padding:1em;padding-top:0.5em" id="card3"><div style="margin:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)"><div class="flxb"><div id="iR1"><div style="pointer-events:all">
-        <h2>Rooms</h2><div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0">`
         let hdraft = ""
         rooms.forEach(room => {
-            hdraft += `<button onclick="roomx='` + room + `';render_room('` + room + `/' + document.getElementById('timeid').value + '/')" style="display:none;`
+            hdraft += `<button onclick="roomx='` + room + `';boot('/room/` + room + `/' + document.getElementById('timeid').value + '/', false, 2)" style="display:none;`
             if (decodeURI(path.split("/")[0]) != "" && room === decodeURI(path.split("/")[0])) {
                 target_room = decodeURI(path.split("/")[0])
                 document.title = "" + target_room + " - uni"
@@ -902,13 +883,12 @@ function render_room(path) {
         })
         hdraft += `</div>`
         if (!path_hv_room_match) {
-            html_draft = html_draft.replace(`<option value="LTA">`, `<option value="LTA" selected>`)
             document.title = "LTA - uni"
         }
-        html_draft += `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" placeholder="Search.." id="myInput" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_room + `">` + hdraft + `</select>`
+        html_draft = `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" placeholder="Search.." id="myInput" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_room + `">` + hdraft + `</select>`
+    
     } else {
-        html_draft = `<div class="card" style="padding:1em;padding-top:0.5em" id="card3"><div style="margin:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)"><div class="flxb"><div id="iR1"><div style="pointer-events:all">
-        <h2>Rooms</h2><div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0"><select name="roomid" id="roomid" title="Select Room" onchange="exe('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/')">`
+        html_draft = `<select name="roomid" id="roomid" title="Select Room" onchange="boot('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/', false, 2)">`
         rooms.forEach(room => {
             html_draft += `<option value="` + room + `"`
             if (decodeURI(path.split("/")[0]) != "" && room === decodeURI(path.split("/")[0])) {
@@ -941,9 +921,9 @@ function render_room(path) {
             allSems = roomAvilSems.filter(n => parseInt(n) > roomMinSem)
         }
         if (room_show_textbox) {
-            html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="exe('/room/' + roomx + '/' + document.getElementById('timeid').value + '/')">`
+            html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="boot('/room/' + roomx + '/' + document.getElementById('timeid').value + '/', false, 2)">`
         } else {
-            html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="exe('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/')">`
+            html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="boot('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/', false, 2)">`
         }
         if (path.split("/")[1] && ((!skipRoomRestriction && parseInt(decodeURI(path.split("/")[1])) < roomMinSem) || ustTimeToString(decodeURI(path.split("/")[1])) === '----')) {
             html_draft += `<option value="1009" selected disabled hidden>` + ustTimeToString(decodeURI(path.split("/")[1])) + `</option>`
@@ -987,11 +967,14 @@ function render_room(path) {
             html_draft += `>` + thisSem + `</option>`
             return true
         })
-        html_draft += `</optgroup></select></div>` + gAdsScript + `</div></div><div id="iL1">
-            <div id="roominfo"><center><div id="d_loading"></div></center></div></div></div></div>`
+        html_draft += `</optgroup></select></div>` 
+        html.innerHTML = html_draft
 
+        html = document.getElementById("courses_select_right") 
+        html_draft = `<div id="roominfo"><center><div id="d_loading"></div></center></div>`
         html.innerHTML = html_draft
         html = document.getElementById("roominfo")
+
         html_draft = ""
 
         if (ustTimeToString(target_time) === '----') { html.innerHTML = `the url is not in a valid format`; return }
@@ -1288,7 +1271,7 @@ function renderTimetableGrid(resp, type, target_time = 0) {
                     grid-row-end: ` + (((endTime[0] - minStartTime) / 10) + 2) + `;
                     grid-column-start: ` + (index - minWeekStartTime + 1) + `;
                     grid-column-end: ` + (index - minWeekStartTime + 2) + `" 
-                    ` + ((type == "room" || type == "people") ? `onclick="render_courses_specific('` + target_time + `/` + lesson.course.split(" - ")[0].split(" ")[0] + `/` + lesson.course.split(" - ")[0].replace(" ", "") + `/')"` : '') + `>
+                    ` + ((type == "room" || type == "people") ? `onclick="boot('/course/` + target_time + `/` + lesson.course.split(" - ")[0].split(" ")[0] + `/` + lesson.course.split(" - ")[0].replace(" ", "") + `/', false, 2)"` : '') + `>
                     <div style="position:sticky;top:2.75em;padding-left:0em;border-left:0em solid #88ff88cc">
                     <h4>` + startTime[1] + ` <span style="opacity:0.4">→</span> ` + endTime[1] + `</h4><p2>`
                 if (type === "room") {
@@ -1314,12 +1297,12 @@ function renderTimetableGrid(resp, type, target_time = 0) {
         days.Other.forEach(lesson => {
             if (type === "room") {
                 html_draft += `<div style="margin:0.75em 0.5em 0.75em 0.25em;padding:0.25em 0.5em 0.25em 0.75em;border-left:0.25em solid #ff888888;cursor:pointer" 
-                onclick="render_courses_specific('` + target_time + `/` + lesson.course.split(" - ")[0].split(" ")[0] + `/` + lesson.course.split(" - ")[0].replace(" ", "") + `/')">
+                onclick="boot('/course/` + target_time + `/` + lesson.course.split(" - ")[0].split(" ")[0] + `/` + lesson.course.split(" - ")[0].replace(" ", "") + `/', false, 2)">
                 <h4>` + lesson.date.substring(0, 25) + `</h4><h5>` + lesson.date.slice(25) + `</h5>
                 <p2>` + lesson.course.split(" - ")[0] + ` - ` + lesson.section + `<br><i>` + lesson.course.replace(lesson.course.split(" - ")[0] + " - ", "").slice(0, -9) + `</i></p2>
                 </div>`
             } else if (type === "people") {
-                html_draft += `<div style="margin:0.75em 0.5em 0.75em 0.25em;padding:0.25em 0.5em 0.25em 0.75em;border-left:0.25em solid #ff888888;cursor:pointer" onclick="render_courses_specific('` + target_time + `/` + lesson.course.split(" - ")[0].split(" ")[0] + `/` + lesson.course.split(" - ")[0].replace(" ", "") + `/')"><h4>` + lesson.course.split(" - ")[0] + ` (` + lesson.section.split(' (')[0] + `)</h4><p2><i>` + lesson.course.split(" - ")[1] + ` (` + lesson.section.split(' (')[1] + `</i><small><br>` + ((typeof lesson.date != "undefined") ? '' + lesson.date.substring(0, 25) + `<br>` + lesson.date.slice(25) + '<br>' : '') + lesson.room + `</small></p2></div>`
+                html_draft += `<div style="margin:0.75em 0.5em 0.75em 0.25em;padding:0.25em 0.5em 0.25em 0.75em;border-left:0.25em solid #ff888888;cursor:pointer" onclick="boot('/course/` + target_time + `/` + lesson.course.split(" - ")[0].split(" ")[0] + `/` + lesson.course.split(" - ")[0].replace(" ", "") + `/', false, 2)"><h4>` + lesson.course.split(" - ")[0] + ` (` + lesson.section.split(' (')[0] + `)</h4><p2><i>` + lesson.course.split(" - ")[1] + ` (` + lesson.section.split(' (')[1] + `</i><small><br>` + ((typeof lesson.date != "undefined") ? '' + lesson.date.substring(0, 25) + `<br>` + lesson.date.slice(25) + '<br>' : '') + lesson.room + `</small></p2></div>`
             } else if (type === "courseDetail") {
                 html_draft += `<div style="margin:0.75em 0.5em 0.75em 0.25em;padding:0.25em 0.5em 0.25em 0.75em;border-left:0.25em solid #ff888888">
                 <h4>` + lesson.date.substring(0, 25) + `</h4><h5>` + lesson.date.slice(25) + `</h5>

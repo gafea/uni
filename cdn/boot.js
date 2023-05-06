@@ -164,12 +164,12 @@ function renderBottomBarButtons(Buttons, SelectedButton) {
         btnx = btn.split(',')
         try {
             if (SelectedButton === btnx[2]) {
-                results += `<button onclick="boot('` + btnx[1] + `');blur()" type="button" tabindex="1000" class="tabview-sel tabview-sel-s">
+                results += `<button onclick="boot('` + btnx[1] + `'` + ((typeof btnx[4] != undefined) ? (`, false, ` + btnx[4]) : ("")) + `);blur()" type="button" tabindex="1000" class="tabview-sel tabview-sel-s">
                 <img src="` + btnx[3] + `" draggable="false" alt=""><p3>` + btnx[0] + `</p3><div class="tabview-sel-tri"></div>
                 </button>`
                 hit = true
             } else {
-                results += `<button onclick="boot('` + btnx[1] + `')" class="tabview-sel tabview-sel-h">
+                results += `<button onclick="boot('` + btnx[1] + `'` + ((typeof btnx[4] != undefined) ? (`, false, ` + btnx[4]) : ("")) + `)" class="tabview-sel tabview-sel-h">
                 <img src="` + btnx[3] + `" draggable="false" alt=""><p3>` + btnx[0] + `</p3>
                 </button>`
             }
@@ -335,9 +335,8 @@ installCSS('webel.css')
 window.onpopstate = function (event) {
     popArray.pop()
     if (typeof noPopStateShowLoading === "undefined") try { setLoadingStatus("show") } catch (error) { }
-    setTimeout(() => {
-        boot(decodeURIComponent((event.state) ? event.state.plate : window.location.pathname), true)
-    }, 50)
+    let prevPath = decodeURIComponent((event.state) ? event.state.plate : window.location.pathname)
+    boot(prevPath, true, ((prev_bootID_call != -2) ? (bootID_mapper(prevPath)) : (-1)))
 }
 
 //<a href=""> -> <a onclick="boot()">
@@ -355,10 +354,11 @@ function postCleanup() {
 }
 
 //load new page
+var prev_bootID_call = -2;
 var prev_boot_call = 'none';
 var isBootRunning = false;
 
-function boot(path, noHistory) {
+function boot(path, noHistory, bootID = -1) {
 
     //if url start with '//' then throw it away
     if (path.startsWith('//')) {
@@ -383,8 +383,9 @@ function boot(path, noHistory) {
 
     if (!path) path = '/'
 
-    if (prev_boot_call != path) { //if already init page then don't init it again
+    if ((bootID != -1) ? (prev_bootID_call != bootID) : (prev_boot_call != path)) { //if already init page then don't init it again
 
+        if (typeof bootID_mapper === "function") prev_bootID_call = bootID_mapper(path);
         prev_boot_call = path;
         let x = init(path);
         if (!!x) {

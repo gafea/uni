@@ -65,6 +65,7 @@ img{object-fit:cover;opacity:1;transition-duration:.375s;transition-timing-funct
 
 .edge2edge{padding:0.75em calc( 5% + 5em );padding:0.75em max(calc(env(safe-area-inset-right) + 5%), calc(5% + 5em)) 0.75em max(calc(env(safe-area-inset-left) + 5%), calc(5% + 5em))}
 .edge2edge_page{padding:2em calc( 5% + 5em );padding:2em max(calc(env(safe-area-inset-right) + 5%), calc(5% + 5em)) 2em max(calc(env(safe-area-inset-left) + 5%), calc(5% + 5em))}
+.edge2edge_wide{padding:0.75em;padding:0.75em max(calc(env(safe-area-inset-right) + 0.75em), 0.75em) 0.75em max(calc(env(safe-area-inset-left) + 0.75em), 0.75em)}
 .card{padding:2em calc( 5% + 5em );padding:2em max(calc(env(safe-area-inset-right) + 5%), calc(5% + 5em)) 2em max(calc(env(safe-area-inset-left) + 5%), calc(5% + 5em))}
 .box, .selbox{background-color:white;padding:1em;margin:0.5em;border-radius:1em}
 .selbox{cursor:pointer;transition-duration: 0.15s;box-shadow: 0 0.5em 1em rgba(0,0,0,.05)}
@@ -311,8 +312,9 @@ input:checked + .sliorange:hover {background-color:#f89e29}
 @media (min-width:1280px) {.no_desktop{display:none!important}}
 @media (max-width:1280px) {
 .no_tablet{display:none!important}
-.edge2edge{padding:0.5em calc( 16px + 1em );padding:0.5em max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) 0.5em max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}
+.edge2edge{padding:0.75em;padding:0.75em max(calc(env(safe-area-inset-right) + 0.75em), 0.75em) 0.75em max(calc(env(safe-area-inset-left) + 0.75em), 0.75em)}
 .edge2edge_page{padding:2em calc( 16px + 1em );padding:2em max(calc(env(safe-area-inset-right) + 1em), calc(16px + 1em)) 2em max(calc(env(safe-area-inset-left) + 1em), calc(16px + 1em))}
+.edge2edge_wide{padding:0.75em;padding:0.75em max(calc(env(safe-area-inset-right) + 0.75em), 0.75em) 0.75em max(calc(env(safe-area-inset-left) + 0.75em), 0.75em)}
 .card{padding:2em calc( 16px + 1em );padding:2em max(calc(env(safe-area-inset-right) + 1em), calc(16px + 1em)) 2em max(calc(env(safe-area-inset-left) + 1em), calc(16px + 1em))}
 .topbar{padding:2em calc( 16px + 1em ) calc( 0.5em - 0.08em ) calc( 16px + 1em - 0.5em );padding:max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}
 .tabview{margin:1em;bottom:calc(1.75em + env(safe-area-inset-bottom));left:10em;right:10em}
@@ -336,6 +338,7 @@ h3{font-size:1.5rem}
 #postbox{width:calc(100% - 3em);padding:1.5em;padding-top:1.25em;border-radius:1.5em 1.5em 0 0;background-image:var(--bg-grd-def);min-height:calc(100vh - 3.75em - 2.75em)}
 .edge2edge{padding:0.75em;padding:0.75em max(env(safe-area-inset-right) + 0.25em, 0.75em) 0.75em max(env(safe-area-inset-left) + 0.25em, 0.75em)}
 .edge2edge_page{padding:1em;padding:1em max(env(safe-area-inset-right) + 0.25em, 1em) 1em max(env(safe-area-inset-left) + 0.25em, 1em)}
+.edge2edge_wide{padding:0.75em;padding:0.75em max(env(safe-area-inset-right) + 0.25em, 0.75em) 0.75em max(env(safe-area-inset-left) + 0.25em, 0.75em)}
 .card{padding:1em;padding:1em max(env(safe-area-inset-right) + 0.25em, 1em) 1em max(env(safe-area-inset-left) + 0.25em, 1em)}
 .topbar{min-height:0;top:-3.5em;top:calc(-3.5em - env(safe-area-inset-top));padding:8px;padding:calc(8px + env(safe-area-inset-top)) 8px 8px 8px;flex-flow:wrap!important;flex-padding:16px calc(16px + 0.5em)}
 .topbar + .card{margin-top:0.5em; box-shadow: 0 -0.25em 0.25em rgba(0,0,0,0.15);border-radius:1.5em;background-color: var(--bgcolor)}
@@ -385,8 +388,9 @@ h3{font-size:1.5rem}
     .content{container-type:inline-size}
 
     @container (max-width:1280px) {
-        .edge2edge{padding:0.5em calc( 16px + 1em );padding:0.5em max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) 0.5em max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}
+        .edge2edge{padding:0.75em;padding:0.75em max(calc(env(safe-area-inset-right) + 0.75em), 0.75em) 0.75em max(calc(env(safe-area-inset-left) + 0.75em), 0.75em)}
         .edge2edge_page{padding:2em calc( 16px + 1em );padding:2em max(calc(env(safe-area-inset-right) + 1em), calc(16px + 1em)) 2em max(calc(env(safe-area-inset-left) + 1em), calc(16px + 1em))}
+        .edge2edge_wide{padding:0.75em;padding:0.75em max(calc(env(safe-area-inset-right) + 0.75em), 0.75em) 0.75em max(calc(env(safe-area-inset-left) + 0.75em), 0.75em)}
         .card{padding:2em calc( 16px + 1em );padding:2em max(calc(env(safe-area-inset-right) + 1em), calc(16px + 1em)) 2em max(calc(env(safe-area-inset-left) + 1em), calc(16px + 1em))}
         .topbar{padding:2em calc( 16px + 1em ) calc( 0.5em - 0.08em ) calc( 16px + 1em - 0.5em );padding:max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}
     }
@@ -394,6 +398,7 @@ h3{font-size:1.5rem}
     @container (max-width:520px) {
         .edge2edge{padding:0.75em;padding:0.75em max(env(safe-area-inset-right) + 0.25em, 0.75em) 0.75em max(env(safe-area-inset-left) + 0.25em, 0.75em)}
         .edge2edge_page{padding:1em;padding:1em max(env(safe-area-inset-right) + 0.25em, 1em) 1em max(env(safe-area-inset-left) + 0.25em, 1em)}
+        .edge2edge_wide{padding:0.75em;padding:0.75em max(calc(env(safe-area-inset-right) + 0.25em), 0.75em) 0.75em max(calc(env(safe-area-inset-left) + 0.25em), 0.75em)}
         .card{padding:1em;padding:1em max(env(safe-area-inset-right) + 0.25em, 1em) 1em max(env(safe-area-inset-left) + 0.25em, 1em)}
         .topbar{min-height:0;top:-3.5em;top:calc(-3.5em - env(safe-area-inset-top));padding:8px;padding:calc(8px + env(safe-area-inset-top)) 8px 8px 8px;flex-flow:wrap!important;flex-padding:16px calc(16px + 0.5em)}
         .dwhdi{flex-flow:wrap;overflow-x:none}
