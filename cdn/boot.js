@@ -1,5 +1,5 @@
 function renderTopBar(title = ' ', subtitle = '', buttonHTML = '', showSearch = false, additionalHTML = '', showBack = true) {
-    return `<div class="` + ((!(buttonHTML || showSearch)) ? 'topbar_mobilefix ' : '') + `topbar flx">` + ((showBack) ? `<button onclick="window.history.back();" class="acss aobh no_print" style="padding:0.5em;font-size:16px;white-space:pre;transition-duration:0s" id="btn_back" tabindex="0" title="back"><b>く<span class="no_mobile"> back</span></b></button>` : "") + `
+    return `<div class="` + ((!(buttonHTML || showSearch)) ? 'topbar_mobilefix ' : '') + `topbar flx">` + ((showBack) ? `<button onclick="window.history.back();" class="acss aobh no_print" id="btn_back" tabindex="0" title="back"><b>く<span class="no_mobile"> back</span></b></button>` : "") + `
     <div id="topbar_loading"></div>
     <div class="dwhdt flx dwhdto"><div class="dwhdt">
         <b id="topbar_title_wrap">

@@ -7,7 +7,8 @@ select, #myInput{color: black; cursor: pointer; font-size: 16px; border: 0.15em 
 .LR_Right, #iL1{width:calc( 100% - 19em )}
 .LR_Left, #iR1{padding:0.5em;pointer-events:none;position:sticky;top:0.75em;left:0;z-index:3;width:17em;overflow-y:auto;height:fit-content}
 .LR_Right{height:fit-content;overflow:clip;padding:0}
-.LR_Left{pointer-events:unset}
+.LR_Left{pointer-events:unset;max-height:calc(95vh - 8em);overflow:overlay}
+.LR_Left_Content{width:17em}
 .ugpgbox{padding:0.5em;border-radius:1.5em;background-color:var(--gbw)} .ugpgbox > button {cursor:pointer;padding:0.25em 1em;border-radius:1em;background:var(--bw);transition-duration:0.05s}
 #myInput{width:calc(100% - 1.3em);margin:0.5em 0;cursor:text;outline:none}
 #myDropdown > button {flex-grow:1;border-radius:0}
@@ -52,6 +53,8 @@ select, #myInput{color: black; cursor: pointer; font-size: 16px; border: 0.15em 
     .chart-container{width:100%; height:55vh}
     .course_sel, .picbox_inner{min-height:8em}
     .course_sel{max-width:unset}
+    .LR_Left{max-height:unset}
+    .LR_Left_Content{width:100%}
 }
 
 @media (max-width:750px) {

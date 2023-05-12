@@ -49,14 +49,16 @@ function init(path) {
             return `<div id="courses_select_wrp">
                 <div class="edge2edge flxb" id="courses_select_main" style="transition-timing-function:cubic-bezier(.65,.05,.36,1);transition-duration:0.6s">
                     <div class="LR_Left" id="courses_select_left">
-                        <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0">
-                            <button onclick="boot('/course/', false, 2)">course</button>
-                            <button onclick="boot('/people/', false, 2)">people</button>
-                            <button onclick="boot('/room/', false, 2)">room</button>
-                            <!-- <button onclick="boot('/search/', false, 2)">search</button> -->
+                        <div class="LR_Left_Content">
+                            <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0">
+                                <button onclick="boot('/course/', false, 2)">course</button>
+                                <button onclick="boot('/people/', false, 2)">people</button>
+                                <button onclick="boot('/room/', false, 2)">room</button>
+                                <!-- <button onclick="boot('/search/', false, 2)">search</button> -->
+                            </div>
+                            <div id="courses_select_left_top"></div>
+                            <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
                         </div>
-                        <div id="courses_select_left_top"></div>
-                        <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
                     </div>
                     <div class="LR_Right" id="courses_select_right"></div>
                 </div>
@@ -224,8 +226,8 @@ function render_me() {
                 htmld += `<div class="edge2edge"><h3>` + ustTimeToString(sem) + `</h3><div class="flx">`
                 accConfig.courses[sem].forEach(course => {
                     htmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" not_class="course_sel selbox picbox" class="course_sel box picbox" not_onclick="render_courses_specific('` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', true)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
-                    <div class="picbox_inner_up"><h5 style="opacity:0.85">` + course.split(" (")[1].split(")")[0] + `</h5></div>
-                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.split(" (")[0].replace(course.split(" (")[0].split(" - ")[0] + " - ", "") + `</h5></div></div></div>`
+                    <div class="picbox_inner_up"><h5 style="opacity:0.85">` + course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0]  + `</h5></div>
+                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.split(" - ")[1].substring(course.split(" - ")[1], course.split(" - ")[1].lastIndexOf(" (")) + `</h5></div></div></div>`
                 })
                 htmld += `</div></div>`
             })
@@ -381,15 +383,6 @@ function enroll_course(sem, course, make_switch = false) {
 let disableSigninRequirement = true;
 
 function render_courses_specific(path, insideCoursePage = false) {
-
-    document.getElementById("course_detail_topbar_specialStyles").innerHTML = `<style>
-    #courses_select_main{padding:0}
-    #courses_select_left{padding:0; max-width:0; width:0; height:0; opacity:0; overflow:clip}
-    #courses_select_right{width:100%}
-    </style>`
-    document.getElementById('courses_select_main').classList.add('edge2edge_wide')
-    document.getElementById("btn_back").style.display = "inline-block"
-
     setLoadingStatus("show")
 
     fetch("/!course/" + path).then(r => r.json()).then(r => {
@@ -521,26 +514,32 @@ function render_courses_specific(path, insideCoursePage = false) {
 
         setTimeout(enroll_course, 50, path.split("/")[0], course)
 
+        let timenow = new Date().getTime()
+
         if (parseInt(path.split("/")[0]) >= 2230) {
             fetch("/!diff/" + path.split('/')[2].toUpperCase() + "/" + ((path.split("/")[0] != allSemsF[0]) ? ("" + path.split("/")[0] + "/") : "")).then(r => r.json()).then(rChart => {
                 if (rChart.status != 200) { document.getElementById("charts").innerHTML = "failed to contact server or script crashed"; return }
 
-                document.getElementById("charts").innerHTML += `<div class="chart-container"><canvas id="chart"></canvas></div>`
+                setTimeout(() => {
+                    
+                    document.getElementById("charts").innerHTML += `<div class="chart-container"><canvas id="chart"></canvas></div>`
 
-                let options = chartOptions(rChart.resp.t)
-                rChart.resp.t.forEach((tx, i) => rChart.resp.t[i] = new Date(parseInt(tx)).toLocaleString());
+                    let options = chartOptions(rChart.resp.t)
+                    rChart.resp.t.forEach((tx, i) => rChart.resp.t[i] = new Date(parseInt(tx)).toLocaleString());
+    
+                    let chx = new Chart(
+                        document.getElementById('chart'),
+                        {
+                            type: 'line',
+                            options: options,
+                            data: {
+                                labels: rChart.resp.t,
+                                datasets: rChart.resp.p
+                            },
+                        }
+                    )
 
-                let chx = new Chart(
-                    document.getElementById('chart'),
-                    {
-                        type: 'line',
-                        options: options,
-                        data: {
-                            labels: rChart.resp.t,
-                            datasets: rChart.resp.p
-                        },
-                    }
-                )
+                }, Math.max( 500 - (new Date().getTime() - timenow), 1 ) )
 
             }).catch(error => {
                 console.log(error)
@@ -549,8 +548,17 @@ function render_courses_specific(path, insideCoursePage = false) {
         }
 
         setLoadingStatus("hide")
-        document.getElementById("topbar_title").innerText = path.split("/")[2].substring(0, 4) + " " + path.split("/")[2].replace(path.split("/")[2].substring(0, 4), "")
-        document.getElementById("topbar_subtitle").innerText = ustTimeToString(path.split("/")[0])
+        document.getElementById("topbar_title").innerText = course.split(" - ")[1].substring(course.split(" - ")[1], course.split(" - ")[1].lastIndexOf(" ("))
+        document.getElementById("topbar_subtitle").innerText = path.split("/")[2].substring(0, 4) + " " + path.split("/")[2].replace(path.split("/")[2].substring(0, 4), "") + " • " + ustTimeToString(path.split("/")[0])
+        document.getElementById('courses_select_main').classList.add('edge2edge_wide')
+        document.getElementById("course_detail_topbar_specialStyles").innerHTML = `<style>
+        #courses_select_main{padding:0}
+        #courses_select_left{padding:0; max-width:0; width:0; height:0; opacity:0; overflow:clip}
+        #courses_select_right{width:100%}
+        #courses_detail_content{width:100vw; width:100dvw}
+        @media (max-width:1020px) {#courses_select_left{display:none}}
+        </style>`
+        setTimeout(() => {document.getElementById("course_detail_topbar_specialStyles").innerHTML += "<style>#btn_back{transition-duration:0.1s!important}</style>"}, 500)
     }).catch(error => {
         console.log(error)
         setLoadingStatus("error", false, "failed to contact server or script crashed")
@@ -561,10 +569,8 @@ let courseSpecificReturnURL = ''
 
 function render_courses_details(path, scrollIntoView = false) {
     setLoadingStatus("show")
-    document.getElementById('courses_select_main').classList.remove('edge2edge_wide')
-    document.getElementById("btn_back").style.display = "none"
+
     courseSpecificReturnURL = "/course/" + path.slice(0, path.lastIndexOf("/") + 1)
-    document.getElementById("course_detail_topbar_specialStyles").innerHTML = `<style>.topbar{z-index:9999!important} @media (min-width: 1280px) {.topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}}</style>`
     html = document.getElementById("courses_detail_content")
     let withinCourseListPage = (path.split('/').length == 2 || (path.split('/').length == 3 && path.split('/')[2] == ""))
     let withinCourseDetailPage = false
@@ -576,11 +582,7 @@ function render_courses_details(path, scrollIntoView = false) {
     }
 
     fetch("/!course/" + path).then(r => r.json()).then(r => {
-        setLoadingStatus("hide")
-        document.getElementById("topbar_title").innerText = path.split("/")[1]
-        document.getElementById("topbar_subtitle").innerText = ustTimeToString(path.split("/")[0])
-
-        if (r.status != 200) { html.innerHTML = "failed to contact server"; return }
+        if (r.status != 200) { setLoadingStatus("error", false, "failed to contact server"); return }
 
         let html_draft = `<style>.uniroomtime{display:none} .uniroomweek{position:unset;margin-top:1em} .uniroomgrid{display:block} .LR_Right{background:none}</style><br><div class="flx"><br><div class="flx" style="gap:0.5em"><p4>View Mode: </p4>`
         if (listMode === "card") {
@@ -598,8 +600,8 @@ function render_courses_details(path, scrollIntoView = false) {
             if ((studprog === "ug" && parseInt(course[5]) > 0 && parseInt(course[5]) < 5) || (studprog === "pg" && parseInt(course[5]) >= 5)) {
                 if (listMode === "card") {
                     html_draft += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="boot('/course/` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + "\n\n" + r.resp[course].attr.DESCRIPTION.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
-                    <div class="picbox_inner_up"><h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.split(" (")[1].split(")")[0] : r.resp[course].attr["VECTOR"]) + `</h5></div>
-                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.split(" (")[0].replace(course.split(" (")[0].split(" - ")[0] + " - ", "") + `</h5></div></div></div>`
+                    <div class="picbox_inner_up"><h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"]) + `</h5></div>
+                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.split(" - ")[1].substring(course.split(" - ")[1], course.split(" - ")[1].lastIndexOf(" (")) + `</h5></div></div></div>`
                 } else {
                     html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)"><div><div><h4>` + course + `</h4><p2 class="no_mobile">` + r.resp[course].attr.DESCRIPTION + `</p2></div>
                     <div class="no_mobile">` + renderCourseAttr(r.resp[course].attr, course) + `</div></div></div></div>`
@@ -612,15 +614,40 @@ function render_courses_details(path, scrollIntoView = false) {
 
         if (scrollIntoView) { if ((Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) <= 520)) { document.getElementById("courses_select_right").scrollIntoView() } else { document.body.scrollIntoView() } }
 
+        setLoadingStatus("hide")
+        document.getElementById("topbar_title").innerText = path.split("/")[1]
+        document.getElementById("topbar_subtitle").innerText = ustTimeToString(path.split("/")[0])
+        document.getElementById('courses_select_main').classList.remove('edge2edge_wide')
+        document.getElementById("course_detail_topbar_specialStyles").innerHTML = `
+        <style>
+        .topbar{z-index:9999!important}
+        #btn_back{max-width: 0em; padding: 0em}
+
+        @media (min-width: 520px) {.topbar{border-radius: 1em 1em 0 0}}
+
+        @media (min-width: 1280px) {
+            #courses_detail_content{width:calc( 90vw - 29em )}
+            .topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}
+        }
+        </style>`
     }).catch(error => {
         console.log(error)
-        html.innerHTML = "failed to contact server or script crashed"
+        setLoadingStatus("error", false, "failed to contact server or script crashed")
     })
 }
 
 var scrollIntoView = false, doNotCheckUGPG = false
 function render_courses(path) {
 
+    if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]), "", false, "", true) + `
+    <style>#btn_back, .topbar, #courses_select_main, #courses_select_left, #courses_select_right{transition-timing-function: cubic-bezier(.65,.05,.36,1);transition-duration: 0.5s !important}</style>
+    <div id="course_detail_topbar_specialStyles">
+        <style>
+            .topbar{z-index:9999!important} @media (min-width: 1280px) {.topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}}
+        </style>
+    </div>
+    <div id="courses_detail_content"></div>`
+    setLoadingStatus("show")
     document.getElementById("courses_select_left_top").innerHTML = `
     <div class="flx">
     <h2>Courses</h2>
@@ -660,7 +687,7 @@ function render_courses(path) {
     }
 
     fetch("/!course/" + semx + "/").then(r => r.json()).then(r => {
-        if (r.status != 200) { document.getElementById("core").innerHTML = "failed to contact server"; return }
+        if (r.status != 200) { setLoadingStatus("error", false, "failed to contact server"); return }
 
         let depts = r.resp.both
         if (typeof r.resp[studprog] != "undefined") depts = depts.concat(r.resp[studprog])
@@ -690,8 +717,6 @@ function render_courses(path) {
         } else {
             deptx = depts[0]
         }
-
-        if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]), "", false, "", true) + `<div id="course_detail_topbar_specialStyles"><style>.topbar{z-index:9999!important} @media (min-width: 1280px) {.topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}}</style></div><style>.topbar, #courses_select_main, #courses_select_left, #courses_select_right{transition-timing-function: cubic-bezier(.65,.05,.36,1);transition-duration: 0.6s}</style><div id="courses_detail_content"></div>`
 
         let coursex = ((path.split("/").length > 2 && path.split("/")[2]) ? decodeURI(path) : "" + semx + "/" + deptx + "/")
 

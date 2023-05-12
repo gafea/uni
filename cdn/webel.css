@@ -56,7 +56,7 @@ a, .acss{text-decoration:none;color:var(--link-color);background-color:transpare
 .bufLR{padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left)}
 #divheadbuffer{height:calc(5vh + 4.5em)}
 img{object-fit:cover;opacity:1;transition-duration:.375s;transition-timing-function:cubic-bezier(.19,1,.22,1)}
-#btn_back{border:none}
+#btn_back{border:none;padding:0.5em;font-size:16px;white-space:pre;max-width:4.25em;overflow:clip}
 
 .smtbtn{white-space:pre;padding:1em;border-radius:1em;font-size:13.25px;margin:3px;text-align:center;transition-duration:.1s;display:inline-block;line-height:normal;user-select:none}
 .smtbtn > span{font-size:1em;color:#3f3c39;transition-duration:.1s;background-position-y:center;background-repeat:no-repeat;background-size:1.75em auto}
