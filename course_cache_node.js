@@ -22,6 +22,7 @@ let xpeoples = {}
 let xrooms = {}
 let xsems = []
 let xinsems = {}
+let xcourseids = {}
 
 function lessonToType(lesson) {
     if (lesson.startsWith("LA")) {
@@ -58,6 +59,23 @@ sharedfx.getAllFromDir(servar.course_path, true).forEach(sx => {
                         xdiffs[code] = {}
                         if (typeof xinsems[code] === "undefined") xinsems[code] = []
                         xinsems[code].push(st.split(".")[0])
+                        if (typeof xcourseids[code] === "undefined") xcourseids[code] = {}
+                        let course = courseName
+                        xcourseids[code] = {SEM: st.split(".")[0], NAME: course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" ("))}
+                        let c = xcourses[sx][st.split(".")[0]][courseName];
+                        ["DESCRIPTION", "INTENDED LEARNING OUTCOMES", "CO-REQUISITE", "ALTERNATE CODE(S)", "PREVIOUS CODE"].forEach(a => {
+                            if (typeof c.attr[a] != "undefined") { 
+                                if (a == "ALTERNATE CODE(S)" || a == "PREVIOUS CODE") {
+                                    let str = []
+                                    c.attr[a].split(", ").forEach(ac => {
+                                        str.push(ac.trim().replace(" ", ""))
+                                    })
+                                    xcourseids[code][a] = str.join(", ")
+                                } else {
+                                    xcourseids[code][a] = c.attr[a]
+                                }
+                            }
+                        })
                     }
                 })
                 xcourses[sx][st.split(".")[0]]["_attr"] = { ug: ug, pg: pg }
@@ -169,7 +187,7 @@ Object.keys(xpeoples).forEach(people => {
     if (Object.keys(xpeoples[people]).length === 0) delete xpeoples[people]
 })
 
-post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peoples: xpeoples, rooms: xrooms, sems: xsems, insems: xinsems })).then(r => r.json()).then(r => {
+post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peoples: xpeoples, rooms: xrooms, sems: xsems, insems: xinsems, courseids: xcourseids })).then(r => r.json()).then(r => {
 
     console.log('[courses_cache] early cacheing done, used ' + ((new Date()).getTime() - cctm.getTime()) + 'ms')
 

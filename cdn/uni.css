@@ -2,6 +2,20 @@
 button{color:black;border:none;padding:1em;border-radius:1em;margin:0;cursor:pointer;font-size:13.25px}
 select, #myInput{color: black; cursor: pointer; font-size: 16px; border: 0.15em solid rgba(128,128,128,.3); background: white; text-overflow: ellipsis; padding: 0.5em; flex-grow: 1; border-radius: 0.5em; max-width: 100%}
 
+.searchimg{max-height:10em;width:100%;max-width:10em;aspect-ratio:1;object-fit:contain;user-select:none}
+#digsrtxt {display:none!important}
+#digbtn, #digbtn form, #digbtn form input, #digsrtxt, #fdigbtn, #mdigbtn, #mdigbtn form, #mdigbtn form input{transition-timing-function: cubic-bezier(.77,0,.18,1);transition-duration:0.4s}
+#digbtn{border-radius:5em;position:absolute;left:calc(5% + 5em + 16em - 2rem - 0.5em);right:calc(100% - 5% - 5em - 16em - 0.5em);padding:0.5em 0 0.5em 1em}
+#digbtn img, #fdigbtn img, #mdigbtn img{vertical-align:middle;object-fit:contain;width:2rem;height:2rem;cursor:pointer;user-select:none;-webkit-touch-callout:none}
+#digbtn form, #fdigbtn form, #mdigbtn form{display:inline-block;width:0;margin:0}
+#digbtn form input, #fdigbtn form input, #mdigbtn form input{outline:none!important;appearance:none;-webkit-appearance:none;padding:0;margin:0;background:none;border:none;height:2rem;margin-left:0.4em;width:calc(100% - 0.4em);font-size:0.85rem}
+#fdigbtn, #digbtn:hover, #digbtn:active, #digbtn:focus, #digbtn:focus-within{background:white;box-shadow:0 1.5em 2em rgba(0,0,0,.3);backdrop-filter:blur(1em);-webkit-backdrop-filter:blur(1em);padding:0.75em;right:calc(5% + 5em + 16em - 2rem - 0.75em);z-index:100000}
+#fdigbtn form, #digbtn:hover form, #digbtn:active form, #digbtn:focus form, #digbtn:focus-within form{width:calc(100% - 2rem)}
+#mdigbtn form{width:calc(100% - 2rem)}
+#fdigbtn{border-radius:5em;box-shadow:0 0.5em 0.75em rgba(0,0,0,.2);margin:0.35em;margin-top:0;position:-webkit-sticky;position:sticky;top:2.3em}
+#fdigbtn:hover, #fdigbtn:active, #fdigbtn:focus, #fdigbtn:focus-within{box-shadow:0 0.75em 1em rgba(0,0,0,.35)}
+#mdigbtn{flex-shrink:0;width:calc(10em + 5%)}
+
 .selbox:hover{z-index:3}
 .flxb{flex-flow:wrap;display:flex;justify-content:space-between}
 .LR_Right, #iL1{width:calc( 100% - 19em )}
@@ -13,6 +27,8 @@ select, #myInput{color: black; cursor: pointer; font-size: 16px; border: 0.15em 
 #myInput{width:calc(100% - 1.3em);margin:0.5em 0;cursor:text;outline:none}
 #myDropdown > button {flex-grow:1;border-radius:0}
 .course_sel{flex-grow:1;max-width:calc(50% - 1em)}
+.course_sel:hover, .course_sel:focus{transform:scale(1.01)}
+.course_sel:hover:active{transform:scale(0.9875)}
 .course_sel, .picbox_inner{min-height:8.5em;min-width:12.5em}
 .picbox_inner{color:white;align-items:flex-end;position:relative;background-color: rgba(0,0,0,.7); background: linear-gradient(180deg, rgba(0,0,0,.3) 0%, rgba(0,0,0,.6) 50%, rgba(0,0,0,.75) 100%); padding: 1em; border-radius: 1em}
 .picbox_inner_up{position: absolute; top: 0.6em;right: 1em;}
@@ -38,6 +54,8 @@ select, #myInput{color: black; cursor: pointer; font-size: 16px; border: 0.15em 
     button{color:#eee;background-color:#3f3c39}
     select, #myInput{color:#eee;background:#3f3c39}
     .courses_specific_close > button > img{filter:invert(1)}
+
+    #fdigbtn, #digbtn:hover, #digbtn:active, #digbtn:focus, #digbtn:focus-within{background:#2c2c34}
 }
 
 @media (max-width:1280px) {
@@ -68,4 +86,12 @@ select, #myInput{color: black; cursor: pointer; font-size: 16px; border: 0.15em 
     .dpv_carrier{display:block}
     .courses_specific_close > button, .courses_specific_close > button > img {width:2.75em;height:2.75em}
     #courses_detail_content .edge2edge, #courses_detail_content .edge2edge_page{padding:1em}
+
+    #mdigbtn form{width:0}
+    #fdigbtn{top:1.1em;top:calc(1.1em + env(safe-area-inset-top))}
+    #digbtn, #mdigbtn{right:1.5em;padding:0.5em;top:0;left:calc(100% - 2rem - 2.55em);box-shadow:0 0.2em 0.3em rgba(0,0,0,.2);padding-top:1.75em;padding-top:max(1.75em, calc(0.5em + env(safe-area-inset-top)));border-radius:0 0 0.5em 0.5em}
+    #digbtn form input, #figbtn form input{margin-left:0.75em;width:calc(100% - 0.75em)}
+    #digbtn:hover, #digbtn:active, #digbtn:focus, #digbtn:focus-within, #mdigbtn:hover, #mdigbtn:active, #mdigbtn:focus, #mdigbtn:focus-within{left:0;right:0;top:0;border-radius:0;padding:0.75em;padding-top:1.75em;padding-top:max(1.75em, calc(0.5em + env(safe-area-inset-top)));box-shadow:0 0.4em 0.8em rgba(0,0,0,.3)}
+    #digbtn:hover form, #digbtn:active form, #digbtn:focus form, #digbtn:focus-within form, #mdigbtn:hover form, #mdigbtn:active form, #mdigbtn:focus form, #mdigbtn:focus-within form{width: calc(100% - 2rem)}
+    #mdigbtn{margin:0;width:auto;border-bottom:none;position:absolute;backdrop-filter:blur(1em);-webkit-backdrop-filter:blur(1em)}
 }

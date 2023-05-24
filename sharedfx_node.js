@@ -15,9 +15,23 @@ const envar = {
     course_path: ".\\course\\",
     course_temp_path: ".\\course_temp\\",
     course_backup_path: false,
-    gscript: ``
-
+    gscript: ``,
+    death_dump_path: "C:\\webserver\\death\\"
 }; Object.freeze(envar)
+
+const deathDump = (domain, msg, e) => {
+    let t = (new Date)
+    let tx = t.toJSON()
+    t = t.getTime()
+    let p = "" + envar.death_dump_path + domain + "\\"
+    try {
+        if (!fs.existsSync(p)) fs.mkdirSync(p)
+        p += t + ".log"
+        fs.writeFileSync(p, `Domain: ` + domain + `\nTime: ` + tx + `\nMessage: ` + msg + `\n\nDetailed error:\n` + e.message + `\n\n` + JSON.stringify(e))
+    } catch (error) {console.log(error)}
+    console.log(`nodejs crashed :(\n\nDomain: ` + domain + `\nTime: ` + tx + `\nMessage: ` + msg + `\n\nThe log will be saved at ` + p + `\n\nDetailed error:<br>` + e.message)
+    throwMail(envar.mail_adr, "[" + domain + " crashed] " + msg, `Domain: ` + domain + `<br>Time: ` + tx + `<br>Message: ` + msg + `<br><br>The log will be saved at ` + p + `<br><br>Detailed error:<br>` + e.message)
+}
 
 const returnErr = (res, statusCode = 404, message = "", useJSON = false, AccessControlAllowOrigin = false, rightHTML = "", postMessagefx = "") => {
     var headerStr = { 'Server': 'joutou' }
@@ -155,4 +169,4 @@ async function throwMail(address, title, body) {
     return info
 }
 
-module.exports = { about, envar, returnErr, getAllFromDir, pushObjArray, sha512, rndStr, isEmailValid, throwMail, parseCookies, zeroPad }
+module.exports = { about, envar, deathDump, returnErr, getAllFromDir, pushObjArray, sha512, rndStr, isEmailValid, throwMail, parseCookies, zeroPad }

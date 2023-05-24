@@ -16,6 +16,8 @@ const servar = {
 }; Object.freeze(servar)
 process.stdout.write(String.fromCharCode(27) + "]0;" + servar.domain + String.fromCharCode(7))
 
+try {
+
 let acc = {}
 if (servar.deployed) {
     acc = require('./../acc_node.js')
@@ -30,9 +32,21 @@ var peoples = {}
 var rooms = {}
 var sems = []
 var insems = {}
+var courseids = {}
 
 //courses_fetch, including course_cache
 function courses_fetch(recur = false) {
+
+    if (recur) {
+        let tu = (new Date())
+        if ((new Date).getTime() < 1683043205000) {
+            setTimeout(courses_fetch, (19 - (tu.getMinutes() % 20)) * 60 * 1000 + (59 - tu.getSeconds()) * 1000 + (999 - tu.getMilliseconds()) + 500, true)
+            return
+        } else if ((new Date).getTime() > 1690818600000) {
+            console.log("[" + servar.domain + "] fetching killtime reached, stopping loop...")
+            return
+        }
+    }
 
     console.log("[" + servar.domain + "] starting fetching...")
 
@@ -44,6 +58,8 @@ function courses_fetch(recur = false) {
     }
 
 }
+let t = (new Date())
+setTimeout(courses_fetch, (19 - (t.getMinutes() % 20)) * 60 * 1000 + (59 - t.getSeconds()) * 1000 + (999 - t.getMilliseconds()) + 500, true)
 
 //course_cache
 let cctm = (new Date())
@@ -56,6 +72,51 @@ function course_cache() {
 
 }
 course_cache()
+
+function course_search(query) {
+    if (!query) return []
+    let tmark = (new Date()).getTime()
+    let resultsPending = {courseids: courseids, peoples: Object.keys(peoples), rooms: Object.keys(rooms)}
+    query = query.normalize().toLowerCase().split(" ")
+
+    query.forEach(q => {
+        resultsPending.peoples = resultsPending.peoples.filter(people => people.normalize().toLowerCase().includes(q))
+        resultsPending.rooms = resultsPending.rooms.filter(room => room.normalize().toLowerCase().includes(q))
+
+        let remainingCourseids = {}
+        Object.keys(resultsPending.courseids).forEach(CODE => {
+            let courseid = resultsPending.courseids[CODE]; courseid.CODE = CODE
+            let keepit = false
+
+            Object.keys(courseid).forEach(key => {
+                if (key != "SEM") { if (courseid[key].normalize().toLowerCase().includes(q)) keepit = true }
+            })
+
+            if (keepit) remainingCourseids[CODE] = resultsPending.courseids[CODE]
+        })
+        resultsPending.courseids = remainingCourseids
+    })
+
+    let results = []
+    if (Object.keys(resultsPending.courseids).length) {
+        Object.keys(resultsPending.courseids).forEach(CODE => {
+            results.push({type: "course", result: {CODE: CODE, NAME: resultsPending.courseids[CODE].NAME, SEM: resultsPending.courseids[CODE].SEM, DESCRIPTION: resultsPending.courseids[CODE].DESCRIPTION}})
+        })
+    }
+    if (resultsPending.peoples.length) {
+        resultsPending.peoples.forEach(people => {
+            results.push({type: "people", result: people})
+        })
+    }
+    if (resultsPending.rooms.length) {
+        resultsPending.rooms.forEach(room => {
+            results.push({type: "room", result: room})
+        })
+    }
+
+    console.log(`[course_search] took time ` + (((new Date()).getTime()) - tmark) + `ms`)
+    return results
+}
 
 //outgoing server
 const server = http.createServer((req, res) => {
@@ -87,7 +148,7 @@ const server = http.createServer((req, res) => {
 
             if (req.url == '/!404' || req.url == '/!404/') { //404 html page
                 sharedfx.returnErr(res, 404, "The page you're looking for is not found.", false, true, `<a href="/" class="y aobh no_print"><p1><b>Return to Home</b></p1></a>`)
-
+                return
 
             } else if (req.url.startsWith('/!insem/') && !req.url.includes("..")) {
                 let path = decodeURIComponent(req.url).substring(8)
@@ -101,6 +162,19 @@ const server = http.createServer((req, res) => {
                 res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
                 res.end(JSON.stringify({ status: 200, resp: insems[path.split('/')[0]] }))
                 return
+
+            } else if (req.url.startsWith('/!search/')) {
+                let path = decodeURIComponent(req.url).substring(9)
+                let params = new URLSearchParams(path)
+                let results = course_search(params.get('q'))
+                if (!results.length) {
+                    sharedfx.returnErr(res, 404, "", true)
+                    return
+                } else {
+                    res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                    res.end(JSON.stringify({ status: 200, resp: results }))
+                    return
+                }
 
             } else if (req.url.startsWith('/!people/') && !req.url.includes("..")) {
                 let path = decodeURIComponent(req.url).substring(9)
@@ -179,7 +253,7 @@ const server = http.createServer((req, res) => {
                 }
 
                 let reqSem = ((isNaN(parseInt(req.url.substring(7).split('/')[1]))) ? sems[0] : parseInt(req.url.substring(7).split('/')[1]))
-                let diffFilePath = servar.course_path + "_diff\\" + reqSem + "\\" + reqCourse + ".json"
+                let diffFilePath = servar.course_path + "_diff\\" + reqSem + "\\" + reqCourse.replaceAll("..", "") + ".json"
 
                 if (!fs.existsSync(diffFilePath)) {
                     res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
@@ -462,6 +536,7 @@ const serverAPI = http.createServer((req, res) => {
                     if (typeof r.rooms != "undefined") rooms = r.rooms
                     if (typeof r.sems != "undefined") sems = r.sems
                     if (typeof r.insems != "undefined") insems = r.insems
+                    if (typeof r.courseids != "undefined") courseids = r.courseids
                     console.log("[" + servar.domain + "] cacheing variables updated")
                 }
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
@@ -499,6 +574,11 @@ const serverAPI = http.createServer((req, res) => {
                         res.end(JSON.stringify({ status: 200, resp: insems }))
                         break
 
+                    case "courseids":
+                        res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 200, resp: courseids }))
+                        break
+
                     default:
                         res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
                         res.end(JSON.stringify({ status: 404 }))
@@ -528,3 +608,7 @@ const serverAPI = http.createServer((req, res) => {
 })
 serverAPI.listen(7002)
 console.log("[" + servar.domain + "] Internal API Server Started / 7002")
+
+} catch (error) {
+    sharedfx.deathDump(servar.domain, "Unrecoverable global crash", error)
+}

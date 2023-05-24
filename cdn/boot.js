@@ -1,6 +1,9 @@
-function renderTopBar(title = ' ', subtitle = '', buttonHTML = '', showSearch = false, additionalHTML = '', showBack = true) {
+function renderTopBar(title = ' ', subtitle = '', buttonHTML = '', showSearch = false, additionalHTML = '', showBack = true, searchSubmitJS = `boot('/_dig/'.concat(document.getElementById('search_box').value))`) {
     return `<div class="` + ((!(buttonHTML || showSearch)) ? 'topbar_mobilefix ' : '') + `topbar flx">` + ((showBack) ? `<button onclick="window.history.back();" class="acss aobh no_print" id="btn_back" tabindex="0" title="back"><b>く<span class="no_mobile"> back</span></b></button>` : "") + `
-    <div id="topbar_loading"></div>
+    <div id="topbar_loading">
+        <div id="topbar_loading_show"></div>
+        <div id="topbar_loading_more"></div>
+    </div>
     <div class="dwhdt flx dwhdto"><div class="dwhdt">
         <b id="topbar_title_wrap">
             <b id="topbar_title_inwrap_main">
@@ -16,13 +19,15 @@ function renderTopBar(title = ' ', subtitle = '', buttonHTML = '', showSearch 
     </div></div>
     ` + ((!!buttonHTML) ? `<div class="flx dwhda">` + buttonHTML + `</div>` : '') + ((showSearch) ? `
     <div class="pgsbtn flx no_print">
-    <label for="search_box" id="topbtn_search" class="dwhdab" onclick="if (event.shiftKey) { window.open('/_dig/', '_blank') }" title="Search box\nHold shift to open in new tab">
+    <label for="search_box" id="topbtn_search" class="dwhdab" title="Search box">
         <img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false">
         <style>#topbtn_search{background-color:rgba(160,160,255,.1)} #topbtn_search:hover{background-color:rgba(160,160,255,.25)} #topbtn_search:hover:active > img{transform:rotate(6deg)}</style>
     </label>
-    <form onsubmit="boot('/_dig/'.concat(document.getElementById('search_box').value));this.blur();return false"><input id="search_box" name="dw" type="search" placeholder="Search for something..." title="Search for something..."></form>
-    </div>` : ``) + additionalHTML + ((showBack && !(buttonHTML || showSearch)) ? `<style>@media (max-width: 520px) {#btn_back {order:unset} .dwhdto {width:calc(100% - 3.5em)} .topbar_mobilefix > .dwhdto {min-height:2.75em}}
-    @container (max-width:520px) {#btn_back {order:unset} .dwhdto {width:calc(100% - 3.5em)} .topbar_mobilefix > .dwhdto {min-height:2.75em}}</style>` : '') + `</div>`
+    <form onsubmit="` + searchSubmitJS + `;this.blur();return false"><input id="search_box" name="dw" type="search" placeholder="Search for something..." title="Search for something..."></form>
+    </div>` : ``) + additionalHTML + ((showBack && !(buttonHTML || showSearch)) ? `<style>
+    @media (max-width: 520px) {#btn_back {order:unset} .dwhdto {width:calc(100% - 3.5em)} .topbar_mobilefix > .dwhdto {min-height:2.75em}}
+    @container (max-width:520px) {#btn_back {order:unset} .dwhdto {width:calc(100% - 3.5em)} .topbar_mobilefix > .dwhdto {min-height:2.75em}}
+    </style>` : '') + `</div>`
 }
 
 function checkSafariToken() {
@@ -221,69 +226,79 @@ async function sha512(message) {
 
 var popArray = []
 
-var LoadingStatusQueue = 0;
-var errorLoadingCSS = ['<style>#topbar_loading::before{border-color:#FF4238!important;background-color:#FF4238;animation:none}</style>', '<style>#topbar_loading::before{border-color:#FF4238!important;background-color:#FF4238;color:white;animation:none;content:"✘"}</style>']
+var LoadingStatusQueue = 0
+const setLoadingStatusCSS = {
+    success: `<style>#topbar_loading::before{border-color:#33ff99!important;background-color:#33ff99;color:green;animation:none;content:"✓"}</style>`,
+    warn: {
+        dim: '<style>#topbar_loading{opacity:0.3} #topbar_loading::before{border-color:#ffaa33!important;animation:none}</style>',
+        grow: '<style>#topbar_loading{opacity:1} #topbar_loading::before{border-color:#ffaa33!important;animation:none}</style>'
+    },
+    error: {
+        hide: '<style>#topbar_loading::before{border-color:#FF4238!important;background-color:#FF4238;animation:none}</style>',
+        show: '<style>#topbar_loading::before{border-color:#FF4238!important;background-color:#FF4238;color:white;animation:none;content:"✘"}</style>'
+    },
+    show: {
+        start: '<style>#topbar_loading{display:unset;opacity:0;transform:translateX(-1.5em);width:0}</style>',
+        end: '<style>#topbar_loading{display:unset;opacity:1;transform:translateX(0);width:2.25em}</style>'
+    },
+    hide: {
+        start: '<style>#topbar_loading{opacity:0;transform:translateX(-1.5em);width:0}</style>',
+        end: '<style>#topbar_loading{display:none;opacity:0;transform:translateX(-1.5em);width:0}</style>'
+    }
+}
 
-function setLoadingStatus(type, presistant = false, title = '', subtitle = '') {
-    if ((type != 'hide' && LoadingStatusQueue > 0) && typeof alwaysExecSetLoadingStatusImmediately === "undefined") {
+function setLoadingStatus(type, presistant = false, title = '', subtitle = '', jumpToShow = '') {
+    if (!(jumpToShow || (typeof alwaysExecSetLoadingStatusImmediately != "undefined" && alwaysExecSetLoadingStatusImmediately) || type === 'show' || type === 'hide' || LoadingStatusQueue === 0 )) {
         //console.log('[LoadingStatus] ' + type + ' queued')
         setTimeout(() => { setLoadingStatus(type, presistant, title, subtitle) }, 100, type, presistant, title, subtitle);
         return false;
     }
 
-    var l = document.getElementById("topbar_loading");
-    var presistTime = 2850;
+    var presistTime = 2850
+    const lx = document.getElementById("topbar_loading_show")
+    const l = document.getElementById("topbar_loading_more")
+
     switch (type) {
         case 'success':
-            setLoadingStatus('show')
+            setLoadingStatus('show', false, '', '', setLoadingStatusCSS.success)
             presistTime = 2850; LoadingStatusQueue += 1; setTimeout(() => { LoadingStatusQueue -= 1 }, presistTime + 750)
-            l.innerHTML = '<style>#topbar_loading::before{border-color:#33ff99!important;background-color:#33ff99;color:green;animation:none;content:"✓"}</style>'
             break
         case 'warning':
-            setLoadingStatus('show')
+            setLoadingStatus('show', false, '', '', setLoadingStatusCSS.warn.grow)
             presistTime = 6350; LoadingStatusQueue += 1; setTimeout(() => { LoadingStatusQueue -= 1 }, presistTime + 750)
-            l.innerHTML = '<style>#topbar_loading::before{border-color:#ffaa33!important;animation:none}</style>'
-            setTimeout(() => { l.style.opacity = 0.3 }, 600)
-            setTimeout(() => { l.style.opacity = 1 }, 1300)
-            setTimeout(() => { l.style.opacity = 0.3 }, 2000)
-            setTimeout(() => { l.style.opacity = 1 }, 2700)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.dim }, 600)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.grow }, 1300)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.dim }, 2000)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.grow }, 2700)
             break
         case 'error':
-            setLoadingStatus('show')
+            setLoadingStatus('show', false, '', '', setLoadingStatusCSS.error.show)
             presistTime = 6850; LoadingStatusQueue += 1; setTimeout(() => { LoadingStatusQueue -= 1 }, presistTime + 750)
-            l.innerHTML = errorLoadingCSS[1]
-            setTimeout(() => { l.innerHTML = errorLoadingCSS[0] }, 850)
-            setTimeout(() => { l.innerHTML = errorLoadingCSS[1] }, 1350)
-            setTimeout(() => { l.innerHTML = errorLoadingCSS[0] }, 1850)
-            setTimeout(() => { l.innerHTML = errorLoadingCSS[1] }, 2350)
-            setTimeout(() => { l.innerHTML = errorLoadingCSS[0] }, 2850)
-            setTimeout(() => { l.innerHTML = errorLoadingCSS[1] }, 3350)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.hide }, 850)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.show }, 1350)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.hide }, 1850)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.show }, 2350)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.hide }, 2850)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.show }, 3350)
             break
         case 'show':
-            LoadingStatusQueue += 1; setTimeout(() => { LoadingStatusQueue -= 1 }, 50)
-            l.innerHTML = "";
-            l.style.display = 'unset';
+            presistant = true
+            if (jumpToShow) l.innerHTML = jumpToShow
+            lx.innerHTML = setLoadingStatusCSS.show.start
             setTimeout(() => {
-                l.style.opacity = 1;
-                l.style.transform = 'translateX(0)';
-                l.style.width = '2.25em';
-            }, 25)
-            presistant = true;
+                lx.innerHTML = setLoadingStatusCSS.show.end
+            }, 1)
             break
         case 'hide':
-            LoadingStatusQueue += 1; setTimeout(() => { LoadingStatusQueue -= 1 }, 700)
-            l.style.opacity = 0;
-            l.style.transform = 'translateX(-1.5em)';
-            setTimeout(() => {
-                l.style.width = '0';
-            }, 0) //50
-            setTimeout(() => {
-                l.style.display = 'none';
-                l.innerHTML = "";
-            }, 650) //700
             presistant = true;
+            lx.innerHTML = setLoadingStatusCSS.hide.start
+            setTimeout(() => {
+                lx.innerHTML = setLoadingStatusCSS.hide.end
+                l.innerHTML = ''
+            }, 650)
             break
     }
+
     if (title) {
         document.getElementById("topbar_title_inwarp_sec_buf").style.maxHeight = '0'
         document.getElementById("topbar_title_inwrap_secondary").style.maxHeight = '0'
@@ -299,7 +314,7 @@ function setLoadingStatus(type, presistant = false, title = '', subtitle = '') {
             document.getElementById("topbar_title_inwarp_sec_buf_sec").style.maxHeight = '0.75em'
         }, 200)
     }
-    if (!presistant) {
+    if (!jumpToShow && !presistant) {
         setTimeout(() => {
             setLoadingStatus('hide')
         }, presistTime - 300)
@@ -335,7 +350,7 @@ installCSS('webel.css')
 window.onpopstate = function (event) {
     popArray.pop()
     if (typeof noPopStateShowLoading === "undefined") try { setLoadingStatus("show") } catch (error) { }
-    let prevPath = decodeURIComponent((event.state) ? event.state.plate : window.location.pathname)
+    let prevPath = decodeURIComponent((event.state) ? event.state.plate : window.location.pathname + window.location.search)
     boot(prevPath, true, ((prev_bootID_call != -2) ? (bootID_mapper(prevPath)) : (-1)))
 }
 
@@ -411,7 +426,7 @@ function reboot() {
     boot(window.location.pathname, true)
 }
 
-boot(window.location.pathname + ((document.URL.split('#')[1]) ? "#" + document.URL.split('#')[1] : ''), true)
+boot(window.location.pathname + window.location.search + ((document.URL.split('#')[1]) ? "#" + document.URL.split('#')[1] : ''), true)
 
 var signinlevel = 0
 const updateSLV = () => {

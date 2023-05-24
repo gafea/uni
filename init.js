@@ -18,11 +18,13 @@ function bootID_mapper(path = "") {
     } else {
         return -1
     }
-} 
+}
 
 function getPageHTML_404() {
     return `<meta http-equiv="refresh" content="0;URL=/!404/">`
 }
+
+document.body.style.overflowY = "scroll" //make scrollbar always visible
 
 var prev_call = 'none'
 function init(path) {
@@ -54,7 +56,7 @@ function init(path) {
                                 <button onclick="boot('/course/', false, 2)">course</button>
                                 <button onclick="boot('/people/', false, 2)">people</button>
                                 <button onclick="boot('/room/', false, 2)">room</button>
-                                <!-- <button onclick="boot('/search/', false, 2)">search</button> -->
+                                <button onclick="boot('/search/', false, 2)">search</button>
                             </div>
                             <div id="courses_select_left_top"></div>
                             <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
@@ -207,8 +209,88 @@ const exe_room = (path) => wait_allSems(render_room, path, "Rooms - uni")
 const exe_me = (path) => wait_allSems(render_me, path, "Me - uni")
 const exe_search = (path) => wait_allSems(render_search, path, "Search - uni")
 
-function render_search() {
-    document.title = "Search - uni"
+function render_search(path) {
+    path = window.location.search
+
+    let params = new URLSearchParams(path)
+    let query = params.get('q')
+
+    document.getElementById("courses_select_left_top").innerHTML = `<div class="flx"><h2>Search</h2></div>`
+    document.getElementById("courses_select_left_optionBox").innerHTML = `<style>#courses_select_left_optionBox{display:none}</style>`
+    document.getElementById("courses_select_right").innerHTML = `<br><div id="fdigbtn" class="flx"><label for="search_dw_box"><img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false"></label><p3 id="digsrtxt">Search</p3>
+    <form onsubmit="boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_dw_box').value)), true, 2);this.blur();return false"><input autofocus id="search_dw_box" name="dw" type="search" placeholder="Search for anything" value="" title="Search"></form></div>
+    <div id="search_result"></div>`
+    document.getElementById("search_dw_box").focus()
+
+    if (!query) {
+        document.title = "Search - uni"
+        document.getElementById("search_result").innerHTML = `<br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Type in keywords to start searching!</b></p1></center>`
+        return
+    }
+
+    document.title = "🔍 " + query + " - uni"
+    document.getElementById("search_dw_box").value = query
+    document.getElementById("search_result").innerHTML = `<br><div class="flx" style="justify-content:center;gap:0.5em;text-align:center"><div id="d_loading"></div><p2><b>Loading...</b></p2></div>`
+
+    let tmark = (new Date()).getTime()
+    fetch("/!search/" + encodeURIComponent(path)).then(r => r.json()).then(r => {
+        switch (r.status) {
+            case 200:
+                document.getElementById("search_result").innerHTML = `<br><p3 style="margin-left:0.5em">Total ` + r.resp.length + ` result` + ((r.resp.length === 1) ? "" : "s") + ` (` + ((new Date()).getTime() - tmark) + ` ms).</p3><br><div class="flx" id="search_out"><div id="d_loading"></div></div>`
+
+                setTimeout(() => {
+                    let draft = ""
+                    r.resp.forEach(ans => {
+                        switch (ans.type) {
+                            case "course":
+                                if (r.resp.length === 1) {
+                                    boot(`/course/` + ans.result.SEM + "/" + ans.result.CODE.substring(0, 4) + "/" + ans.result.CODE + `/`, true, 2)
+                                    return
+                                }
+                                draft += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((ans.result.CODE === "COMP3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + ans.result.CODE + `.png`)) + `)" id="` + ans.result.CODE + `" class="course_sel selbox picbox" onclick="boot('/course/` + ans.result.SEM + "/" + ans.result.CODE.substring(0, 4) + "/" + ans.result.CODE + `/', false, 2)" title="` + ans.result.DESCRIPTION.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
+                                <div class="picbox_inner_up"><h5 style="opacity:0.85"> </h5></div>
+                                <div><h4>` + ans.result.CODE + `</h4><h5>` + ans.result.NAME + `</h5></div></div></div>`
+                                break;
+
+                            case "people":
+                                if (r.resp.length === 1) {
+                                    boot(`/people/` + ans.result + `/`, true, 2)
+                                    return
+                                }
+                                draft += `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="boot('/people/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
+                                <div class="picbox_inner_up"><h5 style="opacity:0.85"></h5></div>
+                                <div><h4>` + ans.result + `</h4></div></div></div>`
+                                break;
+
+                            case "room":
+                                if (r.resp.length === 1) {
+                                    boot(`/room/` + ans.result + `/`, true, 2)
+                                    return
+                                }
+                                draft += `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="boot('/room/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
+                                <div class="picbox_inner_up"><h5 style="opacity:0.85"></h5></div>
+                                <div><h4>` + ans.result + `</h4></div></div></div>`
+                                break;
+
+                            default:
+                                draft += `<div class="box">` + JSON.stringify(ans) + "</div>"
+                                break;
+                        }
+                    })
+                    document.getElementById("search_out").innerHTML = draft
+                }, 10)
+                break;
+            case 404:
+                document.getElementById("search_result").innerHTML = `<br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch_empty.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Not much great matches were found. Try again with different keywords?</b></p1></center>`
+                break;
+            default:
+                document.getElementById("search_result").innerHTML = `<br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch_empty.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Server error, try again later</b></p1></center>`
+                break;
+        }
+    }).catch(error => {
+        console.log(error)
+        document.getElementById("search_result").innerHTML = `<br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch_empty.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Server error or script crashed, try again later</b></p1></center>`
+    })
 }
 
 function render_me() {
@@ -225,9 +307,9 @@ function render_me() {
             Object.keys(accConfig.courses).forEach(sem => {
                 htmld += `<div class="edge2edge"><h3>` + ustTimeToString(sem) + `</h3><div class="flx">`
                 accConfig.courses[sem].forEach(course => {
-                    htmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" not_class="course_sel selbox picbox" class="course_sel box picbox" not_onclick="render_courses_specific('` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', true)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
-                    <div class="picbox_inner_up"><h5 style="opacity:0.85">` + course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0]  + `</h5></div>
-                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.split(" - ")[1].substring(course.split(" - ")[1], course.split(" - ")[1].lastIndexOf(" (")) + `</h5></div></div></div>`
+                    htmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="boot('/course/` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
+                    <div class="picbox_inner_up"><h5 style="opacity:0.85">` + course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] + `</h5></div>
+                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" (")) + `</h5></div></div></div>`
                 })
                 htmld += `</div></div>`
             })
@@ -383,8 +465,6 @@ function enroll_course(sem, course, make_switch = false) {
 let disableSigninRequirement = true;
 
 function render_courses_specific(path, insideCoursePage = false) {
-    setLoadingStatus("show")
-
     fetch("/!course/" + path).then(r => r.json()).then(r => {
         if (r.status != 200) { setLoadingStatus("error", false, "failed to contact server"); return }
 
@@ -413,7 +493,7 @@ function render_courses_specific(path, insideCoursePage = false) {
                 <div class="flx" style="justify-content:flex-start;gap:0.5em">
                     <p4>Also offered in: </p4><div id="alsoOfferedIn"><div id="d_loading"></div></div>
                 </div>
-                <button id="course_enroll_btn" ` + ((true || signinlevel > 0) ? "" : `style="display:none" `) + `onclick="enroll_course('` + path.split("/")[0] + `','` + course + `', true)">Enroll</button>
+                <button id="course_enroll_btn" ` + ((true || signinlevel > 0) ? "" : `style="display:none" `) + `onclick="enroll_course(` + '`' + path.split("/")[0] + '`,`' + course + '`' + `, true)">Enroll</button>
             </div></div>`
         let attrHTML = renderCourseAttr(r.resp[course].attr, course)
         if (attrHTML) html_draft += `<div class="box"><h4>📚 Course Attributes</h4>` + attrHTML + `</div>`
@@ -521,12 +601,12 @@ function render_courses_specific(path, insideCoursePage = false) {
                 if (rChart.status != 200) { document.getElementById("charts").innerHTML = "failed to contact server or script crashed"; return }
 
                 setTimeout(() => {
-                    
+
                     document.getElementById("charts").innerHTML += `<div class="chart-container"><canvas id="chart"></canvas></div>`
 
                     let options = chartOptions(rChart.resp.t)
                     rChart.resp.t.forEach((tx, i) => rChart.resp.t[i] = new Date(parseInt(tx)).toLocaleString());
-    
+
                     let chx = new Chart(
                         document.getElementById('chart'),
                         {
@@ -539,7 +619,7 @@ function render_courses_specific(path, insideCoursePage = false) {
                         }
                     )
 
-                }, Math.max( 500 - (new Date().getTime() - timenow), 1 ) )
+                }, Math.max(500 - (new Date().getTime() - timenow), 1))
 
             }).catch(error => {
                 console.log(error)
@@ -548,7 +628,7 @@ function render_courses_specific(path, insideCoursePage = false) {
         }
 
         setLoadingStatus("hide")
-        document.getElementById("topbar_title").innerText = course.split(" - ")[1].substring(course.split(" - ")[1], course.split(" - ")[1].lastIndexOf(" ("))
+        document.getElementById("topbar_title").innerText = course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" ("))
         document.getElementById("topbar_subtitle").innerText = path.split("/")[2].substring(0, 4) + " " + path.split("/")[2].replace(path.split("/")[2].substring(0, 4), "") + " • " + ustTimeToString(path.split("/")[0])
         document.getElementById('courses_select_main').classList.add('edge2edge_wide')
         document.getElementById("course_detail_topbar_specialStyles").innerHTML = `<style>
@@ -558,7 +638,7 @@ function render_courses_specific(path, insideCoursePage = false) {
         #courses_detail_content{width:100vw; width:100dvw}
         @media (max-width:1020px) {#courses_select_left{display:none}}
         </style>`
-        setTimeout(() => {document.getElementById("course_detail_topbar_specialStyles").innerHTML += "<style>#btn_back{transition-duration:0.1s!important}</style>"}, 500)
+        setTimeout(() => { document.getElementById("course_detail_topbar_specialStyles").innerHTML += "<style>#btn_back{transition-duration:0.1s!important}</style>" }, 500)
     }).catch(error => {
         console.log(error)
         setLoadingStatus("error", false, "failed to contact server or script crashed")
@@ -568,8 +648,6 @@ function render_courses_specific(path, insideCoursePage = false) {
 let courseSpecificReturnURL = ''
 
 function render_courses_details(path, scrollIntoView = false) {
-    setLoadingStatus("show")
-
     courseSpecificReturnURL = "/course/" + path.slice(0, path.lastIndexOf("/") + 1)
     html = document.getElementById("courses_detail_content")
     let withinCourseListPage = (path.split('/').length == 2 || (path.split('/').length == 3 && path.split('/')[2] == ""))
@@ -601,7 +679,7 @@ function render_courses_details(path, scrollIntoView = false) {
                 if (listMode === "card") {
                     html_draft += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="boot('/course/` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + "\n\n" + r.resp[course].attr.DESCRIPTION.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
                     <div class="picbox_inner_up"><h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"]) + `</h5></div>
-                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.split(" - ")[1].substring(course.split(" - ")[1], course.split(" - ")[1].lastIndexOf(" (")) + `</h5></div></div></div>`
+                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" (")) + `</h5></div></div></div>`
                 } else {
                     html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)"><div><div><h4>` + course + `</h4><p2 class="no_mobile">` + r.resp[course].attr.DESCRIPTION + `</p2></div>
                     <div class="no_mobile">` + renderCourseAttr(r.resp[course].attr, course) + `</div></div></div></div>`
@@ -626,7 +704,7 @@ function render_courses_details(path, scrollIntoView = false) {
         @media (min-width: 520px) {.topbar{border-radius: 1em 1em 0 0}}
 
         @media (min-width: 1280px) {
-            #courses_detail_content{width:calc( 90vw - 29em )}
+            #courses_detail_content{width:calc( 90vw - 29em ); max-width:100%}
             .topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}
         }
         </style>`
@@ -639,7 +717,7 @@ function render_courses_details(path, scrollIntoView = false) {
 var scrollIntoView = false, doNotCheckUGPG = false
 function render_courses(path) {
 
-    if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]), "", false, "", true) + `
+    if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]), "", true, "", true, `boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_box').value)), false, 2)`) + `
     <style>#btn_back, .topbar, #courses_select_main, #courses_select_left, #courses_select_right{transition-timing-function: cubic-bezier(.65,.05,.36,1);transition-duration: 0.5s !important}</style>
     <div id="course_detail_topbar_specialStyles">
         <style>
@@ -762,7 +840,6 @@ function render_UGPG_switch() {
 var peoplex = "LAM, Gibson"
 
 function render_people(path) {
-
     document.getElementById("courses_select_left_top").innerHTML = `<h2>Instructors</h2>`
 
     let html_draft = ""
@@ -845,7 +922,7 @@ function render_people(path) {
             html_draft += `>` + thisSem + `</option>`
             return true
         })
-        html_draft += `</optgroup></select></div>` 
+        html_draft += `</optgroup></select></div>`
         html.innerHTML = html_draft
 
         html = document.getElementById("courses_select_right")
@@ -911,7 +988,7 @@ function render_room(path) {
             document.title = "LTA - uni"
         }
         html_draft = `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" placeholder="Search.." id="myInput" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_room + `">` + hdraft + `</select>`
-    
+
     } else {
         html_draft = `<select name="roomid" id="roomid" title="Select Room" onchange="boot('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/', false, 2)">`
         rooms.forEach(room => {
@@ -992,10 +1069,10 @@ function render_room(path) {
             html_draft += `>` + thisSem + `</option>`
             return true
         })
-        html_draft += `</optgroup></select></div>` 
+        html_draft += `</optgroup></select></div>`
         html.innerHTML = html_draft
 
-        html = document.getElementById("courses_select_right") 
+        html = document.getElementById("courses_select_right")
         html_draft = `<div id="roominfo"><center><div id="d_loading"></div></center></div>`
         html.innerHTML = html_draft
         html = document.getElementById("roominfo")
