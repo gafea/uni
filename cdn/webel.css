@@ -57,6 +57,7 @@ a, .acss{text-decoration:none;color:var(--link-color);background-color:transpare
 #divheadbuffer{height:calc(5vh + 4.5em)}
 img{object-fit:cover;opacity:1;transition-duration:.375s;transition-timing-function:cubic-bezier(.19,1,.22,1)}
 #btn_back{border:none;padding:0.5em;font-size:16px;white-space:pre;max-width:4.25em;overflow:clip}
+dialog{border:none; border-radius: 1em; padding:1.5em; box-shadow: 0 1em 1em rgba(0,0,0,.1); background-color: rgba(255,255,255,0.9); backdrop-filter: blur(1em); -webkit-backdrop-filter: blur(1em)}
 
 .smtbtn{white-space:pre;padding:1em;border-radius:1em;font-size:13.25px;margin:3px;text-align:center;transition-duration:.1s;display:inline-block;line-height:normal;user-select:none}
 .smtbtn > span{font-size:1em;color:#3f3c39;transition-duration:.1s;background-position-y:center;background-repeat:no-repeat;background-size:1.75em auto}
@@ -71,6 +72,7 @@ img{object-fit:cover;opacity:1;transition-duration:.375s;transition-timing-funct
 .selbox{cursor:pointer;transition-duration: 0.15s;box-shadow: 0 0.5em 1em rgba(0,0,0,.05)}
 .selbox:hover{box-shadow: 0 1em 2em rgba(0,0,0,.15)}
 .picbox{background-repeat: no-repeat; background-position: center center; background-size: cover; object-fit: cover;}
+.textbox{background-color:rgba(128,128,128,.25);border-radius:0.5em;padding:0.25em 0.5em;opacity:1;backdrop-filter:blur(1em);-webkit-backdrop-filter:blur(1em)}
 
 .ckimg{object-fit:cover;width:7.5em;height:3em;filter:brightness(50%);-webkit-filter:brightness(50%)}
 .centerwrp{justify-content:center;min-height:100vh}
@@ -272,6 +274,7 @@ input:disabled ~ .checkmark, input:disabled ~ .checkmark:hover{cursor:default!im
 
 @media (prefers-color-scheme: dark) {
 body, head, html{background-color:#0f0c09;color:#eeeeee}
+dialog{color:#eeeeee} dialog::backdrop {background-color: rgba(0, 0, 0, 0.5)}
 a, .acss{color:#3993ff} a:hover, .acss:hover{color:#5bb5ff}
 .box, .selbox{background-color: #1f1c19}
 .selbox:hover{background-color: #2f2c29}
@@ -279,7 +282,7 @@ textarea{background:#3f3c39;color:#f0f0f0;border-color:#606060}
 .aobh:hover{background-color:rgba(255,255,255,.05);color:#5bb5ff}
 .aobh:active{background-color:rgba(255,255,255,.1)}
 .smtbtn > span, .ckusrwrp{color:white}
-.topbar{background-color:rgba(0,0,0,.95)}
+.topbar, dialog{background-color:rgba(0,0,0,.95)}
 .dwhdb{border-bottom:2px solid rgba(255,255,255,.3)}
 .dwhdb, .dwhdbtf{color:#9f9c99}
 .dwhdbtf{border-bottom:2px solid rgba(255,255,255,.6)}
@@ -303,8 +306,8 @@ input:checked + .sliorange:hover {background-color:#f89e29}
 .bottom_wrp, .ckusrbtn:focus, .ckusrbtn:focus-within{background-color:#1f1c19}
 #OverlayContent{background-color:rgba(24,24,24,.9)}
 .ckimg {filter: brightness(1); -webkit-filter: brightness(1)}
-@supports (backdrop-filter:blur(1em)) {.topbar, .bottom_wrp{background-color:rgba(0,0,0,.8)}}
-@supports (-webkit-backdrop-filter:blur(1em)) {.topbar, .bottom_wrp{background-color:rgba(0,0,0,.8)}}
+@supports (backdrop-filter:blur(1em)) {.topbar, .bottom_wrp, dialog{background-color:rgba(0,0,0,.8)}}
+@supports (-webkit-backdrop-filter:blur(1em)) {.topbar, .bottom_wrp, dialog{background-color:rgba(0,0,0,.8)}}
 }
 
 @media (min-width:2500px) {.no_widescreen{display:none!important}}

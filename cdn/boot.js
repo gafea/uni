@@ -129,6 +129,7 @@ const refresh_cToken = () => {
 }
 
 function renderBottomBar(loc, hideUser = false) {
+    if (!navigator.cookieEnabled) hideUser = true
     if (!hideUser) setTimeout(() => renderBottomBarUserInfo(), 200)
     document.getElementById("bottomBar").innerHTML = `<div class="bottom_wrp flx"><a href="/" style="height:52px"><img class="ckimg" src="` + resourceNETpath + `image/ck.svg" draggable="false" alt="Home"></a>` + renderBottomBarButtons(bottombarbuttons, loc) + `<div class="ckimg"><div class="flx ckusrico"><button type="button" tabindex="1001" class="ckusrbtn">
     <a href="" tabindex="0"><img alt="" src="https://me.gafea.net/getpp/" draggable="false"></a>
@@ -335,6 +336,17 @@ function setLoadingStatus(type, presistant = false, title = '', subtitle = '', j
 //easy post to server
 window.post = function (url, data) {
     return fetch(url, { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+}
+
+//easy formdata to json
+function formToJson(data) {
+    var object = {}
+    data.forEach((value, key) => {
+        if (!Reflect.has(object, key)) { object[key] = value; return }
+        if (!Array.isArray(object[key])) { object[key] = [object[key]] }
+        object[key].push(value)
+    })
+    return object
 }
 
 //add css into html

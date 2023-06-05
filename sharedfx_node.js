@@ -169,4 +169,44 @@ async function throwMail(address, title, body) {
     return info
 }
 
-module.exports = { about, envar, deathDump, returnErr, getAllFromDir, pushObjArray, sha512, rndStr, isEmailValid, throwMail, parseCookies, zeroPad }
+class CSRF {
+    #csrf = {}
+    #csrf_valid_time_ms = 1000
+
+    #gc() {
+        setInterval(() => {
+            let t = (new Date()).getTime()
+            Object.keys(this.#csrf).forEach(key => {
+                if (t > this.#csrf[key][1]) delete this.#csrf[key]
+            })
+        }, this.#csrf_valid_time_ms)
+    }
+
+    constructor(csrf_valid_time_ms) {
+        this.#csrf_valid_time_ms = csrf_valid_time_ms
+        this.#gc()
+    }
+
+    get csrf_valid_time_ms() { 
+        return this.#csrf_valid_time_ms 
+    }
+
+    generate(key) {
+        let csrfHash = ""
+        do {
+            csrfHash = rndStr(64 + Math.floor(Math.random() * 64))
+        } while (typeof this.#csrf[csrfHash] != "undefined")
+        this.#csrf[csrfHash] = [key, (new Date).getTime() + this.#csrf_valid_time_ms]
+        return csrfHash
+    }
+
+    check(csrfHash, key) {
+        if (typeof this.#csrf[csrfHash] === "undefined" || this.#csrf[csrfHash][0] != key || (new Date()).getTime() > this.#csrf[csrfHash][1]) {
+            return false
+        }
+        delete this.#csrf[csrfHash]
+        return true
+    }
+}
+
+module.exports = { about, envar, deathDump, returnErr, getAllFromDir, pushObjArray, sha512, rndStr, isEmailValid, throwMail, parseCookies, zeroPad, CSRF }

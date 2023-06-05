@@ -209,6 +209,15 @@ const exe_room = (path) => wait_allSems(render_room, path, "Rooms - uni")
 const exe_me = (path) => wait_allSems(render_me, path, "Me - uni")
 const exe_search = (path) => wait_allSems(render_search, path, "Search - uni")
 
+function courseStringToParts(course) {
+    let dept = course.split(" ")[0]
+    let code = course.split(" - ")[0]
+    let units = course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0]
+    let name = course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" ("))
+
+    return { dept: dept, code: code, units: units, name: name }
+}
+
 function render_search(path) {
     path = window.location.search
 
@@ -218,7 +227,7 @@ function render_search(path) {
     document.getElementById("courses_select_left_top").innerHTML = `<div class="flx"><h2>Search</h2></div>`
     document.getElementById("courses_select_left_optionBox").innerHTML = `<style>#courses_select_left_optionBox{display:none}</style>`
     document.getElementById("courses_select_right").innerHTML = `<br><div id="fdigbtn" class="flx"><label for="search_dw_box"><img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false"></label><p3 id="digsrtxt">Search</p3>
-    <form onsubmit="boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_dw_box').value)), true, 2);this.blur();return false"><input autofocus id="search_dw_box" name="dw" type="search" placeholder="Search for anything" value="" title="Search"></form></div>
+    <form onsubmit="boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_dw_box').value)), true, 2);this.blur();return false"><input ` + ((!query) ? "autofocus " : "") + `id="search_dw_box" name="dw" type="search" placeholder="Search for anything" value="" title="Search"></form></div>
     <div id="search_result"></div>`
     document.getElementById("search_dw_box").focus()
 
@@ -299,23 +308,62 @@ function render_me() {
     let my_courses = document.getElementById("my_courses")
     if (signinlevel <= 0) {
         my_courses.innerHTML = `<div class="edge2edge"><p2>Please sign in first!</p2></div>`
-    } else {
-        if (typeof accConfig.courses === "undefined") {
-            my_courses.innerHTML = `<div class="edge2edge"><p2>No courses found!</p2></div>`
-        } else {
-            let htmld = ""
-            Object.keys(accConfig.courses).forEach(sem => {
-                htmld += `<div class="edge2edge"><h3>` + ustTimeToString(sem) + `</h3><div class="flx">`
-                accConfig.courses[sem].forEach(course => {
-                    htmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="boot('/course/` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
-                    <div class="picbox_inner_up"><h5 style="opacity:0.85">` + course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] + `</h5></div>
-                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" (")) + `</h5></div></div></div>`
-                })
-                htmld += `</div></div>`
-            })
-            my_courses.innerHTML = htmld
-        }
+        return
     }
+    let htmld = "", total_cred = 0, total_passed_cred = 0, total_gpacred = 0, total_grade_points = 0
+    if (typeof accConfig.courses === "undefined" || Object.keys(accConfig.courses).length === 0) {
+        htmld = `<div class="edge2edge"><p2>No courses found!</p2></div>`
+    } else {
+        let semsdb = {}
+
+        Object.keys(accConfig.courses).forEach(course => {
+            Object.keys(accConfig.courses[course]).forEach(sem => {
+                if (typeof semsdb[sem] === "undefined") semsdb[sem] = {}
+                semsdb[sem][course] = accConfig.courses[course][sem]
+            })
+        })
+
+        Object.keys(semsdb).sort().reverse().forEach(sem => {
+            let mhtmld = "", gpacred = 0, total_term_cred = 0, termcredload = 0, gpasum = 0, haveunfilled = false
+            Object.keys(semsdb[sem]).forEach(course => {
+                let cred = parseInt(semsdb[sem][course].units)
+                let actualcred = cred
+                if (typeof semsdb[sem][course].actual_cred != "undefined") actualcred = parseInt(semsdb[sem][course].actual_cred)
+                mhtmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course == "COMP 3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.replace(" ", "") + `.png`)) + `)" id="` + course.replace(" ", "") + `" class="course_sel selbox picbox" onclick="boot('/course/` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title=""><div class="picbox_inner flx">
+                    <div class="picbox_inner_up flx" style="width:calc(100% - 1.6em)">
+                        <h5 class="textbox">` + semsdb[sem][course].grade + `</h5>
+                        <h5 style="opacity:0.85">` + ((actualcred != cred) ? ("" + actualcred + " of ") : "") + semsdb[sem][course].units + ` unit` + ((semsdb[sem][course].units === "1") ? '' : 's') + `</h5>
+                    </div><div><h4>` + course + `</h4><h5>` + semsdb[sem][course].name + `</h5></div></div></div>`
+                total_term_cred += actualcred
+                total_cred += actualcred
+                termcredload += actualcred
+                if (semsdb[sem][course].grade === "----") {
+                    haveunfilled = true
+                    return
+                };
+                ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"].forEach((grade, index) => {
+                    if (semsdb[sem][course].grade === grade) {
+                        gpacred += cred
+                        total_gpacred += cred
+                        if (grade != "F") total_passed_cred += cred
+                        gpasum += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
+                        total_grade_points += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
+                    }
+                })
+                if (["P", "T", "CR", "DI", "DN", "PA", "PS"].includes(semsdb[sem][course].grade)) {
+                    total_passed_cred += cred
+                    if (semsdb[sem][course].grade === "T") termcredload -= actualcred
+                }
+                if (["AU", "W"].includes(semsdb[sem][course].grade)) {
+                    total_term_cred -= actualcred
+                    total_cred -= actualcred
+                    if (semsdb[sem][course].grade === "W") termcredload -= actualcred
+                }
+            })
+            htmld += `<div class="edge2edge"><div class="flx"><h3>` + ustTimeToString(sem) + `</h3><h5>` + ((gpacred) ? (`TGA <span class="textbox"` + (haveunfilled ? ` title="There are courses missing grade information">⌛ ` : ">") + (gpasum / gpacred).toFixed(3) + `</span> `) : "") + ((termcredload != total_term_cred) ? (`Actual Credit Load <span class="textbox" title="The actual credit load after deducting transferred credits">` + termcredload + `</span> `) : "") + `Credits <span class="textbox">` + total_term_cred + `</span></h5></div><div class="flx">` + mhtmld + `</div></div>`
+        })
+    }
+    my_courses.innerHTML = `<div class="edge2edge"><div class="flx"><h3> </h3><h5>GPA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span> Passed Credits <span class="textbox">` + total_passed_cred + `</span> Total Credits <span class="textbox">` + total_cred + `</span></h5></div><br><hr></div>` + htmld
 }
 
 var studprog = "ug"
@@ -429,35 +477,116 @@ let alwaysExecSetLoadingStatusImmediately = false
 let chartx = ''
 let wasInsideCoursePage = false
 
-function enroll_course(sem, course, make_switch = false) {
+function generate_grade_selection(selection = "----", possibleGrades = []) {
+    selection = selection.toUpperCase()
+    function loop(grades, selection) {
+        let t = ""
+        grades.forEach(grade => {
+            t += `<option value="` + grade + `"` + (grade === selection ? " selected" : "") + `>` + grade + `</option>`
+        })
+        return t
+    }
+    return ((possibleGrades.length) ? ("" + loop(possibleGrades, selection)) : ("" + loop(["----"], selection) + `<optgroup label="Toward GPA">` + loop(["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"], selection) + `</optgroup><optgroup label="Not for GPA">` + loop(["P", "PP", "T", "AU", "W", "CR", "DI", "DN", "I", "PA", "PS"].sort(), selection) + `</optgroup>`))
+}
+
+function submitCourseUpdate(remove = false) {
+
+    document.getElementById('course_update_dialog').close()
+    setLoadingStatus('show')
+    const formData = formToJson(new FormData(document.getElementById("course_update_dialog_form")))
+    let newConfig = JSON.parse(JSON.stringify(accConfig))
     let btn = document.getElementById("course_enroll_btn")
+
+    if (remove) {
+        delete newConfig.courses[formData.code][formData.sem]
+        if (Object.keys(newConfig.courses[formData.code]).length === 0) delete newConfig.courses[formData.code]
+        update_accConfig("courses", newConfig.courses, (err) => {
+            if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); return }
+            setLoadingStatus('success', false)
+            update_enroll_course_gui(formData.currentsem, formData.code)
+            return
+        })
+        return
+    }
+
+    //console.log(formData)
+    if (typeof newConfig.courses === "undefined") newConfig.courses = {}
+    if (typeof newConfig.courses[formData.code] === "undefined") newConfig.courses[formData.code] = {}
+    if (typeof newConfig.courses[formData.code][formData.sem] === "undefined") newConfig.courses[formData.code][formData.sem] = {}
+    newConfig.courses[formData.code][formData.sem] = { grade: formData.grade, units: formData.units, name: formData.name, actual_cred: formData.actual_cred }
+    newConfig.courses[formData.code][formData.sem].is_SPO = (!!(typeof formData.is_SPO !== "undefined" && formData.is_SPO))
+
+    update_accConfig("courses", newConfig.courses, (err) => {
+        if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); return }
+        setLoadingStatus('success', false)
+        update_enroll_course_gui(formData.currentsem, formData.code)
+    })
+
+}
+
+function update_enroll_course_gui(sem, code) {
+    let btn = document.getElementById("course_enroll_btn")
+    let newConfig = JSON.parse(JSON.stringify(accConfig))
+    if (typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).includes(sem)) {
+        btn.innerText = "✅ Enrolled (grade: " + newConfig.courses[code][sem].grade + ")"
+        document.getElementById("course_enroll_notice").innerHTML = ""
+    } else {
+        btn.innerText = "Enroll"
+        document.getElementById("course_enroll_notice").innerHTML = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).length) ? (`<p4>Last enrolled at ` + ustTimeToString(Object.keys(newConfig.courses[code]).sort().reverse()[0]) + `</p4>`) : "")
+    }
+}
+
+function enroll_course(sem, course, make_switch = false, is_SPO = false, possibleGrades = [], actual_cred = []) {
+    let btn = document.getElementById("course_enroll_btn")
+    let model = document.getElementById("course_enroll_model")
     if (btn) {
         if (make_switch && !(signinlevel > 0)) {
             alert("Please signin first!")
             return
         }
         let newConfig = JSON.parse(JSON.stringify(accConfig))
+        let courseParts = courseStringToParts(course)
+        //console.log(courseParts)
         if (typeof newConfig.courses === "undefined") newConfig.courses = {}
-        if (typeof newConfig.courses[sem] === "undefined") newConfig.courses[sem] = []
+        if (typeof newConfig.courses[courseParts.code] === "undefined") newConfig.courses[courseParts.code] = {}
         if (make_switch) {
-            if (newConfig.courses[sem].includes(course)) {
-                newConfig.courses[sem] = newConfig.courses[sem].filter(function (item) {
-                    return item !== course
-                })
-                update_accConfig("courses", newConfig.courses)
-                btn.innerText = "Enroll"
-            } else {
-                newConfig.courses[sem].push(course)
-                update_accConfig("courses", newConfig.courses)
-                btn.innerText = "✅ Enrolled"
-            }
-            setLoadingStatus("success")
+
+            let unit = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[courseParts.code] != "undefined" && typeof newConfig.courses[courseParts.code][sem] != "undefined" && typeof newConfig.courses[courseParts.code][sem].units != "undefined") ? newConfig.courses[courseParts.code][sem].units : courseParts.units.split(" ")[0])
+            model.innerHTML = `<dialog id="course_update_dialog">
+            <form id="course_update_dialog_form" action="javascript:void(0);">
+                <div class="flx"><br><button value="cancel" formmethod="dialog" class="closebtn"><img src="` + resourceNETpath + `image/circle-cross.png" title="Close"></button></div><br>
+
+                <div id="course_update_dialog_content"><p2>
+                    <input readonly name="actual_cred" type="hidden" value="` + (actual_cred.length ? actual_cred[parseInt("" + sem[2]) - 1] : unit) + `"><input readonly name="currentsem" type="hidden" value="` + document.getElementById("timeidx").value + `"><input readonly name="name" type="hidden" value="` + courseParts.name + `"><input hidden type="checkbox" id="is_SPO" name="is_SPO" value="yes"` + (is_SPO ? " checked" : "") + `>
+                    <input name="units" type="hidden" min="0" value="` + unit + `">
+                    Course: <input readonly name="code" type="text" value="` + courseParts.code + `"><br>
+                    Semester: <select id="course_update_sem" name="sem" onchange="enroll_course(document.getElementById('course_update_sem').value, '` + course.replace("'", '"') + `', ` + make_switch + `, ` + is_SPO + `, ` + JSON.stringify(possibleGrades).replaceAll('"', "'") + `, ` + JSON.stringify(actual_cred).replaceAll('"', "'") + `)">` + document.getElementById("timeidx").innerHTML + `</select><br>
+                    Grade: <select name="grade">` + generate_grade_selection((Object.keys(newConfig.courses[courseParts.code]).includes(sem) ? newConfig.courses[courseParts.code][sem].grade : "----"), possibleGrades) + `</select><br>
+                    <div class="box" style="display:none">
+                        <p2>Lec: </p2><br>
+                        <p2>Lab: </p2><br>
+                        <p2>Tut: </p2><br>
+                        <p2>Rsh: </p2><br>
+                    </div>
+
+                </p2></div><br>
+
+                <div class="flx">
+                ` + (Object.keys(newConfig.courses[courseParts.code]).includes(sem) ? `
+                    <button id="security_dialog_confirmBtn" onclick="submitCourseUpdate(true)">Remove</button>
+                    <button id="security_dialog_confirmBtn" onclick="submitCourseUpdate(false)">Save</button>
+                ` : `
+                    <br>
+                    <button id="security_dialog_confirmBtn" onclick="submitCourseUpdate(false)">Add</button>
+                `) + `
+                </div>
+            </form>
+            </dialog>`
+
+            document.getElementById('course_update_sem').value = sem
+            document.getElementById('course_update_dialog').showModal()
         } else {
-            if (newConfig.courses[sem].includes(course)) {
-                btn.innerText = "✅ Enrolled"
-            } else {
-                btn.innerText = "Enroll"
-            }
+            update_enroll_course_gui(sem, courseParts.code)
         }
     }
 }
@@ -487,13 +616,70 @@ function render_courses_specific(path, insideCoursePage = false) {
             document.title = "" + course.split(" - ")[0] + " - " + ustTimeToString(path.split("/")[0]) + " - uni"
         }
 
+        let is_SPO = "false"
+        if (typeof r.resp[course].attr.ATTRIBUTES != "undefined" && r.resp[course].attr.ATTRIBUTES.includes("[SPO] Self-paced online delivery")) is_SPO = "true"
+
+        let possibleGrades = []
+        if (r.resp[course].attr.DESCRIPTION.includes("Graded P or F")) {
+            possibleGrades = ["----", "P", "F", "T"]
+        } else if (r.resp[course].attr.DESCRIPTION.includes("Graded PP, P or F")) {
+            possibleGrades = ["----", "P", "PP", "F", "T"]
+        }
+
+        let actual_cred = []
+        if (typeof r.resp[course].section != "undefined" && Object.keys(r.resp[course].section).length && typeof r.resp[course].section[Object.keys(r.resp[course].section)[0]][Object.keys(r.resp[course].section[Object.keys(r.resp[course].section)[0]])[0]]["Remarks"] != "undefined") {
+            let remarks = r.resp[course].section[Object.keys(r.resp[course].section)[0]][Object.keys(r.resp[course].section[Object.keys(r.resp[course].section)[0]])[0]]["Remarks"]
+            let extract = ""
+            if (remarks.split("> The credit load will usually be spread in the following pattern: ").length > 1) {
+                extract = remarks.split("> The credit load will usually be spread in the following pattern: ")[1].split("Instructor Consent Required")[0]
+            } else if (remarks.split("> The credit load is spread in the following pattern: ").length > 1) {
+                extract = remarks.split("> The credit load is spread in the following pattern: ")[1].split("Instructor Consent Required")[0]
+            }
+            if (extract) {
+                let kp = {}
+                extract.split("; ").forEach(spec => {
+                    kp[spec.split(": ")[0]] = spec.split(": ")[1]
+                });
+                ["Fall", "Winter", "Spring", "Summer"].forEach(semu => {
+                    if (typeof kp[semu] != "undefined") {
+                        actual_cred.push(kp[semu])
+                    } else {
+                        actual_cred.push("0")
+                    }
+                })
+            }
+        }
+
+        let draft = `<select style="width:100%" name="timeidx" id="timeidx" title="Select Semester" onchange="boot('/course/' + document.getElementById('timeidx').value + '/' + '` + course.split(" ")[0] + `' + '/' + '` + course.split(" ")[0] + course.split(" ")[1] + `' + '/', false, 2)">`
+        let prevSem = "----"
+        r.resp[course].insem.sort().reverse().forEach(sem => {
+            let thisSem = ustTimeToString(sem)
+            if (thisSem.split(" ")[0] != prevSem) {
+                if (prevSem != '----') draft += `</optgroup>`
+                draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
+                prevSem = thisSem.split(" ")[0]
+            }
+            draft += `<option value="` + sem + `"`
+            if (sem == path.split("/")[0]) {
+                draft += " selected"
+            }
+            draft += `>` + ustTimeToString(sem) + `</option>`
+        })
+        draft += `</optgroup></select>`
+
         html_draft += `<div class="edge2edge_page"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `">
-            <div class="box"><div class="flx"><h4>` + course + `</h4></div><p2>` + r.resp[course].attr.DESCRIPTION + `</p2><br><br>
+            <div class="box"><div class="flx"><h4>` + course + `</h4></div><p2>` + r.resp[course].attr.DESCRIPTION + `</p2>
+            <br><br><a target="_blank" href="https://ust.space/review/` + course.split(" ")[0] + course.split(" ")[1] + `">try check ustspace</a><br><br>
+            <div id="course_enroll_model"></div>
             <div class="flx" style="gap:0.5em">
                 <div class="flx" style="justify-content:flex-start;gap:0.5em">
-                    <p4>Also offered in: </p4><div id="alsoOfferedIn"><div id="d_loading"></div></div>
+                    <p4>Also offered in: </p4>
+                    <div id="alsoOfferedIn">` + draft + `</div>
                 </div>
-                <button id="course_enroll_btn" ` + ((true || signinlevel > 0) ? "" : `style="display:none" `) + `onclick="enroll_course(` + '`' + path.split("/")[0] + '`,`' + course + '`' + `, true)">Enroll</button>
+                <div class="enroll_btn_wrp flx">
+                    <button id="course_enroll_btn" ` + ((true || signinlevel > 0) ? "" : `style="display:none" `) + `onclick="enroll_course(` + '`' + path.split("/")[0] + '`,`' + course + '`' + `, true, ` + is_SPO + `, ` + JSON.stringify(possibleGrades).replaceAll('"', "'") + `, ` + JSON.stringify(actual_cred).replaceAll('"', "'") + `)">Enroll</button>
+                    <div id="course_enroll_notice"></div>
+                </div>
             </div></div>`
         let attrHTML = renderCourseAttr(r.resp[course].attr, course)
         if (attrHTML) html_draft += `<div class="box"><h4>📚 Course Attributes</h4>` + attrHTML + `</div>`
@@ -540,7 +726,8 @@ function render_courses_specific(path, insideCoursePage = false) {
                 delete attrs["Instructor"]
                 //
 
-                htmlsd += JSON.stringify(attrs) + `<br>`
+                htmlsd += JSON.stringify(attrs) + `<br>` // TODO: do not relay on this info as it is cached, use the one from /!diff/ instead
+
                 let resp = {}
                 Object.keys(r.resp[course].section[sectionName]).forEach(time => {
                     resp[time] = { Room: r.resp[course].section[sectionName][time].Room, Instructor: r.resp[course].section[sectionName][time].Instructor }
@@ -561,34 +748,6 @@ function render_courses_specific(path, insideCoursePage = false) {
         })
 
         html_draft += `<style>#courses_detail_content .uniroomtime{display:none} #courses_detail_content .uniroomweek{position:unset;margin-top:1em} #courses_detail_content .uniroomgrid{display:block}</style></div>`
-
-        fetch("/!insem/" + course.split(" ")[0] + course.split(" ")[1] + "/").then(r => r.json()).then(u => {
-            if (u.status != 200) { document.getElementById("alsoOfferedIn").innerHTML = "failed to contact server or script crashed"; return }
-
-            u.resp.sort()
-            u.resp.reverse()
-            let draft = `<select style="width:100%" name="timeidx" id="timeidx" title="Select Semester" onchange="boot('/course/' + document.getElementById('timeidx').value + '/' + '` + course.split(" ")[0] + `' + '/' + '` + course.split(" ")[0] + course.split(" ")[1] + `' + '/', false, 2)">`
-            let prevSem = "----"
-            u.resp.forEach(sem => {
-                let thisSem = ustTimeToString(sem)
-                if (thisSem.split(" ")[0] != prevSem) {
-                    if (prevSem != '----') draft += `</optgroup>`
-                    draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
-                    prevSem = thisSem.split(" ")[0]
-                }
-                draft += `<option value="` + sem + `"`
-                if (sem == path.split("/")[0]) {
-                    draft += " selected"
-                }
-                draft += `>` + ustTimeToString(sem) + `</option>`
-            })
-            draft += `</optgroup></select>`
-
-            document.getElementById("alsoOfferedIn").innerHTML = draft
-        }).catch(error => {
-            console.log(error)
-            document.getElementById("alsoOfferedIn").innerHTML = "failed to contact server or script crashed"
-        })
 
         document.getElementById("courses_detail_content").innerHTML = html_draft
 
@@ -678,7 +837,7 @@ function render_courses_details(path, scrollIntoView = false) {
             if ((studprog === "ug" && parseInt(course[5]) > 0 && parseInt(course[5]) < 5) || (studprog === "pg" && parseInt(course[5]) >= 5)) {
                 if (listMode === "card") {
                     html_draft += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="boot('/course/` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + "\n\n" + r.resp[course].attr.DESCRIPTION.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
-                    <div class="picbox_inner_up"><h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"]) + `</h5></div>
+                    <div class="picbox_inner_up` + ((typeof accConfig.courses != "undefined" && typeof accConfig.courses[course.split(" - ")[0]] != "undefined" && typeof accConfig.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (` flx" style="width:calc(100% - 1.6em)"><style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + accConfig.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : (`">`)) + `<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"]) + `</h5></div>
                     <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" (")) + `</h5></div></div></div>`
                 } else {
                     html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)"><div><div><h4>` + course + `</h4><p2 class="no_mobile">` + r.resp[course].attr.DESCRIPTION + `</p2></div>
@@ -735,6 +894,11 @@ function render_courses(path) {
     </div></b></p5>
     </div>`
 
+    if (!(path.split('/').length <= 2 || (path.split('/').length == 3 && path.split('/')[2] == ""))) {
+        render_courses_specific(path, true)
+        return
+    }
+
     apply_config()
     render_UGPG_switch()
 
@@ -759,8 +923,8 @@ function render_courses(path) {
     html_draft += `</optgroup></select>`
 
     if (parseInt(semx) > parseInt(allSems[0])) {
-        alert('i hope i can know what courses would exist in the future too 👀')
-        setTimeout(() => { boot("/", true, 2) }, 1)
+        alert('i hope i can know what courses will exist in the future too 👀')
+        boot("/", true)
         return
     }
 
@@ -812,11 +976,7 @@ function render_courses(path) {
 
         html.innerHTML = html_draft
 
-        if ((path.split('/').length <= 2 || (path.split('/').length == 3 && path.split('/')[2] == ""))) {
-            render_courses_details(coursex, scrollIntoView)
-        } else {
-            render_courses_specific(path, true)
-        }
+        render_courses_details(coursex, scrollIntoView)
 
     }).catch(error => {
         console.log(error)
@@ -933,7 +1093,7 @@ function render_people(path) {
         html_draft = ""
 
         if (ustTimeToString(target_time) === '----') { html.innerHTML = `the url is not in a valid format`; return }
-        if (parseInt(target_time) > maxSem) { html.innerHTML = `i hope i can know what courses would exist in the future too 👀`; return }
+        if (parseInt(target_time) > maxSem) { html.innerHTML = `i hope i can know what courses will exist in the future too 👀`; return }
         if (!disableSigninRequirement) { if (signinlevel === 0 && parseInt(target_time) < peopleMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.` + rootdomain + `/">sign in</a> now to get access to this page`; return } }
         if ((!skippeopleRestriction && parseInt(target_time) < peopleMinSem) || parseInt(target_time) < 1200) { html.innerHTML = `we don't have data for semesters that are too old :(`; return }
 
@@ -1080,7 +1240,7 @@ function render_room(path) {
         html_draft = ""
 
         if (ustTimeToString(target_time) === '----') { html.innerHTML = `the url is not in a valid format`; return }
-        if (parseInt(target_time) > maxSem) { html.innerHTML = `i hope i can know what courses would exist in the future too 👀`; return }
+        if (parseInt(target_time) > maxSem) { html.innerHTML = `i hope i can know what courses will exist in the future too 👀`; return }
         if (!disableSigninRequirement) { if (signinlevel === 0 && parseInt(target_time) < roomMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.` + rootdomain + `/">sign in</a> now to get access to this page`; return } }
         if ((!skipRoomRestriction && parseInt(target_time) < roomMinSem) || parseInt(target_time) < 1200) { html.innerHTML = `we don't have data for semesters that are too old :(`; return }
 
@@ -1173,11 +1333,10 @@ const chartOptions = (timeRange) => {
     let lastTime = timeRange[timeRange.length - 1]
     let i = 0, startMissing = ((timeNow + 8 * 60 * 60 * 1000) % (24 * 60 * 60 * 1000)) / (20 * 60 * 1000)
 
-    while (timeNow < lastTime) {
-        options.plugins.annotation.annotations["box" + i] = { type: 'box', xMin: i * 24 * 3 - startMissing + 24 * 3 - ((i) ? 2 : 0), xMax: i * 24 * 3 - startMissing + 24 * 3 * 2 - ((i) ? 2 : 1), backgroundColor: 'rgba(128,128,128,0.05)', borderWidth: 0, drawTime: 'beforeDatasetsDraw' }
+    do {
+        options.plugins.annotation.annotations["box" + i] = { type: 'box', xMin: i * 24 * 3 - startMissing + 24 * 3, xMax: i * 24 * 3 - startMissing + 24 * 3 * 2 - 1, backgroundColor: 'rgba(128,128,128,0.05)', borderWidth: 0, drawTime: 'beforeDatasetsDraw' }
         i += 2; timeNow += 2 * 24 * 60 * 60 * 1000
-    }
-    //console.log(options)
+    } while (timeNow < lastTime)
 
     return options
 }

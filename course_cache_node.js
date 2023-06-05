@@ -63,7 +63,7 @@ sharedfx.getAllFromDir(servar.course_path, true).forEach(sx => {
                         let course = courseName
                         xcourseids[code] = {SEM: st.split(".")[0], NAME: course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" ("))}
                         let c = xcourses[sx][st.split(".")[0]][courseName];
-                        ["DESCRIPTION", "INTENDED LEARNING OUTCOMES", "CO-REQUISITE", "ALTERNATE CODE(S)", "PREVIOUS CODE"].forEach(a => {
+                        ["DESCRIPTION", "INTENDED LEARNING OUTCOMES", "ALTERNATE CODE(S)", "PREVIOUS CODE"].forEach(a => {
                             if (typeof c.attr[a] != "undefined") { 
                                 if (a == "ALTERNATE CODE(S)" || a == "PREVIOUS CODE") {
                                     let str = []
@@ -111,6 +111,10 @@ Object.keys(xcourses).forEach(courseKey => {
 
             if (!lessonKey.startsWith("_") && Object.keys(examJSONkeys).includes(lessonKey.split(" - ")[0])) {
                 xcourses[courseKey][semKey][lessonKey]["exam"] = examJSON[examJSONkeys[lessonKey.split(" - ")[0]]]
+            }
+
+            if (typeof xinsems[lessonKey.split(" ")[0] + lessonKey.split(" ")[1]] != "undefined") {
+                xcourses[courseKey][semKey][lessonKey]["insem"] = xinsems[lessonKey.split(" ")[0] + lessonKey.split(" ")[1]]
             }
 
             lesson = xcourses[courseKey][semKey][lessonKey]
@@ -187,14 +191,14 @@ Object.keys(xpeoples).forEach(people => {
     if (Object.keys(xpeoples[people]).length === 0) delete xpeoples[people]
 })
 
-post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peoples: xpeoples, rooms: xrooms, sems: xsems, insems: xinsems, courseids: xcourseids })).then(r => r.json()).then(r => {
+post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peoples: xpeoples, rooms: xrooms, sems: xsems, courseids: xcourseids })).then(r => r.json()).then(r => {
 
     console.log('[courses_cache] early cacheing done, used ' + ((new Date()).getTime() - cctm.getTime()) + 'ms')
 
     if (true) {
         let cacheData = {}
 
-        let timeArray = []
+        let timeArray = [], startT = 0, endT = 0
         Object.keys(xdiffs).forEach(courseCode => {
             let diffFilePath = servar.course_path + "_diff\\" + xsems[0] + "\\" + courseCode + ".json"
             if (fs.existsSync(diffFilePath)) {
@@ -207,7 +211,7 @@ post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peopl
                 })
             }
         })
-        timeArray.sort()
+        timeArray.sort(); startT = timeArray[0]; endT = timeArray[timeArray.length - 1] + 19 * 60 * 1000
 
         Object.keys(xdiffs).forEach(courseCode => {
             if (typeof cacheData[courseCode] != "undefined") {
@@ -224,18 +228,29 @@ post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peopl
                 xdiffs[courseCode] = []
                 //xdiffs[courseCode] = { lec: [], lab: [], tut: [], rsh: [], otr: [] }
 
-                let datasets = {}, lessonType = ""
-                Object.keys(data).forEach(lesson => {
-                    lessonType = lessonToType(lesson)
-                    timeArray.forEach(time => {
-                        if (typeof datasets[lessonType] === "undefined") datasets[lessonType] = [];
-                        if (typeof datasets[lessonType][lesson] === "undefined") datasets[lessonType][lesson] = [];
-                        if (!time in Object.keys(data[lesson])) {
-                            datasets[lessonType][lesson].push(NaN)
+                let datasets = {}, db = data
+                Object.keys(db).forEach(key => {
+                    let keys = Object.keys(db[key])
+                    keys.sort()
+
+                    let time = startT, value = db[key][keys[0]], keys_pos = -1, iter = -1, newDB = []
+                    do {
+                        iter++
+                        time += 20 * 60 * 1000
+
+                        if (keys[keys_pos + 1] <= time + 20 * 60 * 1000) {
+                            keys_pos++
+                            value = db[key][keys[keys_pos]]
                         } else {
-                            datasets[lessonType][lesson].push(data[lesson][time])
+                            value = null
                         }
-                    })
+
+                        newDB.push(value)
+
+                    } while (keys_pos < keys.length && endT > time)
+
+                    if (typeof datasets[lessonToType(key)] == "undefined") datasets[lessonToType(key)] = {}
+                    datasets[lessonToType(key)][key] = newDB
                 });
 
                 let maxLessonNum = 1;
