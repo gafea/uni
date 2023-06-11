@@ -17,6 +17,8 @@ select, #myInput, input{color: black; cursor: pointer; font-size: 16px; border: 
 #mdigbtn{flex-shrink:0;width:calc(10em + 5%)}
 
 .selbox:hover{z-index:3}
+.course_sel:hover, .course_sel:focus, .selbox:hover, .selbox:focus{transform:scale(1.005)}
+.course_sel:hover:active, .selbox:hover:active{transform:scale(0.99)}
 .flxb{flex-flow:wrap;display:flex;justify-content:space-between}
 .LR_Right, #iL1{width:calc( 100% - 19em )}
 .LR_Left, #iR1{padding:0.5em;pointer-events:none;position:sticky;top:0.75em;left:0;z-index:3;width:17em;overflow-y:auto;height:fit-content}
@@ -46,15 +48,18 @@ select, #myInput, input{color: black; cursor: pointer; font-size: 16px; border: 
 .dpv_carrier{scroll-snap-type:x mandatory;scroll-padding:calc(5% + 5em);padding-top:1em!important;padding-bottom:1.5em!important;overflow-x:auto;flex-flow:row!important;scrollbar-width:thin;scrollbar-color:dark;justify-content:flex-start!important}
 
 .uniroomgrid{display:grid;grid-auto-rows:1fr;grid-auto-columns:1fr;grid-template-columns:auto 1fr}
-.uniroomweek{margin-left:0.675em;padding:0.25em 0.75em;position:sticky;top:0.5em;background-color:var(--bw);z-index:5;height:min-content;width:min-content;border-radius:1em}
+.uniroomweek{margin:0.5em 0 0.5em 0.675em;padding:0.25em 0.75em;position:sticky;top:0.5em;background-color:var(--bw);z-index:5;height:min-content;width:min-content;border-radius:1em}
 .uniroomtime{opacity:0.6;text-align:right;padding-right:1em}
 
 .lessonbox{border:0.1em dotted rgba(128,128,128,.5);padding:1em;border-radius:1em;max-width:100%;word-wrap:break-word}
 
 .chart-container{position: relative; width:100%; height:52.5vh}
 
-.enroll_btn_wrp{width:min-content;justify-content:flex-end}
+.enroll_btn_wrp{gap:0.5em;justify-content:flex-start;align-items:baseline;margin:0 0.25em}
 .enroll_btn_wrp > * {width:max-content}
+#course_enroll_btn{background-color: #08f3; padding: 0.5em 1.5em; margin: 0; border-radius: 1.5em; transition-duration: 0.1s;}
+#course_enroll_btn:hover, #course_enroll_btn:active{background-color: #08f7}
+#course_enroll_btn:hover:active{transform:scale(0.925)}
 
 @media (prefers-color-scheme: dark) {
     button{color:#eee;background-color:#3f3c39}
@@ -92,7 +97,6 @@ select, #myInput, input{color: black; cursor: pointer; font-size: 16px; border: 
     .dpv_carrier{display:block}
     .courses_specific_close > button, .courses_specific_close > button > img {width:2.75em;height:2.75em}
     #courses_detail_content .edge2edge, #courses_detail_content .edge2edge_page{padding:1em}
-    .enroll_btn_wrp{width:100%;gap:0.5em;justify-content:flex-start}
 
     #mdigbtn form{width:0}
     #fdigbtn{top:1.1em;top:calc(1.1em + env(safe-area-inset-top))}

@@ -46,7 +46,8 @@ a, .acss{text-decoration:none;color:var(--link-color);background-color:transpare
 .aobh{transition-duration:0.1s!important;border-radius:0.5em;padding:0.5em;user-select:none;cursor:pointer;display:inline-block}
 .aobh:hover{background-color:rgba(0,0,0,.05)}
 .aobh:active{background-color:rgba(0,0,0,.1)}
-.aobh:hover:active{transform:scale(0.95)}
+.aobh:hover:active, .ax:hover:active{transform:scale(0.95)}
+.ax{user-select: none; cursor: pointer; display: inline-block;}
 .gray_aobh{padding:0.5em;user-select:none;filter:grayscale(1)}
 .flx{flex-flow:wrap;display:flex;justify-content:space-between;align-items:center} .flx div{vertical-align:middle}
 .label{padding:0.25em 0.5em;border-radius:0.5em;white-space:nowrap;width:min-content}

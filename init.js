@@ -1,8 +1,9 @@
 var script1 = document.createElement('script'); script1.src = '/!acc/uniplus.js'; document.head.appendChild(script1);
 
 const bottombarbuttons = [
-    'Me,/me/,me,' + resourceNETpath + 'image/nullicon.png,1',
-    'Courses,/course/,course,' + resourceNETpath + 'image/nullicon.png,2',
+    'Me,/me/,me,' + resourceNETpath + 'image/me.png,1',
+    'Browse,/course/,course,' + resourceNETpath + 'image/browse.png,2',
+    'Search,/search/,search,' + resourceNETpath + 'image/search.png,3',
     'About,/about/,about,' + resourceNETpath + 'image/info.png,0'
 ]
 
@@ -13,8 +14,10 @@ function bootID_mapper(path = "") {
         return 0
     } else if (path.toLowerCase().startsWith("/me/")) {
         return 1
-    } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/") || path.toLowerCase().startsWith("/search/")) {
+    } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/")) {
         return 2
+    } else if (path.toLowerCase().startsWith("/search/")) {
+        return 3
     } else {
         return -1
     }
@@ -46,7 +49,7 @@ function init(path) {
             </div>
             ` + renderBottomBar('me')
 
-        } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/") || path.toLowerCase().startsWith("/search/")) { //course + people + room + search
+        } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/")) { //course + people + room
 
             return `<div id="courses_select_wrp">
                 <div class="edge2edge flxb" id="courses_select_main" style="transition-timing-function:cubic-bezier(.65,.05,.36,1);transition-duration:0.6s">
@@ -54,9 +57,8 @@ function init(path) {
                         <div class="LR_Left_Content">
                             <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0">
                                 <button onclick="boot('/course/', false, 2)">course</button>
-                                <button onclick="boot('/people/', false, 2)">people</button>
-                                <button onclick="boot('/room/', false, 2)">room</button>
-                                <button onclick="boot('/search/', false, 2)">search</button>
+                                <button onclick="peoplex='` + default_people + `';boot('/people/', false, 2)">people</button>
+                                <button onclick="roomx='LTA';boot('/room/', false, 2)">room</button>
                             </div>
                             <div id="courses_select_left_top"></div>
                             <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
@@ -65,6 +67,20 @@ function init(path) {
                     <div class="LR_Right" id="courses_select_right"></div>
                 </div>
             </div>` + renderBottomBar('course')
+
+        } else if (path.toLowerCase().startsWith("/search/")) { //search
+
+            return `<div id="courses_select_wrp">
+                <div class="edge2edge flxb" id="courses_select_main" style="transition-timing-function:cubic-bezier(.65,.05,.36,1);transition-duration:0.6s">
+                    <div class="LR_Left" id="courses_select_left">
+                        <div class="LR_Left_Content"><br>
+                            <div id="courses_select_left_top"></div>
+                            <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
+                        </div>
+                    </div>
+                    <div class="LR_Right" id="courses_select_right"></div>
+                </div>
+            </div>` + renderBottomBar('search')
 
         } else if (path.toLowerCase().startsWith("/about/")) { //about page
             wasInsideCoursePage = false
@@ -80,20 +96,6 @@ function init(path) {
             </p3>
 
             <br><br><h3>Licenses</h3>
-            <div class="box">
-                <h4>anime.js</h4>
-                <p3>
-                    The MIT License (MIT)
-                <br><br>
-                    Copyright (c) 2019 Julian Garnier
-                <br><br>
-                    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-                <br><br>
-                    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-                <br><br>
-                    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-                </p3>
-            </div>
             <div class="box">
                 <h4>Chart.js</h4>
                 <p3>
@@ -182,7 +184,7 @@ function exe(path) {
             exe_room(path.substring(6))
         }
     } else if (path.toLowerCase().startsWith("/me/")) {
-        exe_me()
+        update_accConfig("", "", () => exe_me())
     } else if (path.toLowerCase().startsWith("/search/")) {
         document.getElementById('courses_select_main').classList.remove('edge2edge_wide')
         exe_search()
@@ -227,7 +229,7 @@ function render_search(path) {
     document.getElementById("courses_select_left_top").innerHTML = `<div class="flx"><h2>Search</h2></div>`
     document.getElementById("courses_select_left_optionBox").innerHTML = `<style>#courses_select_left_optionBox{display:none}</style>`
     document.getElementById("courses_select_right").innerHTML = `<br><div id="fdigbtn" class="flx"><label for="search_dw_box"><img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false"></label><p3 id="digsrtxt">Search</p3>
-    <form onsubmit="boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_dw_box').value)), true, 2);this.blur();return false"><input ` + ((!query) ? "autofocus " : "") + `id="search_dw_box" name="dw" type="search" placeholder="Search for anything" value="" title="Search"></form></div>
+    <form onsubmit="boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_dw_box').value)), true, 3);this.blur();return false"><input ` + ((!query) ? "autofocus " : "") + `id="search_dw_box" name="dw" type="search" placeholder="Search for anything" value="" title="Search"></form></div>
     <div id="search_result"></div>`
     document.getElementById("search_dw_box").focus()
 
@@ -263,20 +265,22 @@ function render_search(path) {
 
                             case "people":
                                 if (r.resp.length === 1) {
+                                    peoplex = ans.result
                                     boot(`/people/` + ans.result + `/`, true, 2)
                                     return
                                 }
-                                draft += `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="boot('/people/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
+                                draft += `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="peoplex='` + ans.result + `';boot('/people/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
                                 <div class="picbox_inner_up"><h5 style="opacity:0.85"></h5></div>
                                 <div><h4>` + ans.result + `</h4></div></div></div>`
                                 break;
 
                             case "room":
                                 if (r.resp.length === 1) {
+                                    roomx = ans.result
                                     boot(`/room/` + ans.result + `/`, true, 2)
                                     return
                                 }
-                                draft += `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="boot('/room/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
+                                draft += `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="roomx='` + ans.result + `';boot('/room/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
                                 <div class="picbox_inner_up"><h5 style="opacity:0.85"></h5></div>
                                 <div><h4>` + ans.result + `</h4></div></div></div>`
                                 break;
@@ -331,7 +335,8 @@ function render_me() {
                 if (typeof semsdb[sem][course].actual_cred != "undefined") actualcred = parseInt(semsdb[sem][course].actual_cred)
                 mhtmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course == "COMP 3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.replace(" ", "") + `.png`)) + `)" id="` + course.replace(" ", "") + `" class="course_sel selbox picbox" onclick="boot('/course/` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title=""><div class="picbox_inner flx">
                     <div class="picbox_inner_up flx" style="width:calc(100% - 1.6em)">
-                        <h5 class="textbox">` + semsdb[sem][course].grade + `</h5>
+                        ` + ( (semsdb[sem][course].grade === "----") ? (`<style>#` + course.replace(" ", "") + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">`) : (`<h5 class="textbox">`)) + `
+                        ` + semsdb[sem][course].grade + `</h5>
                         <h5 style="opacity:0.85">` + ((actualcred != cred) ? ("" + actualcred + " of ") : "") + semsdb[sem][course].units + ` unit` + ((semsdb[sem][course].units === "1") ? '' : 's') + `</h5>
                     </div><div><h4>` + course + `</h4><h5>` + semsdb[sem][course].name + `</h5></div></div></div>`
                 total_term_cred += actualcred
@@ -363,7 +368,7 @@ function render_me() {
             htmld += `<div class="edge2edge"><div class="flx"><h3>` + ustTimeToString(sem) + `</h3><h5>` + ((gpacred) ? (`TGA <span class="textbox"` + (haveunfilled ? ` title="There are courses missing grade information">⌛ ` : ">") + (gpasum / gpacred).toFixed(3) + `</span> `) : "") + ((termcredload != total_term_cred) ? (`Actual Credit Load <span class="textbox" title="The actual credit load after deducting transferred credits">` + termcredload + `</span> `) : "") + `Credits <span class="textbox">` + total_term_cred + `</span></h5></div><div class="flx">` + mhtmld + `</div></div>`
         })
     }
-    my_courses.innerHTML = `<div class="edge2edge"><div class="flx"><h3> </h3><h5>GPA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span> Passed Credits <span class="textbox">` + total_passed_cred + `</span> Total Credits <span class="textbox">` + total_cred + `</span></h5></div><br><hr></div>` + htmld
+    my_courses.innerHTML = `<div class="edge2edge"><div class="flx"><h3> </h3><h5>CGA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span> Passed Credits <span class="textbox">` + total_passed_cred + `</span> Total Credits <span class="textbox">` + total_cred + `</span></h5></div><br><hr></div>` + htmld
 }
 
 var studprog = "ug"
@@ -423,11 +428,7 @@ function wait_allSems(cb, path, title) {
             document.getElementById("core").innerHTML = `
             <div class="edge2edge_page">
                 <h2>Oops</h2><br>
-                <p3>It seems that there are nothing we can show to you at the moment. Try coming back later.</p3><br><br>
-                <div class="box">
-                    <h4>Technical Information</h4>
-                    <p3>wait_allSems failed, possibly due to no data in cache or other server error.<br>Run <b>/!course_fetch/</b> and <b>/!course_cache/</b> on the internal API, or check server status.</p3>
-                </div>
+                <p3>It seems that there are nothing we can show to you at the moment. Try coming back later.</p3>
             </div>
             `
             return
@@ -486,7 +487,7 @@ function generate_grade_selection(selection = "----", possibleGrades = []) {
         })
         return t
     }
-    return ((possibleGrades.length) ? ("" + loop(possibleGrades, selection)) : ("" + loop(["----"], selection) + `<optgroup label="Toward GPA">` + loop(["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"], selection) + `</optgroup><optgroup label="Not for GPA">` + loop(["P", "PP", "T", "AU", "W", "CR", "DI", "DN", "I", "PA", "PS"].sort(), selection) + `</optgroup>`))
+    return ((possibleGrades.length) ? ("" + loop(["----"], selection) + `<optgroup label="Grades">` + loop(possibleGrades, selection) + `</optgroup><optgroup>` + loop(["AU", "I", "T", "W"], selection)) + `</optgroup>` : ("" + loop(["----"], selection) + `<optgroup label="Toward GPA">` + loop(["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"], selection) + `</optgroup><optgroup label="Not for GPA">` + loop(["P", "PP", "T", "AU", "W", "CR", "DI", "DN", "I", "PA", "PS"].sort(), selection) + `</optgroup>`))
 }
 
 function submitCourseUpdate(remove = false) {
@@ -620,10 +621,13 @@ function render_courses_specific(path, insideCoursePage = false) {
         if (typeof r.resp[course].attr.ATTRIBUTES != "undefined" && r.resp[course].attr.ATTRIBUTES.includes("[SPO] Self-paced online delivery")) is_SPO = "true"
 
         let possibleGrades = []
-        if (r.resp[course].attr.DESCRIPTION.includes("Graded P or F")) {
-            possibleGrades = ["----", "P", "F", "T"]
-        } else if (r.resp[course].attr.DESCRIPTION.includes("Graded PP, P or F")) {
-            possibleGrades = ["----", "P", "PP", "F", "T"]
+        let desc = r.resp[course].attr.DESCRIPTION
+        if (desc.includes("Graded P or F") && !desc.toUpperCase().includes("GRADED PP")) {
+            possibleGrades = ["P", "F"]
+        } else if ((desc.includes("Graded P or F") && desc.toUpperCase().includes("GRADED PP")) || desc.includes("Graded PP, P or F") || desc.includes("Graded P, PP or F") || desc.includes("Graded P/PP/F")) {
+            possibleGrades = ["P", "PP", "F"]
+        } else if (desc.includes("Graded DI, PA or F") || desc.includes("Graded DI/PA/F")) {
+            possibleGrades = ["DI", "PA", "F"]
         }
 
         let actual_cred = []
@@ -669,19 +673,22 @@ function render_courses_specific(path, insideCoursePage = false) {
 
         html_draft += `<div class="edge2edge_page"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `">
             <div class="box"><div class="flx"><h4>` + course + `</h4></div><p2>` + r.resp[course].attr.DESCRIPTION + `</p2>
-            <br><br><a target="_blank" href="https://ust.space/review/` + course.split(" ")[0] + course.split(" ")[1] + `">try check ustspace</a><br><br>
+            <br><br>
             <div id="course_enroll_model"></div>
             <div class="flx" style="gap:0.5em">
                 <div class="flx" style="justify-content:flex-start;gap:0.5em">
                     <p4>Also offered in: </p4>
                     <div id="alsoOfferedIn">` + draft + `</div>
                 </div>
-                <div class="enroll_btn_wrp flx">
-                    <button id="course_enroll_btn" ` + ((true || signinlevel > 0) ? "" : `style="display:none" `) + `onclick="enroll_course(` + '`' + path.split("/")[0] + '`,`' + course + '`' + `, true, ` + is_SPO + `, ` + JSON.stringify(possibleGrades).replaceAll('"', "'") + `, ` + JSON.stringify(actual_cred).replaceAll('"', "'") + `)">Enroll</button>
-                    <div id="course_enroll_notice"></div>
-                </div>
+                <a target="_blank" class="aobh" href="https://ust.space/review/` + course.split(" ")[0] + course.split(" ")[1] + `">try check ustspace</a>
             </div></div>`
-        let attrHTML = renderCourseAttr(r.resp[course].attr, course)
+
+        document.getElementById('topbar_buttons_wrp').innerHTML = `<div class="enroll_btn_wrp flx">
+            <button id="course_enroll_btn" ` + ((true || signinlevel > 0) ? "" : `style="display:none" `) + `onclick="enroll_course(` + '`' + path.split("/")[0] + '`,`' + course + '`' + `, true, ` + is_SPO + `, ` + JSON.stringify(possibleGrades).replaceAll('"', "'") + `, ` + JSON.stringify(actual_cred).replaceAll('"', "'") + `)">Enroll</button>
+            <div id="course_enroll_notice"></div>
+        </div>`
+
+        let attrHTML = renderCourseAttr(r.resp[course].attr, course, r.resp[course].attr)
         if (attrHTML) html_draft += `<div class="box"><h4>📚 Course Attributes</h4>` + attrHTML + `</div>`
         html_draft += `</div>`
 
@@ -821,6 +828,8 @@ function render_courses_details(path, scrollIntoView = false) {
     fetch("/!course/" + path).then(r => r.json()).then(r => {
         if (r.status != 200) { setLoadingStatus("error", false, "failed to contact server"); return }
 
+        document.getElementById('topbar_buttons_wrp').innerHTML = ''
+
         let html_draft = `<style>.uniroomtime{display:none} .uniroomweek{position:unset;margin-top:1em} .uniroomgrid{display:block} .LR_Right{background:none}</style><br><div class="flx"><br><div class="flx" style="gap:0.5em"><p4>View Mode: </p4>`
         if (listMode === "card") {
             html_draft += `<p5><b><div class="ugpgbox flx">
@@ -876,7 +885,7 @@ function render_courses_details(path, scrollIntoView = false) {
 var scrollIntoView = false, doNotCheckUGPG = false
 function render_courses(path) {
 
-    if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]), "", true, "", true, `boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_box').value)), false, 2)`) + `
+    if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]),  `<div id="topbar_buttons_wrp"></div>`, true, "", true, `boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_box').value)), false, 3)`) + `
     <style>#btn_back, .topbar, #courses_select_main, #courses_select_left, #courses_select_right{transition-timing-function: cubic-bezier(.65,.05,.36,1);transition-duration: 0.5s !important}</style>
     <div id="course_detail_topbar_specialStyles">
         <style>
@@ -997,14 +1006,15 @@ function render_UGPG_switch() {
     pgbtn.pointerEvents = ((studprog === "pg") ? "none" : "unset")
 }
 
-var peoplex = "LAM, Gibson"
+var default_people = "CHAN, Ki Cecia"
+var peoplex = default_people
 
 function render_people(path) {
     document.getElementById("courses_select_left_top").innerHTML = `<h2>Instructors</h2>`
 
     let html_draft = ""
     let path_hv_people_match = false
-    let target_people = "LAM, Gibson"
+    let target_people = default_people
     html = document.getElementById("courses_select_left_optionBox")
 
     let hdraft = ""
@@ -1020,8 +1030,8 @@ function render_people(path) {
     })
     hdraft += `</div>`
     if (!path_hv_people_match) {
-        hdraft = hdraft.replace(`<option value="LAM, Gibson">`, `<option value="LAM, Gibson" selected>`)
-        document.title = "LAM, Gibson - uni"
+        hdraft = hdraft.replace(`<option value="` + default_people + `">`, `<option value="` + default_people + `" selected>`)
+        document.title = "" + default_people + " - uni"
     }
     html_draft += `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" placeholder="Search.." id="myInput" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_people + `">` + hdraft + `</select>`
 
@@ -1388,6 +1398,14 @@ const renderCourseAttr = (attrs, course) => {
                     html_draft += "ℹ️ Vector"
                     break
 
+                case "PRE-REQUISITE-BY":
+                    html_draft += "🚨 Required For"
+                    break
+    
+                case "EXCLUSION-BY":
+                    html_draft += "⛔ Excluded By"
+                    break
+
                 default:
                     html_draft += "[" + attr + "]"
                     break
@@ -1401,7 +1419,7 @@ const renderCourseAttr = (attrs, course) => {
                                     <b>` + v.split(":")[0].split("-")[2] + `</b> Laboratory or field study hours per week<br>          
                                     <b>` + v.split(":")[1] + `</b> Course credits`
                 }
-            } else if ((attr === "PREVIOUS CODE" || attr === "ALTERNATE CODE(S)") && course.toUpperCase().startsWith("CORE")) {
+            } else if (false && (attr === "PREVIOUS CODE" || attr === "ALTERNATE CODE(S)") && course.toUpperCase().startsWith("CORE")) {
                 html_draft += `<br><br><a target="_blank" href="https://ust.space/review/` + attrs[attr].replace(" ", "") + `">try check ustspace</a>`
 
             }
@@ -1457,7 +1475,7 @@ const ustTimeToString = (time) => {
 }
 
 function renderTimetableGrid(resp, type, target_time = 0) {
-    let html_draft = `<div class="uniroomgrid">`
+    let html_draft = ``
     let sday = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
     let sfday = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     let days = { Mo: [], Tu: [], We: [], Th: [], Fr: [], Sa: [], Su: [], Other: [] }
@@ -1473,6 +1491,39 @@ function renderTimetableGrid(resp, type, target_time = 0) {
             })
         }
     })
+
+    if (days.Other.length > 0) {
+        html_draft += `<div>`
+        if (type === "courseDetail") {
+            html_draft += `<div>`
+        } else {
+            html_draft += `<div class="uniroomweek"><h3 style="font-size:1.25em">Others</h3></div><div class="flx">`
+        }
+        days.Other.forEach(lesson => {
+            if (type === "room") {
+                html_draft += `<div class="selbox" style="cursor:pointer;flex-grow:1"
+                onclick="boot('/course/` + target_time + `/` + lesson.course.split(" - ")[0].split(" ")[0] + `/` + lesson.course.split(" - ")[0].replace(" ", "") + `/', false, 2)">
+                <div style="margin:0.25em 0.5em 0.25em 0.25em;padding:0 0.5em 0 0.75em;border-left:0.25em solid #ff888888"> 
+                <h4>` + lesson.date.substring(0, 25) + `</h4><h5>` + lesson.date.slice(25) + `</h5>
+                <p2>` + lesson.course.split(" - ")[0] + ` - ` + lesson.section + `<br><i>` + lesson.course.replace(lesson.course.split(" - ")[0] + " - ", "").slice(0, -9) + `</i></p2>
+                </div></div>`
+            } else if (type === "people") {
+                html_draft += `<div class="selbox" style="cursor:pointer;flex-grow:1" onclick="boot('/course/` + target_time + `/` + lesson.course.split(" - ")[0].split(" ")[0] + `/` + lesson.course.split(" - ")[0].replace(" ", "") + `/', false, 2)">
+                <div style="margin:0.25em 0.5em 0.25em 0.25em;padding:0 0.5em 0 0.75em;border-left:0.25em solid #ff888888"><h4>` + lesson.course.split(" - ")[0] + ` (` + lesson.section.split(' (')[0] + `)</h4><p2><i>` + lesson.course.split(" - ")[1] + ` (` + lesson.section.split(' (')[1] + `</i><small><br>` + ((typeof lesson.date != "undefined") ? '' + lesson.date.substring(0, 25) + `<br>` + lesson.date.slice(25) + '<br>' : '') + lesson.room + `
+                </small></p2></div></div>`
+            } else if (type === "courseDetail") {
+                html_draft += `<div style="margin:0.75em 0.5em 0.75em 0.25em;padding:0.25em 0.5em 0.25em 0.75em;border-left:0.25em solid #ff888888">
+                <h4>` + lesson.date.substring(0, 25) + `</h4><h5>` + lesson.date.slice(25) + `</h5>
+                <p2>Room: ` + lesson.Room + `<br><i>Instructor: ` + JSON.stringify(lesson.Instructor) + `</i></p2>
+                </div>`
+            }
+        })
+        html_draft += `</div></div>`
+        if (type != "courseDetail") html_draft += `<br>`
+    }
+
+    html_draft += `<div class="uniroomgrid">`
+
     let minStartTime = 0, maxEndTime = 0, minWeekStartTime = -1, haveWeekRendered = false
     sday.forEach((day) => {
         if (days[day].length > 0) {
@@ -1550,29 +1601,6 @@ function renderTimetableGrid(resp, type, target_time = 0) {
         }
     })
     html_draft += `</div>`
-
-    if (days.Other.length > 0) {
-        html_draft += `<div>`
-        if (type != "courseDetail") html_draft += `<h3 style="padding-left:1em">Others</h3>`
-        html_draft += `<div class="box" style="padding:0.5em 1em">`
-        days.Other.forEach(lesson => {
-            if (type === "room") {
-                html_draft += `<div style="margin:0.75em 0.5em 0.75em 0.25em;padding:0.25em 0.5em 0.25em 0.75em;border-left:0.25em solid #ff888888;cursor:pointer" 
-                onclick="boot('/course/` + target_time + `/` + lesson.course.split(" - ")[0].split(" ")[0] + `/` + lesson.course.split(" - ")[0].replace(" ", "") + `/', false, 2)">
-                <h4>` + lesson.date.substring(0, 25) + `</h4><h5>` + lesson.date.slice(25) + `</h5>
-                <p2>` + lesson.course.split(" - ")[0] + ` - ` + lesson.section + `<br><i>` + lesson.course.replace(lesson.course.split(" - ")[0] + " - ", "").slice(0, -9) + `</i></p2>
-                </div>`
-            } else if (type === "people") {
-                html_draft += `<div style="margin:0.75em 0.5em 0.75em 0.25em;padding:0.25em 0.5em 0.25em 0.75em;border-left:0.25em solid #ff888888;cursor:pointer" onclick="boot('/course/` + target_time + `/` + lesson.course.split(" - ")[0].split(" ")[0] + `/` + lesson.course.split(" - ")[0].replace(" ", "") + `/', false, 2)"><h4>` + lesson.course.split(" - ")[0] + ` (` + lesson.section.split(' (')[0] + `)</h4><p2><i>` + lesson.course.split(" - ")[1] + ` (` + lesson.section.split(' (')[1] + `</i><small><br>` + ((typeof lesson.date != "undefined") ? '' + lesson.date.substring(0, 25) + `<br>` + lesson.date.slice(25) + '<br>' : '') + lesson.room + `</small></p2></div>`
-            } else if (type === "courseDetail") {
-                html_draft += `<div style="margin:0.75em 0.5em 0.75em 0.25em;padding:0.25em 0.5em 0.25em 0.75em;border-left:0.25em solid #ff888888">
-                <h4>` + lesson.date.substring(0, 25) + `</h4><h5>` + lesson.date.slice(25) + `</h5>
-                <p2>Room: ` + lesson.Room + `<br><i>Instructor: ` + JSON.stringify(lesson.Instructor) + `</i></p2>
-                </div>`
-            }
-        })
-        html_draft += `</div></div>`
-    }
 
     return html_draft
 }

@@ -33,6 +33,7 @@ try {
     var sems = []
     var insems = {}
     var courseids = {}
+    var extraattr = {}
 
     //courses_fetch, including course_cache
     function courses_fetch(recur = false) {
@@ -63,15 +64,15 @@ try {
 
     //course_cache
     let cctm = (new Date())
-    function course_cache() {
+    function course_cache(firstBoot = false) {
 
         console.log("[" + servar.domain + "] starting cacheing...")
 
         cctm = (new Date())
-        setTimeout(exec, 100, (servar.deployed) ? 'node uni\\course_cache_node.js' : 'node course_cache_node.js', err => { })
+        setTimeout(exec, 100, "node " + ((servar.deployed) ? 'uni\\' : "") + "course_cache_node.js" + ((firstBoot) ? " firstBoot" : ""), err => { })
 
     }
-    course_cache()
+    course_cache(true)
 
     function course_search(query) {
         if (!query) return []
@@ -284,27 +285,24 @@ try {
                             if (!timeArray.includes(newDataPointTime)) timeArray.push(newDataPointTime)
                         })
                     })
-                    timeArray.sort(); startT = timeArray[0]; endT = timeArray[timeArray.length - 1] + 19 * 60 * 1000
+                    timeArray.sort(); startT = timeArray[0]; endT = timeArray[timeArray.length - 1] + 19 * 60 * 1000; timeArray = [];
+                    let timeU = startT; do { timeArray.push(timeU); timeU += 20 * 60 * 1000 } while (endT > timeU);
 
                     Object.keys(db).forEach(key => {
                         let keys = Object.keys(db[key])
                         keys.sort()
 
-                        let time = startT, value = db[key][keys[0]], keys_pos = -1, iter = -1, newDB = []
+                        let time = startT, value = db[key][keys[0]], keys_pos = -1, newDB = []
                         do {
-                            iter++
-                            time += 20 * 60 * 1000
-
-                            if (keys[keys_pos + 1] <= time + 20 * 60 * 1000) {
+                            if (keys[keys_pos + 1] < time + 20 * 60 * 1000) {
                                 keys_pos++
                                 value = db[key][keys[keys_pos]]
                             } else {
                                 value = null
                             }
-
                             newDB.push(value)
-
-                        } while (keys_pos < keys.length && endT > time)
+                            time += 20 * 60 * 1000
+                        } while (keys_pos < keys.length && endT >= time) 
 
                         if (typeof datasets[lessonToType(key)] == "undefined") datasets[lessonToType(key)] = {}
                         datasets[lessonToType(key)][key] = newDB
@@ -390,7 +388,12 @@ try {
                         if (req.url.substring(9).split('/').length == 2 || (req.url.substring(9).split('/').length == 3 && req.url.substring(9).split('/')[2] == "")) {
                             let resp = {}
                             Object.keys(courses[deptx][semx]).forEach(courseFullName => {
-                                if (courseFullName != "_attr") resp[courseFullName] = { attr: courses[deptx][semx][courseFullName]["attr"] }
+                                if (courseFullName != "_attr") {
+                                    resp[courseFullName] = { attr: courses[deptx][semx][courseFullName]["attr"] }
+                                    if (typeof extraattr[courseFullName.split(" ")[0] + courseFullName.split(" ")[1]] != "undefined") {
+                                        resp[courseFullName].attr = {...resp[courseFullName].attr, ...extraattr[courseFullName.split(" ")[0] + courseFullName.split(" ")[1]]}
+                                    }
+                                }
                             })
                             res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
                             res.end(JSON.stringify({ status: 200, resp: resp }))
@@ -409,8 +412,27 @@ try {
                             return
                         }
 
+                        let rx = JSON.parse(JSON.stringify(courses[deptx][semx][courseNameFound]))
+                        
+                        if (typeof insems[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]] != "undefined") {
+                            rx.insem = insems[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]]
+                        }
+
+                        let extraattrs = extraattr[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]]
+                        if (typeof extraattrs != "undefined") {
+                            Object.keys(extraattrs).forEach(k => {
+                                rx.attr[k] = extraattrs[k].join(", ")
+                            })
+                        }
+
+                        Object.keys(rx.attr).forEach(key => {
+                            Object.keys(courseids).sort().reverse().forEach(courseid => {
+                                rx.attr[key] = rx.attr[key].replaceAll("" + courseid.substring(0, 4) + " " + courseid.substring(4), `<a class="ax" onclick="boot('/course/` + courseids[courseid].SEM + `/` + courseid.substring(0, 4) + `/` + courseid + `/', false, 2)">` + courseid + `</a>`)
+                            })      
+                        })
+
                         res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                        res.end(JSON.stringify({ status: 200, resp: { [courseNameFound]: courses[deptx][semx][courseNameFound] } }))
+                        res.end(JSON.stringify({ status: 200, resp: { [courseNameFound]: rx} }))
                         return
                     }
 
@@ -464,8 +486,8 @@ try {
                         }
                     })
 
-                } else if (servar.deployed && req.url.startsWith('/!acc/')) {
-                    acc.handle(req, res, body, servar)
+                } else if (req.url.startsWith('/!acc/')) {
+                    (servar.deployed) ? acc.handle(req, res, body, servar) : sharedfx.returnErr(res, 503, "not-supported", true)
 
                 } else if (req.url.toLowerCase() === '/init.js') {
                     res.writeHead(200, { 'Content-Type': 'application/javascript', 'Server': 'joutou', 'Cache-Control': 'max-age=7200' })
@@ -484,7 +506,6 @@ try {
                     res.end(sharedfx.envar.indexHTML.replace("%script%", `
                 <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chart.umd.js"></script>
                 <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chartjs-plugin-annotation.min.js"></script>
-                <script src="` + sharedfx.envar.cdnNETpath + `pkg\\anime.min.js"></script>
                 `).replace("%gscript%", sharedfx.envar.gscript))
 
                 }
@@ -545,6 +566,7 @@ try {
                         if (typeof r.sems != "undefined") sems = r.sems
                         if (typeof r.insems != "undefined") insems = r.insems
                         if (typeof r.courseids != "undefined") courseids = r.courseids
+                        if (typeof r.extraattr != "undefined") extraattr = r.extraattr
                         console.log("[" + servar.domain + "] cacheing variables updated")
                     }
                     res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
@@ -585,6 +607,11 @@ try {
                         case "courseids":
                             res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
                             res.end(JSON.stringify({ status: 200, resp: courseids }))
+                            break
+
+                        case "extraattr":
+                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify({ status: 200, resp: extraattr }))
                             break
 
                         default:

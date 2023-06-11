@@ -13,6 +13,11 @@ const servar = {
     course_backup_path: sharedfx.envar.course_backup_path,
 }; Object.freeze(servar)
 
+let firstBoot = false
+process.argv.forEach(function (val, index, array) {
+    if (val == "firstBoot") firstBoot = true
+})
+
 let cctm = (new Date())
 console.log("[courses_cache] cacheing courses...")
 
@@ -23,6 +28,7 @@ let xrooms = {}
 let xsems = []
 let xinsems = {}
 let xcourseids = {}
+let xextraattr = {}
 
 function lessonToType(lesson) {
     if (lesson.startsWith("LA")) {
@@ -49,10 +55,10 @@ sharedfx.getAllFromDir(servar.course_path, true).forEach(sx => {
                 let ug = false, pg = false, firstNum = 0
                 Object.keys(xcourses[sx][st.split(".")[0]]).forEach(courseName => {
                     firstNum = parseInt(courseName[5])
-                    if (firstNum > 0 && firstNum < 5) { 
-                        ug = true 
-                    } else if (firstNum > 4) { 
-                        pg = true 
+                    if (firstNum > 0 && firstNum < 5) {
+                        ug = true
+                    } else if (firstNum > 4) {
+                        pg = true
                     }
                     if (courseName.startsWith(sx)) {
                         let code = courseName.split(" ")[0] + courseName.split(" ")[1]
@@ -61,10 +67,10 @@ sharedfx.getAllFromDir(servar.course_path, true).forEach(sx => {
                         xinsems[code].push(st.split(".")[0])
                         if (typeof xcourseids[code] === "undefined") xcourseids[code] = {}
                         let course = courseName
-                        xcourseids[code] = {SEM: st.split(".")[0], NAME: course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" ("))}
+                        xcourseids[code] = { SEM: st.split(".")[0], NAME: course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" (")) }
                         let c = xcourses[sx][st.split(".")[0]][courseName];
                         ["DESCRIPTION", "INTENDED LEARNING OUTCOMES", "ALTERNATE CODE(S)", "PREVIOUS CODE"].forEach(a => {
-                            if (typeof c.attr[a] != "undefined") { 
+                            if (typeof c.attr[a] != "undefined") {
                                 if (a == "ALTERNATE CODE(S)" || a == "PREVIOUS CODE") {
                                     let str = []
                                     c.attr[a].split(", ").forEach(ac => {
@@ -111,10 +117,6 @@ Object.keys(xcourses).forEach(courseKey => {
 
             if (!lessonKey.startsWith("_") && Object.keys(examJSONkeys).includes(lessonKey.split(" - ")[0])) {
                 xcourses[courseKey][semKey][lessonKey]["exam"] = examJSON[examJSONkeys[lessonKey.split(" - ")[0]]]
-            }
-
-            if (typeof xinsems[lessonKey.split(" ")[0] + lessonKey.split(" ")[1]] != "undefined") {
-                xcourses[courseKey][semKey][lessonKey]["insem"] = xinsems[lessonKey.split(" ")[0] + lessonKey.split(" ")[1]]
             }
 
             lesson = xcourses[courseKey][semKey][lessonKey]
@@ -191,11 +193,12 @@ Object.keys(xpeoples).forEach(people => {
     if (Object.keys(xpeoples[people]).length === 0) delete xpeoples[people]
 })
 
-post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peoples: xpeoples, rooms: xrooms, sems: xsems, courseids: xcourseids })).then(r => r.json()).then(r => {
+post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peoples: xpeoples, rooms: xrooms, sems: xsems, courseids: xcourseids, insems: xinsems })).then(r => r.json()).then(r => {
 
     console.log('[courses_cache] early cacheing done, used ' + ((new Date()).getTime() - cctm.getTime()) + 'ms')
 
     if (true) {
+        let atm2 = (new Date())
         let cacheData = {}
 
         let timeArray = [], startT = 0, endT = 0
@@ -211,7 +214,8 @@ post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peopl
                 })
             }
         })
-        timeArray.sort(); startT = timeArray[0]; endT = timeArray[timeArray.length - 1] + 19 * 60 * 1000
+        timeArray.sort(); startT = timeArray[0]; endT = timeArray[timeArray.length - 1] + 19 * 60 * 1000; timeArray = [];
+        let timeU = startT; do { timeArray.push(timeU); timeU += 20 * 60 * 1000 } while (endT >= timeU);
 
         Object.keys(xdiffs).forEach(courseCode => {
             if (typeof cacheData[courseCode] != "undefined") {
@@ -228,26 +232,22 @@ post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peopl
                 xdiffs[courseCode] = []
                 //xdiffs[courseCode] = { lec: [], lab: [], tut: [], rsh: [], otr: [] }
 
-                let datasets = {}, db = data
-                Object.keys(db).forEach(key => {
-                    let keys = Object.keys(db[key])
+                let datasets = {}
+                Object.keys(data).forEach(key => {
+                    let keys = Object.keys(data[key])
                     keys.sort()
 
-                    let time = startT, value = db[key][keys[0]], keys_pos = -1, iter = -1, newDB = []
+                    let time = startT, value = data[key][keys[0]], keys_pos = -1, newDB = []
                     do {
-                        iter++
-                        time += 20 * 60 * 1000
-
-                        if (keys[keys_pos + 1] <= time + 20 * 60 * 1000) {
+                        if (keys[keys_pos + 1] < time + 20 * 60 * 1000) {
                             keys_pos++
-                            value = db[key][keys[keys_pos]]
+                            value = data[key][keys[keys_pos]]
                         } else {
                             value = null
                         }
-
                         newDB.push(value)
-
-                    } while (keys_pos < keys.length && endT > time)
+                        time += 20 * 60 * 1000
+                    } while (keys_pos < keys.length && endT >= time)
 
                     if (typeof datasets[lessonToType(key)] == "undefined") datasets[lessonToType(key)] = {}
                     datasets[lessonToType(key)][key] = newDB
@@ -298,7 +298,42 @@ post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peopl
         xdiffs["_times"] = timeArray
 
         post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ diffs: xdiffs })).then(r => r.json()).then(r => {
-            console.log('[courses_cache] cacheing done, used ' + ((new Date()).getTime() - cctm.getTime()) + 'ms')
+            console.log('[courses_cache] cacheing diff done, used ' + ((new Date()).getTime() - atm2.getTime()) + 'ms')
+        })
+    }
+
+    if (firstBoot) {
+        let atm1 = (new Date())
+        let kcourseids = Object.keys(xcourseids).sort().reverse()
+        kcourseids.forEach(courseid => {
+            let xcourseName = ""
+            for (const fullCourseName of Object.keys(xcourses[courseid.substring(0, 4)][xcourseids[courseid].SEM])) {
+                if (fullCourseName.startsWith(courseid.substring(0, 4) + " " + courseid.substring(4) + " - ")) {
+                    xcourseName = fullCourseName
+                    break
+                }
+            }
+            let rx = JSON.parse(JSON.stringify(xcourses[courseid.substring(0, 4)][xcourseids[courseid].SEM][xcourseName])), condiA = false, condiB = false
+            kcourseids.forEach(xcourseid => {
+                ["PRE-REQUISITE", "EXCLUSION"].forEach(a => {
+                    if (typeof rx.attr[a] != "undefined") {
+                        condiA = rx.attr[a].includes(xcourseid.substring(0, 4) + " " + xcourseid.substring(4))
+                        //TODO: think about how to handle cases like ( exclude CORE1403 -> exclude CORE1403A & CORE1403S & CORE1403I ) with current looping approach
+                        //current bug: ( exclude CORE1403I will be treated as exclude CORE1403A & CORE1403S & CORE1403I when CORE1403 does not exist )
+                        //condiB = (condiA) ? true : (!kcourseids.includes(xcourseid.substring(0, 8)) && rx.attr[a].includes(xcourseid.substring(0, 4) + " " + xcourseid.substring(4, 8)))
+                        if (condiA || condiB) {
+                            if (typeof xextraattr[xcourseid] === "undefined") xextraattr[xcourseid] = {}
+                            if (typeof xextraattr[xcourseid]["" + a + "-BY"] === "undefined") xextraattr[xcourseid]["" + a + "-BY"] = []
+                            xextraattr[xcourseid]["" + a + "-BY"].push(courseid.substring(0, 4) + " " + courseid.substring(4))
+                            if (condiA) rx.attr[a] = rx.attr[a].replaceAll(xcourseid, " . ")
+                        }
+                    }
+                })
+            })
+        })
+
+        post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ extraattr: xextraattr })).then(r => r.json()).then(r => {
+            console.log('[courses_cache] cacheing extraattr done, used ' + ((new Date()).getTime() - atm1.getTime()) + 'ms')
         })
     }
 

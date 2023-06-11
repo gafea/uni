@@ -17,7 +17,7 @@ function renderTopBar(title = ' ', subtitle = '', buttonHTML = '', showSearch 
             </b>
         </b>
     </div></div>
-    ` + ((!!buttonHTML) ? `<div class="flx dwhda">` + buttonHTML + `</div>` : '') + ((showSearch) ? `
+    ` + ((buttonHTML) ? (`<div class="flx dwhda">` + buttonHTML + `</div>` + ((showSearch) ? `<style>@media (max-width: 520px) {#btn_back{width:45.6px}}</style>` : "")) : '') + ((showSearch) ? `
     <div class="pgsbtn flx no_print">
     <label for="search_box" id="topbtn_search" class="dwhdab" title="Search box">
         <img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false">
@@ -150,7 +150,9 @@ function renderBottomBarUserInfo() {
     if (typeof bottomBarUserInfo === "string") {
         fetch('/!acc/name', {}).then(r => r.json()).then(r => {bottomBarUserInfo = r; renderBottomBarUserInfo()}).catch(e => console.log(e))
     } else {
-        if (bottomBarUserInfo.status != 200) {
+        if (bottomBarUserInfo.status >= 500) {
+            document.getElementById("ckusrinfo").innerHTML = `<p2>:( server error</p2><br><br>`
+        } else if (bottomBarUserInfo.status != 200) {
             if (bottomBarUserInfo.cTokenOnly) { refresh_cToken() }
             document.getElementById("ckusrinfo").innerHTML = `<a href="https://me.gafea.net" target="_blank" tabindex="0"><button>sign in</button></a><br><br><br>`
         } else {
