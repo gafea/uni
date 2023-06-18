@@ -3,6 +3,7 @@ var script1 = document.createElement('script'); script1.src = '/!acc/uniplus.js'
 const bottombarbuttons = [
     'Me,/me/,me,' + resourceNETpath + 'image/me.png,1',
     'Browse,/course/,course,' + resourceNETpath + 'image/browse.png,2',
+    'Planning,/plan/,plan,' + resourceNETpath + 'image/nullicon.png,4',
     'Search,/search/,search,' + resourceNETpath + 'image/search.png,3',
     'About,/about/,about,' + resourceNETpath + 'image/info.png,0'
 ]
@@ -14,13 +15,19 @@ function bootID_mapper(path = "") {
         return 0
     } else if (path.toLowerCase().startsWith("/me/")) {
         return 1
-    } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/")) {
+    } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/group/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/")) {
         return 2
     } else if (path.toLowerCase().startsWith("/search/")) {
         return 3
+    } else if (path.toLowerCase().startsWith("/plan/")) {
+        return 4
     } else {
         return -1
     }
+}
+
+function signout_reboot_customScript() {
+    try { config = {} } catch (error) { }
 }
 
 function getPageHTML_404() {
@@ -28,6 +35,12 @@ function getPageHTML_404() {
 }
 
 document.body.style.overflowY = "scroll" //make scrollbar always visible
+
+let disableSigninRequirement = true, scrollIntoView = false, doNotCheckUGPG = false, room_show_textbox = false
+let studprog = "ug", listMode = "card", config = {}
+let allSems = [], allSemsF = [], deptx = "ACCT"
+let rooms = [], roomx = "LTA"
+let peoples = [], default_people = "CHAN, Ki Cecia", peoplex = default_people
 
 var prev_call = 'none'
 function init(path) {
@@ -40,16 +53,9 @@ function init(path) {
             return `<meta http-equiv="refresh" content="0;URL=/course/">`
 
         } else if (path.toLowerCase().startsWith("/me/")) { //me page
-            return `
-            <div class="edge2edge_page">
-                <h3>Courses Enrolled</h3>
-            </div>
-            <div id="my_courses">
-                
-            </div>
-            ` + renderBottomBar('me')
+            return `<div id="me_wrp"></div>` + renderBottomBar('me')
 
-        } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/")) { //course + people + room
+        } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/group/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/")) { //course + people + room
 
             return `<div id="courses_select_wrp">
                 <div class="edge2edge flxb" id="courses_select_main" style="transition-timing-function:cubic-bezier(.65,.05,.36,1);transition-duration:0.6s">
@@ -61,7 +67,7 @@ function init(path) {
                                 <button onclick="roomx='LTA';boot('/room/', false, 2)">room</button>
                             </div>
                             <div id="courses_select_left_top"></div>
-                            <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
+                            <div class="flx" style="justify-content:center;gap:0.5em;margin:0.5em 0;border-top:0.15em dotted rgba(128,128,128,.2);padding-top:0.75em" id="courses_select_left_optionBox"></div>
                         </div>
                     </div>
                     <div class="LR_Right" id="courses_select_right"></div>
@@ -73,7 +79,8 @@ function init(path) {
             return `<div id="courses_select_wrp">
                 <div class="edge2edge flxb" id="courses_select_main" style="transition-timing-function:cubic-bezier(.65,.05,.36,1);transition-duration:0.6s">
                     <div class="LR_Left" id="courses_select_left">
-                        <div class="LR_Left_Content"><br>
+                        <div class="LR_Left_Content">
+                            <br>
                             <div id="courses_select_left_top"></div>
                             <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
                         </div>
@@ -82,8 +89,23 @@ function init(path) {
                 </div>
             </div>` + renderBottomBar('search')
 
+        } else if (path.toLowerCase().startsWith("/plan/")) { //plan
+
+            return `<div id="courses_select_wrp">
+                <div class="edge2edge flxb" id="courses_select_main" style="transition-timing-function:cubic-bezier(.65,.05,.36,1);transition-duration:0.6s">
+                    <div class="LR_Left" id="courses_select_left">
+                        <div class="LR_Left_Content">
+                            <br>
+                            <div id="courses_select_left_top"></div>
+                            <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
+                        </div>
+                    </div>
+                    <div class="LR_Right" id="courses_select_right">
+                    </div>
+                </div>
+            </div>` + renderBottomBar('plan')
+
         } else if (path.toLowerCase().startsWith("/about/")) { //about page
-            wasInsideCoursePage = false
             return `<div id="about"><div class="edge2edge_page">
             
             <h2>About</h2>
@@ -97,7 +119,10 @@ function init(path) {
 
             <br><br><h3>Licenses</h3>
             <div class="box">
-                <h4>Chart.js</h4>
+                <div class="flx" style="justify-content: start; gap: 0.5em; align-items: baseline">
+                    <h4>Chart.js</h4>
+                    <p2><a href="https://github.com/chartjs/Chart.js" class="aobh" target="_blank">GitHub</a></p2>
+                </div>
                 <p3>
                     The MIT License (MIT)
                 <br><br>
@@ -111,11 +136,31 @@ function init(path) {
                 </p3>
             </div>
             <div class="box">
-                <h4>chartjs-plugin-annotation.js</h4>
+                <div class="flx" style="justify-content: start; gap: 0.5em; align-items: baseline">
+                    <h4>chartjs-plugin-annotation.js</h4>
+                    <p2><a href="https://github.com/chartjs/chartjs-plugin-annotation" class="aobh" target="_blank">GitHub</a></p2>
+                </div>
                 <p3>
                     The MIT License (MIT)
                 <br><br>
                     Copyright (c) 2016-2021 chartjs-plugin-annotation Contributors
+                <br><br>
+                    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+                <br><br>
+                    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+                <br><br>
+                    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+                </p3>
+            </div>
+            <div class="box">
+                <div class="flx" style="justify-content: start; gap: 0.5em; align-items: baseline">
+                    <h4>Chart.js Graphs</h4>
+                    <p2><a href="https://github.com/sgratzl/chartjs-chart-graph" class="aobh" target="_blank">GitHub</a></p2>
+                </div>
+                <p3>
+                    The MIT License (MIT)
+                <br><br>
+                    Copyright (c) 2019-2022 Samuel Gratzl
                 <br><br>
                     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
                 <br><br>
@@ -144,15 +189,12 @@ function init(path) {
 
 }
 
-var rooms = []
-var peoples = []
-
 function exe(path) {
 
     if (path === 'cleanup') { return }
 
-    if (path.toLowerCase().startsWith("/course/")) {
-        exe_courses(path.substring(8))
+    if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/group/")) {
+        exe_courses(path)
     } else if (path.toLowerCase().startsWith("/people/")) {
         document.getElementById('courses_select_main').classList.add('edge2edge_wide')
         html = document.getElementById("courses_select_right")
@@ -184,10 +226,12 @@ function exe(path) {
             exe_room(path.substring(6))
         }
     } else if (path.toLowerCase().startsWith("/me/")) {
-        update_accConfig("", "", () => exe_me())
+        update_config("", "", () => exe_me(path.substring(4)))
     } else if (path.toLowerCase().startsWith("/search/")) {
         document.getElementById('courses_select_main').classList.remove('edge2edge_wide')
         exe_search()
+    } else if (path.toLowerCase().startsWith("/plan/")) {
+        exe_plan(path.substring(6))
     } else if (path.toLowerCase().startsWith("/about/")) {
         exe_about()
     } else if (false && path.startsWith('/!') && !(path === '/!404' || path.startsWith('/!404/'))) {
@@ -210,6 +254,7 @@ const exe_people = (path) => wait_allSems(render_people, path, "Instructors - un
 const exe_room = (path) => wait_allSems(render_room, path, "Rooms - uni")
 const exe_me = (path) => wait_allSems(render_me, path, "Me - uni")
 const exe_search = (path) => wait_allSems(render_search, path, "Search - uni")
+const exe_plan = (path) => wait_allSems(render_plan, path, "Planning - uni")
 
 function courseStringToParts(course) {
     let dept = course.split(" ")[0]
@@ -241,6 +286,7 @@ function render_search(path) {
 
     document.title = "🔍 " + query + " - uni"
     document.getElementById("search_dw_box").value = query
+    document.getElementById("search_dw_box").blur()
     document.getElementById("search_result").innerHTML = `<br><div class="flx" style="justify-content:center;gap:0.5em;text-align:center"><div id="d_loading"></div><p2><b>Loading...</b></p2></div>`
 
     let tmark = (new Date()).getTime()
@@ -306,81 +352,283 @@ function render_search(path) {
     })
 }
 
-function render_me() {
-    document.title = "Me - uni"
+function render_plan(path) {
+    document.getElementById("courses_select_left_top").innerHTML = "<h2>Planning</h2>"
+    document.getElementById("courses_select_left_optionBox").innerHTML = "coming soon!"
+    document.getElementById("courses_select_right").innerHTML = `<div class="box" style="aspect-ratio:2.25"><canvas id="canvas"></canvas></div>`
 
-    let my_courses = document.getElementById("my_courses")
-    if (signinlevel <= 0) {
-        my_courses.innerHTML = `<div class="edge2edge"><p2>Please sign in first!</p2></div>`
-        return
-    }
-    let htmld = "", total_cred = 0, total_passed_cred = 0, total_gpacred = 0, total_grade_points = 0
-    if (typeof accConfig.courses === "undefined" || Object.keys(accConfig.courses).length === 0) {
-        htmld = `<div class="edge2edge"><p2>No courses found!</p2></div>`
-    } else {
-        let semsdb = {}
-
-        Object.keys(accConfig.courses).forEach(course => {
-            Object.keys(accConfig.courses[course]).forEach(sem => {
-                if (typeof semsdb[sem] === "undefined") semsdb[sem] = {}
-                semsdb[sem][course] = accConfig.courses[course][sem]
-            })
-        })
-
-        Object.keys(semsdb).sort().reverse().forEach(sem => {
-            let mhtmld = "", gpacred = 0, total_term_cred = 0, termcredload = 0, gpasum = 0, haveunfilled = false
-            Object.keys(semsdb[sem]).forEach(course => {
-                let cred = parseInt(semsdb[sem][course].units)
-                let actualcred = cred
-                if (typeof semsdb[sem][course].actual_cred != "undefined") actualcred = parseInt(semsdb[sem][course].actual_cred)
-                mhtmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course == "COMP 3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.replace(" ", "") + `.png`)) + `)" id="` + course.replace(" ", "") + `" class="course_sel selbox picbox" onclick="boot('/course/` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title=""><div class="picbox_inner flx">
-                    <div class="picbox_inner_up flx" style="width:calc(100% - 1.6em)">
-                        ` + ( (semsdb[sem][course].grade === "----") ? (`<style>#` + course.replace(" ", "") + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">`) : (`<h5 class="textbox">`)) + `
-                        ` + semsdb[sem][course].grade + `</h5>
-                        <h5 style="opacity:0.85">` + ((actualcred != cred) ? ("" + actualcred + " of ") : "") + semsdb[sem][course].units + ` unit` + ((semsdb[sem][course].units === "1") ? '' : 's') + `</h5>
-                    </div><div><h4>` + course + `</h4><h5>` + semsdb[sem][course].name + `</h5></div></div></div>`
-                total_term_cred += actualcred
-                total_cred += actualcred
-                termcredload += actualcred
-                if (semsdb[sem][course].grade === "----") {
-                    haveunfilled = true
-                    return
-                };
-                ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"].forEach((grade, index) => {
-                    if (semsdb[sem][course].grade === grade) {
-                        gpacred += cred
-                        total_gpacred += cred
-                        if (grade != "F") total_passed_cred += cred
-                        gpasum += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
-                        total_grade_points += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
-                    }
-                })
-                if (["P", "T", "CR", "DI", "DN", "PA", "PS"].includes(semsdb[sem][course].grade)) {
-                    total_passed_cred += cred
-                    if (semsdb[sem][course].grade === "T") termcredload -= actualcred
+    let colors = ["red", "green", "green", "green", "green", "green", "grey", "red", "green", "red", "green", "green", "green", "red", "red", "grey", "grey", "green"]
+    const chart = new Chart(document.getElementById('canvas').getContext('2d'), {
+        type: 'tree',
+        data: {
+            labels: ["Start", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q"],
+            datasets: [
+                {
+                    pointBackgroundColor: colors,
+                    pointBorderColor: colors,
+                    edgeLineBorderColor: colors.slice(1),
+                    edgeLineBorderWidth: [1, 1, 1, 1, 1, 0.25, 3, 1, 3, 1, 1, 1, 3, 3, 0.25, 0.25, 1],
+                    pointRadius: [9, 6, 6, 6, 6, 6, 7, 9, 6, 9, 6, 6, 6, 9, 9, 7, 7, 6],
+                    pointStyle: ["rectRounded", "circle", "circle", "circle", "circle", "circle", "crossRot", "rectRounded", "circle", "rectRounded", "circle", "circle", "circle", "rectRounded", "rectRounded", "crossRot", "crossRot", "circle"],
+                    pointHoverRadius: 10,
+                    data: [
+                        { name: "Start", },
+                        { name: "A", parent: 0 },
+                        { name: "B", parent: 1 },
+                        { name: "C", parent: 1 },
+                        { name: "D", parent: 0 },
+                        { name: "E", parent: 4 },
+                        { name: "F", parent: 4 },
+                        { name: "G", parent: 0 },
+                        { name: "H", parent: 7 },
+                        { name: "I", parent: 7 },
+                        { name: "J", parent: 2 },
+                        { name: "K", parent: 2 },
+                        { name: "L", parent: 2 },
+                        { name: "M", parent: 9 },
+                        { name: "N", parent: 9 },
+                        { name: "O", parent: 6 },
+                        { name: "P", parent: 6 },
+                        { name: "Q", parent: 9 },
+                    ]
+                },
+            ],
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
                 }
-                if (["AU", "W"].includes(semsdb[sem][course].grade)) {
-                    total_term_cred -= actualcred
-                    total_cred -= actualcred
-                    if (semsdb[sem][course].grade === "W") termcredload -= actualcred
-                }
-            })
-            htmld += `<div class="edge2edge"><div class="flx"><h3>` + ustTimeToString(sem) + `</h3><h5>` + ((gpacred) ? (`TGA <span class="textbox"` + (haveunfilled ? ` title="There are courses missing grade information">⌛ ` : ">") + (gpasum / gpacred).toFixed(3) + `</span> `) : "") + ((termcredload != total_term_cred) ? (`Actual Credit Load <span class="textbox" title="The actual credit load after deducting transferred credits">` + termcredload + `</span> `) : "") + `Credits <span class="textbox">` + total_term_cred + `</span></h5></div><div class="flx">` + mhtmld + `</div></div>`
-        })
-    }
-    my_courses.innerHTML = `<div class="edge2edge"><div class="flx"><h3> </h3><h5>CGA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span> Passed Credits <span class="textbox">` + total_passed_cred + `</span> Total Credits <span class="textbox">` + total_cred + `</span></h5></div><br><hr></div>` + htmld
+            }
+        }
+    })
 }
 
-var studprog = "ug"
-var listMode = "card"
+function render_me(path) {
+    document.title = "Me - uni"
+    if (signinlevel <= 0) {
+        me_wrp.innerHTML = `<div class="edge2edge_page"><p2>Please sign in first!<br><br>...or continue with a <button onclick="signinlevel = 0.1; reboot()">Guest Profile</button>, this temporary profile will be wiped when you close or refresh your browser, and is not migratable when you sign in later</p2></div>`
+        return
+    }
 
-var accConfig = {}
+    let paths = path.split("/")
+    switch (paths[0]) {
+        case "":
+            me_wrp.innerHTML = `<div class="edge2edge_page" style="padding-bottom:0">
+            <button onclick="boot('/me/', false, 1)">home</button>
+            <button onclick="boot('/me/course/', false, 1)">my courses</button>
+            <button onclick="boot('/me/profile/', false, 1)">my profile</button>
+            </div>
 
-function update_accConfig(newKey = "", newVal = "", cb = (err) => { }) {
+            <div class="edge2edge_page">
+                <h3>Home</h3><br>
+                ` + ((signinlevel < 1) ? `<div class="box">[!] You are using a Guest Profile, this temporary profile will be wiped when you close or refresh your browser, and is not migratable when you sign in later<br><br>
+                    <button onclick="config = {}; signinlevel = 0; reboot(); setTimeout(() => alert('Guest Profile Deleted'), 1)">delete this profile now</button></div><br>` : "") + `
+                <p2>Coming soon!</p2>
+            </div>`
+            break
+
+        case "profile":
+            document.title = "My Profile - uni"
+            me_wrp.innerHTML = `<div class="edge2edge_page" style="padding-bottom:0">
+            <button onclick="boot('/me/', false, 1)">home</button>
+            <button onclick="boot('/me/course/', false, 1)">my courses</button>
+            <button onclick="boot('/me/profile/', false, 1)">my profile</button>
+            </div>
+
+            <div class="edge2edge_page">
+            <h3>My Profile</h3><br>
+
+            <div class="box">
+                <h4>Current Studies</h4><br>
+                <div id="me_profile_currentStudies"></div>
+            </div>
+
+            <div class="box">
+                <h4>Special Approvals</h4><br>
+                <div id="me_profile_specialApproval"></div>
+            </div>
+
+            <div class="box">
+                <h4>Past Qualifications</h4><br>
+                <div id="me_profile_pastQuali"></div>
+            </div>
+
+            </div>`
+
+            let htmlp = ""
+            let currentStudiesHTML = document.getElementById("me_profile_currentStudies")
+            let pastQualiHTML = document.getElementById("me_profile_pastQuali")
+            let specialApprovalHTML = document.getElementById("me_profile_specialApproval")
+
+            let configTemp = JSON.parse(JSON.stringify(config))
+            if (typeof configTemp.profile === "undefined") configTemp.profile = { currentStudies: {}, pastQuali: {}, specialApproval: {} }
+            if (typeof configTemp.profile.currentStudies === "undefined") configTemp.profile.currentStudies = {}
+            if (typeof configTemp.profile.pastQuali === "undefined") configTemp.profile.pastQuali = {}
+            if (typeof configTemp.profile.specialApproval === "undefined") configTemp.profile.specialApproval = {}
+
+            htmlp += `<div><p2>
+            Study Program: 
+            <select id="me_profile_currentStudies_studyProgram" name="me_profile_currentStudies_studyProgram" onchange="updateProfile('currentStudies', 'studyProgram', document.getElementById('me_profile_currentStudies_studyProgram').value)">
+                <option disabled value="" ` + ((typeof configTemp.profile.currentStudies.studyProgram === "undefined" || !(configTemp.profile.currentStudies.studyProgram === "UG" || configTemp.profile.currentStudies.studyProgram === "PG")) ? "selected" : "hidden") + `>----</option>
+                <option value="UG"` + ((typeof configTemp.profile.currentStudies.studyProgram != "undefined" && configTemp.profile.currentStudies.studyProgram === "UG") ? " selected" : "") + `>Undergraduate</option>
+                <option value="PG"` + ((typeof configTemp.profile.currentStudies.studyProgram != "undefined" && configTemp.profile.currentStudies.studyProgram === "PG") ? " selected" : "") + `>Postgraduate</option>
+            </select>
+            <br>
+            Year of Intake: 
+            <select id="me_profile_currentStudies_yearOfIntake" name="me_profile_currentStudies_yearOfIntake" onchange="updateProfile('currentStudies', 'yearOfIntake', document.getElementById('me_profile_currentStudies_yearOfIntake').value)">
+                ` + generate_year_of_intake_select((typeof configTemp.profile.currentStudies.yearOfIntake === "undefined") ? "" : configTemp.profile.currentStudies.yearOfIntake) + `
+            </select>
+            </p2></div>`
+            currentStudiesHTML.innerHTML = htmlp
+            htmlp = ""
+
+            pastQualiHTML.innerHTML = `<div><p2>
+            HKDSE<br>
+            HKALE<br>
+            HKASLE<br>
+            HKCEE<br>
+            <br>
+            IELTS<br>
+            GCE-A<br>
+            JEE<br>
+            </p2></div>`
+
+            specialApprovalHTML.innerHTML = `<div><p2>
+            Requisites Waiver<br>
+            Cross-career (UG/PG) Enrollment<br>
+            Instructor's Consent<br>
+            Credit Overload<br>
+            <br>
+            [RR-8]/[RR-8a] Application for Leave from Study (UG)/(PG)<br>
+            [RR-31] Application for Extension of Study (UG)<br>
+            [GR-23] Application for Deviation from Curriculum (UG)<br>
+            <!-- [GR-27] Application for Course Substitution / Deviation from Curriculum (PG)<br> -->
+            </p2></div>`
+
+            break
+
+        case "course":
+            document.title = "My Courses - uni"
+            me_wrp.innerHTML = `<div class="edge2edge_page" style="padding-bottom:0">
+            <button onclick="boot('/me/', false, 1)">home</button>
+            <button onclick="boot('/me/course/', false, 1)">my courses</button>
+            <button onclick="boot('/me/profile/', false, 1)">my profile</button>
+            </div>
+            
+            <div id="my_courses"></div>`
+            let my_courses = document.getElementById("my_courses")
+
+            let htmld = "", total_cred = 0, total_passed_cred = 0, total_gpacred = 0, total_grade_points = 0
+            if (typeof config.courses === "undefined" || Object.keys(config.courses).length === 0) {
+                htmld = `<div class="edge2edge_page" style="padding-top:0"><p2>No courses found!</p2></div>`
+            } else {
+                let semsdb = {}
+
+                Object.keys(config.courses).forEach(course => {
+                    Object.keys(config.courses[course]).forEach(sem => {
+                        if (typeof semsdb[sem] === "undefined") semsdb[sem] = {}
+                        semsdb[sem][course] = config.courses[course][sem]
+                    })
+                })
+
+                Object.keys(semsdb).sort().reverse().forEach(sem => {
+                    let mhtmld = "", gpacred = 0, total_term_cred = 0, termcredload = 0, gpasum = 0, haveunfilled = false
+                    Object.keys(semsdb[sem]).forEach(course => {
+                        let cred = parseInt(semsdb[sem][course].units)
+                        let actualcred = cred
+                        if (typeof semsdb[sem][course].actual_cred != "undefined") actualcred = parseInt(semsdb[sem][course].actual_cred)
+                        mhtmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course == "COMP 3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.replace(" ", "") + `.png`)) + `)" id="` + course.replace(" ", "") + `" class="course_sel selbox picbox" onclick="boot('/course/` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title=""><div class="picbox_inner flx">
+                        <div class="picbox_inner_up flx" style="width:calc(100% - 1.6em)">
+                            ` + ((semsdb[sem][course].grade === "----") ? (`<style>#` + course.replace(" ", "") + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">`) : (`<h5 class="textbox">`)) + `
+                            ` + semsdb[sem][course].grade + `</h5>
+                            <h5 style="opacity:0.85">` + ((actualcred != cred) ? ("" + actualcred + " of ") : "") + semsdb[sem][course].units + ` unit` + ((semsdb[sem][course].units === "1") ? '' : 's') + `</h5>
+                        </div><div><h4>` + course + `</h4><h5>` + semsdb[sem][course].name + `</h5></div></div></div>`
+                        total_term_cred += actualcred
+                        total_cred += actualcred
+                        termcredload += actualcred
+                        if (semsdb[sem][course].grade === "----") {
+                            haveunfilled = true
+                            return
+                        };
+                        ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"].forEach((grade, index) => {
+                            if (semsdb[sem][course].grade === grade) {
+                                gpacred += cred
+                                total_gpacred += cred
+                                if (grade != "F") total_passed_cred += cred
+                                gpasum += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
+                                total_grade_points += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
+                            }
+                        })
+                        if (["P", "T", "CR", "DI", "DN", "PA", "PS"].includes(semsdb[sem][course].grade)) {
+                            total_passed_cred += cred
+                            if (semsdb[sem][course].grade === "T") termcredload -= actualcred
+                        }
+                        if (["AU", "W"].includes(semsdb[sem][course].grade)) {
+                            total_term_cred -= actualcred
+                            total_cred -= actualcred
+                            if (semsdb[sem][course].grade === "W") termcredload -= actualcred
+                        }
+                    })
+                    htmld += `<div class="edge2edge_page" style="padding-top:0"><div class="flx"><h3>` + ustTimeToString(sem) + `</h3><h5>` + ((gpacred) ? (`TGA <span class="textbox"` + (haveunfilled ? ` title="There are courses missing grade information">⌛ ` : ">") + (gpasum / gpacred).toFixed(3) + `</span> `) : "") + ((termcredload != total_term_cred) ? (`Actual Credit Load <span class="textbox" title="The actual credit load after deducting transferred credits">` + termcredload + `</span> `) : "") + `Credits <span class="textbox">` + total_term_cred + `</span></h5></div><div class="flx">` + mhtmld + `</div></div>`
+                })
+            }
+            my_courses.innerHTML = `<div class="edge2edge_page"><div class="flx" style="align-items:end"><div><h3>My Courses</h3><br>add course</div><h5>` + ((total_gpacred) ? (`CGA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span> `) : "") + `Passed Credits <span class="textbox">` + total_passed_cred + `</span> Total Credits <span class="textbox">` + total_cred + `</span></h5></div><br><hr></div>` + htmld
+            break
+    }
+}
+
+function generate_year_of_intake_select(selection = "") {
+    let years = []
+    for (let y = (new Date().getFullYear()); y > (new Date().getFullYear()) - 7; y--) {
+        years.push("" + y + "-" + (y + 1 - 2000))
+    }
+
+    if (!selection) {
+        years = ["----", ...years]
+    } else if (!years.includes(selection)) {
+        years.push(selection)
+    }
+
+    let htmly = ""
+    years.forEach(year => {
+        if (year === "----") {
+            htmly += `<option value="" selected disabled>` + year + `</option>`
+        } else {
+            htmly += `<option value="` + year + `"` + ((year === selection) ? " selected" : "") + `>` + year + `</option>`
+        }
+    })
+
+    return htmly
+}
+
+function updateProfile(category, target, value) {
+    let configTemp = JSON.parse(JSON.stringify(config))
+    if (typeof configTemp.profile === "undefined") configTemp.profile = {}
+    if (typeof configTemp.profile[category] === "undefined") configTemp.profile[category] = {}
+    configTemp.profile[category][target] = value
+    update_config("profile", configTemp.profile, (err) => {
+        if (err) { alert(err); console.log(err); return }
+        alert("Profile updated!")
+    })
+}
+
+function update_config(newKey = "", newVal = "", cb = (err) => { }) {
+    if (signinlevel <= 0) {
+        cb("not-signed-in")
+        return
+    }
+    if (signinlevel < 1) {
+        if (newKey) config[newKey] = newVal
+        apply_config()
+        cb()
+        return
+    }
     if (!newKey && !newVal) {
         fetch("/!acc/config/").then(r => r.json()).then(r => {
             if (r.status === 200) {
-                accConfig = r.resp
+                config = r.resp
                 apply_config()
             }
             cb()
@@ -389,11 +637,9 @@ function update_accConfig(newKey = "", newVal = "", cb = (err) => { }) {
             cb(err)
         })
     } else {
-        let newKeyVal = {}
-        newKeyVal[newKey] = newVal
-        post("/!acc/config/", newKeyVal).then(r => r.json()).then(r => {
+        post("/!acc/config/", { [newKey]: newVal }).then(r => r.json()).then(r => {
             if (r.status === 200) {
-                accConfig = r.resp
+                config = r.resp
                 apply_config()
             }
             cb()
@@ -405,17 +651,13 @@ function update_accConfig(newKey = "", newVal = "", cb = (err) => { }) {
 }
 
 function apply_config() {
-    if (typeof accConfig.studprog != "undefined") {
-        studprog = accConfig.studprog
+    if (typeof config.studprog != "undefined") {
+        studprog = config.studprog
     }
-    if (typeof accConfig.listMode != "undefined") {
-        listMode = accConfig.listMode
+    if (typeof config.listMode != "undefined") {
+        listMode = config.listMode
     }
 }
-
-var allSems = []
-var allSemsF = []
-var deptx = "ACCT"
 
 function wait_allSems(cb, path, title) {
 
@@ -438,7 +680,7 @@ function wait_allSems(cb, path, title) {
 
         fetch("/!acc/config/").then(r => r.json()).then(r => {
             if (r.status === 200) {
-                accConfig = r.resp
+                config = r.resp
             }
             cb(path)
         }).catch(error => {
@@ -474,16 +716,12 @@ function filterFunction(hideListIfEmpty = false) {
     }
 }
 
-let alwaysExecSetLoadingStatusImmediately = false
-let chartx = ''
-let wasInsideCoursePage = false
-
 function generate_grade_selection(selection = "----", possibleGrades = []) {
     selection = selection.toUpperCase()
     function loop(grades, selection) {
         let t = ""
         grades.forEach(grade => {
-            t += `<option value="` + grade + `"` + (grade === selection ? " selected" : "") + `>` + grade + `</option>`
+            t += `<option value="` + grade + `"` + (grade === selection ? " selected" : "") + `>` + (grade === "----" ? "---- (TBA)" : grade) + `</option>`
         })
         return t
     }
@@ -495,13 +733,13 @@ function submitCourseUpdate(remove = false) {
     document.getElementById('course_update_dialog').close()
     setLoadingStatus('show')
     const formData = formToJson(new FormData(document.getElementById("course_update_dialog_form")))
-    let newConfig = JSON.parse(JSON.stringify(accConfig))
+    let newConfig = JSON.parse(JSON.stringify(config))
     let btn = document.getElementById("course_enroll_btn")
 
     if (remove) {
         delete newConfig.courses[formData.code][formData.sem]
         if (Object.keys(newConfig.courses[formData.code]).length === 0) delete newConfig.courses[formData.code]
-        update_accConfig("courses", newConfig.courses, (err) => {
+        update_config("courses", newConfig.courses, (err) => {
             if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); return }
             setLoadingStatus('success', false)
             update_enroll_course_gui(formData.currentsem, formData.code)
@@ -517,7 +755,7 @@ function submitCourseUpdate(remove = false) {
     newConfig.courses[formData.code][formData.sem] = { grade: formData.grade, units: formData.units, name: formData.name, actual_cred: formData.actual_cred }
     newConfig.courses[formData.code][formData.sem].is_SPO = (!!(typeof formData.is_SPO !== "undefined" && formData.is_SPO))
 
-    update_accConfig("courses", newConfig.courses, (err) => {
+    update_config("courses", newConfig.courses, (err) => {
         if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); return }
         setLoadingStatus('success', false)
         update_enroll_course_gui(formData.currentsem, formData.code)
@@ -527,7 +765,7 @@ function submitCourseUpdate(remove = false) {
 
 function update_enroll_course_gui(sem, code) {
     let btn = document.getElementById("course_enroll_btn")
-    let newConfig = JSON.parse(JSON.stringify(accConfig))
+    let newConfig = JSON.parse(JSON.stringify(config))
     if (typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).includes(sem)) {
         btn.innerText = "✅ Enrolled (grade: " + newConfig.courses[code][sem].grade + ")"
         document.getElementById("course_enroll_notice").innerHTML = ""
@@ -545,7 +783,7 @@ function enroll_course(sem, course, make_switch = false, is_SPO = false, possibl
             alert("Please signin first!")
             return
         }
-        let newConfig = JSON.parse(JSON.stringify(accConfig))
+        let newConfig = JSON.parse(JSON.stringify(config))
         let courseParts = courseStringToParts(course)
         //console.log(courseParts)
         if (typeof newConfig.courses === "undefined") newConfig.courses = {}
@@ -592,8 +830,6 @@ function enroll_course(sem, course, make_switch = false, is_SPO = false, possibl
     }
 }
 
-let disableSigninRequirement = true;
-
 function render_courses_specific(path, insideCoursePage = false) {
     fetch("/!course/" + path).then(r => r.json()).then(r => {
         if (r.status != 200) { setLoadingStatus("error", false, "failed to contact server"); return }
@@ -601,15 +837,14 @@ function render_courses_specific(path, insideCoursePage = false) {
         let html_draft = ""
         let course = Object.keys(r.resp)[0]
 
-        wasInsideCoursePage = insideCoursePage
         if (insideCoursePage) {
             if (parseInt(course[5]) > 0 && parseInt(course[5]) < 5 && studprog != "ug") {
                 studprog = "ug"
-                render_courses(path)
+                render_courses(`/course/` + path)
                 return
             } else if (parseInt(course[5]) >= 5 && studprog != "pg") {
                 studprog = "pg"
-                render_courses(path)
+                render_courses(`/course/` + path)
                 return
             }
 
@@ -680,7 +915,10 @@ function render_courses_specific(path, insideCoursePage = false) {
                     <p4>Also offered in: </p4>
                     <div id="alsoOfferedIn">` + draft + `</div>
                 </div>
-                <a target="_blank" class="aobh" href="https://ust.space/review/` + course.split(" ")[0] + course.split(" ")[1] + `">try check ustspace</a>
+                <div>
+                    <a target="_blank" class="aobh" href="https://ust.space/review/` + course.split(" ")[0] + course.split(" ")[1] + `">try check ustspace</a>
+                    <a target="_blank" class="aobh" href="http://petergao.net/ustpastpaper/index.php?course=` + course.split(" ")[0] + course.split(" ")[1] + `">try check petergao</a>
+                </div>
             </div></div>`
 
         document.getElementById('topbar_buttons_wrp').innerHTML = `<div class="enroll_btn_wrp flx">
@@ -811,10 +1049,7 @@ function render_courses_specific(path, insideCoursePage = false) {
     })
 }
 
-let courseSpecificReturnURL = ''
-
-function render_courses_details(path, scrollIntoView = false) {
-    courseSpecificReturnURL = "/course/" + path.slice(0, path.lastIndexOf("/") + 1)
+function render_courses_details(path, scrollIntoView = false, isGroup = false) {
     html = document.getElementById("courses_detail_content")
     let withinCourseListPage = (path.split('/').length == 2 || (path.split('/').length == 3 && path.split('/')[2] == ""))
     let withinCourseDetailPage = false
@@ -825,7 +1060,7 @@ function render_courses_details(path, scrollIntoView = false) {
         return
     }
 
-    fetch("/!course/" + path).then(r => r.json()).then(r => {
+    fetch("/!" + (isGroup ? "group" : "course") + "/" + path).then(r => r.json()).then(r => {
         if (r.status != 200) { setLoadingStatus("error", false, "failed to contact server"); return }
 
         document.getElementById('topbar_buttons_wrp').innerHTML = ''
@@ -834,22 +1069,22 @@ function render_courses_details(path, scrollIntoView = false) {
         if (listMode === "card") {
             html_draft += `<p5><b><div class="ugpgbox flx">
                 <button id="cardbtn" style="background:rgba(64,160,255,.4);cursor:default" title="Card View">📇</button>
-                <button id="detailbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'detail'; accConfig['listMode'] = 'detail'; update_accConfig('listMode', 'detail'); scrollIntoView = true, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Detail View">🧾</button>
+                <button id="detailbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'detail'; config['listMode'] = 'detail'; update_config('listMode', 'detail'); scrollIntoView = true, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Detail View">🧾</button>
                 </div></b></p5></div></div><div class="flx" style="margin-top:0.5em">`
         } else {
             html_draft += `<p5><b><div class="ugpgbox flx">
-                <button id="cardbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'card'; accConfig['listMode'] = 'card'; update_accConfig('listMode', 'card'); scrollIntoView = true, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Card View">📇</button>
+                <button id="cardbtn" style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="listMode = 'card'; config['listMode'] = 'card'; update_config('listMode', 'card'); scrollIntoView = true, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Card View">📇</button>
                 <button id="detailbtn" style="background:rgba(64,160,255,.4);cursor:default" title="Detail View">🧾</button>
                 </div></b></p5></div></div>`
         }
         Object.keys(r.resp).forEach((course, ix) => {
             if ((studprog === "ug" && parseInt(course[5]) > 0 && parseInt(course[5]) < 5) || (studprog === "pg" && parseInt(course[5]) >= 5)) {
                 if (listMode === "card") {
-                    html_draft += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="boot('/course/` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + "\n\n" + r.resp[course].attr.DESCRIPTION.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
-                    <div class="picbox_inner_up` + ((typeof accConfig.courses != "undefined" && typeof accConfig.courses[course.split(" - ")[0]] != "undefined" && typeof accConfig.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (` flx" style="width:calc(100% - 1.6em)"><style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + accConfig.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : (`">`)) + `<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"]) + `</h5></div>
+                    html_draft += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="boot('/course/` + path.split('/')[0] + "/" + course.split(" ")[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + "\n\n" + r.resp[course].attr.DESCRIPTION.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
+                    <div class="picbox_inner_up` + ((typeof config.courses != "undefined" && typeof config.courses[course.split(" - ")[0]] != "undefined" && typeof config.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (` flx" style="width:calc(100% - 1.6em)"><style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + config.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : (`">`)) + `<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"]) + `</h5></div>
                     <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" (")) + `</h5></div></div></div>`
                 } else {
-                    html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + path.split('/')[1] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)"><div><div><h4>` + course + `</h4><p2 class="no_mobile">` + r.resp[course].attr.DESCRIPTION + `</p2></div>
+                    html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + course.split(" ")[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)"><div><div><h4>` + course + `</h4><p2 class="no_mobile">` + r.resp[course].attr.DESCRIPTION + `</p2></div>
                     <div class="no_mobile">` + renderCourseAttr(r.resp[course].attr, course) + `</div></div></div></div>`
                 }
             }
@@ -869,9 +1104,9 @@ function render_courses_details(path, scrollIntoView = false) {
         .topbar{z-index:9999!important}
         #btn_back{max-width: 0em; padding: 0em}
 
-        @media (min-width: 520px) {.topbar{border-radius: 1em 1em 0 0}}
+        @media (min-width: 581px) {.topbar{border-radius: 1em 1em 0 0}}
 
-        @media (min-width: 1280px) {
+        @media (min-width: 1281px) {
             #courses_detail_content{width:calc( 90vw - 29em ); max-width:100%}
             .topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}
         }
@@ -882,14 +1117,16 @@ function render_courses_details(path, scrollIntoView = false) {
     })
 }
 
-var scrollIntoView = false, doNotCheckUGPG = false
-function render_courses(path) {
+function render_courses(pathF) {
 
-    if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]),  `<div id="topbar_buttons_wrp"></div>`, true, "", true, `boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_box').value)), false, 3)`) + `
+    let isGroup = (pathF.toLowerCase().startsWith("/group/"))
+    let path = pathF.substring(isGroup ? 7 : 8)
+
+    if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]), `<div id="topbar_buttons_wrp"></div>`, true, "", true, `boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_box').value)), false, 3)`) + `
     <style>#btn_back, .topbar, #courses_select_main, #courses_select_left, #courses_select_right{transition-timing-function: cubic-bezier(.65,.05,.36,1);transition-duration: 0.5s !important}</style>
     <div id="course_detail_topbar_specialStyles">
         <style>
-            .topbar{z-index:9999!important} @media (min-width: 1280px) {.topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}}
+            .topbar{z-index:9999!important} @media (min-width: 1281px) {.topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}}
         </style>
     </div>
     <div id="courses_detail_content"></div>`
@@ -898,8 +1135,8 @@ function render_courses(path) {
     <div class="flx">
     <h2>Courses</h2>
     <p5><b><div class="ugpgbox flx">
-        <button id="ugbtn" onclick="studprog = 'ug'; accConfig['studprog'] = 'ug'; update_accConfig('studprog', 'ug'); scrollIntoView = false, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Undergraduate Courses">UG</button>
-        <button id="pgbtn" onclick="studprog = 'pg'; accConfig['studprog'] = 'pg'; update_accConfig('studprog', 'pg'); scrollIntoView = false, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Postgraduate Courses">PG</button>
+        <button id="ugbtn" onclick="studprog = 'ug'; config['studprog'] = 'ug'; update_config('studprog', 'ug'); scrollIntoView = false, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Undergraduate Courses">UG</button>
+        <button id="pgbtn" onclick="studprog = 'pg'; config['studprog'] = 'pg'; update_config('studprog', 'pg'); scrollIntoView = false, doNotCheckUGPG = true; boot(window.location.pathname, true, 2)" title="Postgraduate Courses">PG</button>
     </div></b></p5>
     </div>`
 
@@ -913,7 +1150,21 @@ function render_courses(path) {
 
     html = document.getElementById("courses_select_left_optionBox")
     let semx = ((ustTimeToString(decodeURI(path.split("/")[0])) != '----') ? decodeURI(path.split("/")[0]) : allSems[0])
-    let html_draft = `<select style="width:100%" name="timeid" id="timeid" title="Select Semester" onchange="boot('/course/' + document.getElementById('timeid').value + '/' + deptx + '/', false, 2)">`
+    let html_draft = ""
+
+    if (isGroup) {
+        html_draft += `<p5><b><div class="ugpgbox flx" style="margin-bottom:0.3em">
+        <button style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="boot('/course/' + document.getElementById('timeid').value + '/', true, 2)">Dept</button>
+        <button style="background:rgba(255,160,64,.4);cursor:default">Group</button>
+        </div></b></p5>`
+    } else {
+        html_draft += `<p5><b><div class="ugpgbox flx" style="margin-bottom:0.3em">
+        <button style="background:rgba(255,160,64,.4);cursor:default">Dept</button>
+        <button style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="boot('/group/' + document.getElementById('timeid').value + '/', true, 2)">Group</button>
+        </div></b></p5>`
+    }
+
+    html_draft += `<select style="width:100%" name="timeid" id="timeid" title="Select Semester" onchange="boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/' + deptx + '/', false, 2)">`
     let prevSem = "----"
     allSemsF.forEach(sem => {
         let thisSem = ustTimeToString(sem)
@@ -937,7 +1188,7 @@ function render_courses(path) {
         return
     }
 
-    fetch("/!course/" + semx + "/").then(r => r.json()).then(r => {
+    fetch("/!" + (isGroup ? "group" : "course") + "/" + semx + "/").then(r => r.json()).then(r => {
         if (r.status != 200) { setLoadingStatus("error", false, "failed to contact server"); return }
 
         let depts = r.resp.both
@@ -971,12 +1222,12 @@ function render_courses(path) {
 
         let coursex = ((path.split("/").length > 2 && path.split("/")[2]) ? decodeURI(path) : "" + semx + "/" + deptx + "/")
 
-        html_draft += `<div id="myDropdown" class="flx"><input type="text" placeholder="Filter..." id="myInput" onkeyup="filterFunction()">`
+        html_draft += `<div id="myDropdown" class="flx"><input type="text" style="position:sticky;top:0.5em" placeholder="Filter..." id="myInput" onkeyup="filterFunction()">`
         depts.forEach(dept => {
-            html_draft += `<button onclick="scrollIntoView = true, doNotCheckUGPG = false; boot('/course/' + document.getElementById('timeid').value + '/` + dept + `/', false, 2)"`
+            html_draft += `<button onclick="scrollIntoView = true, doNotCheckUGPG = false; boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/` + dept + `/', false, 2)"`
             if (dept == deptx) {
                 document.title = "" + deptx + " - " + ustTimeToString(semx) + " - uni"
-                history.replaceState(null, window.title, "/course/" + semx + "/" + deptx + "/")
+                history.replaceState(null, window.title, "/" + (isGroup ? "group" : "course") + "/" + semx + "/" + deptx + "/")
                 html_draft += ` style="background:rgba(255,255,0,.4)"`
             }
             html_draft += `>` + dept + `</button>`
@@ -985,7 +1236,7 @@ function render_courses(path) {
 
         html.innerHTML = html_draft
 
-        render_courses_details(coursex, scrollIntoView)
+        render_courses_details(coursex, scrollIntoView, isGroup)
 
     }).catch(error => {
         console.log(error)
@@ -1005,9 +1256,6 @@ function render_UGPG_switch() {
     pgbtn.cursor = ((studprog === "pg") ? "default" : "pointer")
     pgbtn.pointerEvents = ((studprog === "pg") ? "none" : "unset")
 }
-
-var default_people = "CHAN, Ki Cecia"
-var peoplex = default_people
 
 function render_people(path) {
     document.getElementById("courses_select_left_top").innerHTML = `<h2>Instructors</h2>`
@@ -1033,7 +1281,7 @@ function render_people(path) {
         hdraft = hdraft.replace(`<option value="` + default_people + `">`, `<option value="` + default_people + `" selected>`)
         document.title = "" + default_people + " - uni"
     }
-    html_draft += `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" placeholder="Search.." id="myInput" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_people + `">` + hdraft + `</select>`
+    html_draft += `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" style="position:sticky;top:0.5em" placeholder="Search.." id="myInput" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_people + `">` + hdraft + `</select>`
 
     fetch("/!people/" + target_people + "/").then(r => r.json()).then(r => {
         if (r.status != 200) { html.innerHTML = "failed to contact server"; return }
@@ -1128,9 +1376,6 @@ function render_people(path) {
     })
 
 }
-
-var roomx = "LTA"
-var room_show_textbox = false
 
 function render_room(path) {
 
@@ -1401,7 +1646,7 @@ const renderCourseAttr = (attrs, course) => {
                 case "PRE-REQUISITE-BY":
                     html_draft += "🚨 Required For"
                     break
-    
+
                 case "EXCLUSION-BY":
                     html_draft += "⛔ Excluded By"
                     break

@@ -34,6 +34,7 @@ try {
     var insems = {}
     var courseids = {}
     var extraattr = {}
+    var coursegroups = {}
 
     //courses_fetch, including course_cache
     function courses_fetch(recur = false) {
@@ -90,7 +91,7 @@ try {
                 let keepit = false
 
                 Object.keys(courseid).forEach(key => {
-                    if (key != "SEM") { if (courseid[key].normalize().toLowerCase().includes(q)) keepit = true }
+                    if (key != "SEM" && key != "COURSEID") { if (courseid[key].normalize().toLowerCase().includes(q)) keepit = true }
                 })
 
                 if (keepit) remainingCourseids[CODE] = resultsPending.courseids[CODE]
@@ -302,7 +303,7 @@ try {
                             }
                             newDB.push(value)
                             time += 20 * 60 * 1000
-                        } while (keys_pos < keys.length && endT >= time) 
+                        } while (keys_pos < keys.length && endT >= time)
 
                         if (typeof datasets[lessonToType(key)] == "undefined") datasets[lessonToType(key)] = {}
                         datasets[lessonToType(key)][key] = newDB
@@ -344,6 +345,58 @@ try {
                     res.end(JSON.stringify({ status: 200, resp: { s: reqSem, t: timeArray, p: respArray } }))
                     return
 
+                } else if (req.url.startsWith('/!group/')) {
+                    let paths = req.url.substring(8).split('/')
+
+                    if (parseInt(paths[0]) < 1200 || req.url.includes("..") || paths.length < 1 || paths.length > 3 || (paths.length === 3 && paths[2])) {
+                        res.writeHead(400, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 400 }))
+                        return
+                    }
+
+                    let semx = paths[0]
+                    if (paths.length == 1 || (paths.length == 2 && !paths[1])) {
+                        if (typeof coursegroups[semx] === "undefined" || !Object.keys(coursegroups[semx]).length) {
+                            res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify({ status: 404 }))
+                            return
+                        }
+
+                        let rx = { ug: [], pg: [], both: [] }
+                        Object.keys(coursegroups[semx]).sort().forEach(dept => {
+                            if (coursegroups[semx][dept]["_attr"]["ug"] && !coursegroups[semx][dept]["_attr"]["pg"]) {
+                                rx["ug"].push(dept)
+                            } else if (!coursegroups[semx][dept]["_attr"]["ug"] && coursegroups[semx][dept]["_attr"]["pg"]) {
+                                rx["pg"].push(dept)
+                            } else {
+                                rx["both"].push(dept)
+                            }
+                        })
+
+                        res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 200, resp: rx }))
+                        return
+                    }
+
+                    let deptx = decodeURIComponent(paths[1])
+                    if (typeof coursegroups[semx][deptx] === "undefined" || !Object.keys(coursegroups[semx][deptx]).length) {
+                        res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 404 }))
+                        return
+                    }
+
+                    //TODO: make extraattr show in detail view
+                    let resp = {}
+                    Object.keys(coursegroups[semx][deptx]).forEach(courseFullName => {
+                        if (courseFullName != "_attr") {
+                            resp[courseFullName] = { attr: coursegroups[semx][deptx][courseFullName]["attr"] }
+                        }
+                    })
+
+                    res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                    res.end(JSON.stringify({ status: 200, resp: resp }))
+                    return
+
                 } else if (req.url.startsWith('/!course/')) {
                     if (req.url === '/!course/') {
                         res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
@@ -357,84 +410,88 @@ try {
 
                     let semx = req.url.substring(9).split('/')[0]
                     if (req.url.substring(9).split('/').length == 1 || (req.url.substring(9).split('/').length == 2 && req.url.substring(9).split('/')[1] == "")) {
+
                         let list = Object.keys(courses).filter(course => semx in courses[course])
-                        list.sort()
-                        if (list.length > 0) {
-                            let rx = { ug: [], pg: [], both: [] }
-                            list.forEach(dept => {
-                                if (courses[dept][semx]["_attr"]["ug"] && !courses[dept][semx]["_attr"]["pg"]) {
-                                    rx["ug"].push(dept)
-                                } else if (!courses[dept][semx]["_attr"]["ug"] && courses[dept][semx]["_attr"]["pg"]) {
-                                    rx["pg"].push(dept)
-                                } else {
-                                    rx["both"].push(dept)
-                                }
-                            })
-                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                            res.end(JSON.stringify({ status: 200, resp: rx }))
-                        } else {
-                            res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                            res.end(JSON.stringify({ status: 404 }))
-                        }
-                    } else {
-                        let deptx = req.url.substring(9).split("/")[1]
-
-                        if (!(deptx.length === 4 && typeof courses[deptx] != "undefined" && typeof courses[deptx][semx] != "undefined")) {
+                        if (!list.length) {
                             res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
                             res.end(JSON.stringify({ status: 404 }))
                             return
                         }
 
-                        if (req.url.substring(9).split('/').length == 2 || (req.url.substring(9).split('/').length == 3 && req.url.substring(9).split('/')[2] == "")) {
-                            let resp = {}
-                            Object.keys(courses[deptx][semx]).forEach(courseFullName => {
-                                if (courseFullName != "_attr") {
-                                    resp[courseFullName] = { attr: courses[deptx][semx][courseFullName]["attr"] }
-                                    if (typeof extraattr[courseFullName.split(" ")[0] + courseFullName.split(" ")[1]] != "undefined") {
-                                        resp[courseFullName].attr = {...resp[courseFullName].attr, ...extraattr[courseFullName.split(" ")[0] + courseFullName.split(" ")[1]]}
-                                    }
-                                }
-                            })
-                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                            res.end(JSON.stringify({ status: 200, resp: resp }))
-                            return
-                        }
-
-                        let coursex = req.url.substring(9).split("/")[2]
-                        let courseNameFound = ""
-                        Object.keys(courses[deptx][semx]).forEach(courseFullName => {
-                            if (coursex === (courseFullName.split(" ")[0] + courseFullName.split(" ")[1])) courseNameFound = courseFullName
-                        })
-
-                        if (!courseNameFound) {
-                            res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                            res.end(JSON.stringify({ status: 404 }))
-                            return
-                        }
-
-                        let rx = JSON.parse(JSON.stringify(courses[deptx][semx][courseNameFound]))
-                        
-                        if (typeof insems[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]] != "undefined") {
-                            rx.insem = insems[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]]
-                        }
-
-                        let extraattrs = extraattr[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]]
-                        if (typeof extraattrs != "undefined") {
-                            Object.keys(extraattrs).forEach(k => {
-                                rx.attr[k] = extraattrs[k].join(", ")
-                            })
-                        }
-
-                        Object.keys(rx.attr).forEach(key => {
-                            Object.keys(courseids).sort().reverse().forEach(courseid => {
-                                rx.attr[key] = rx.attr[key].replaceAll("" + courseid.substring(0, 4) + " " + courseid.substring(4), `<a class="ax" onclick="boot('/course/` + courseids[courseid].SEM + `/` + courseid.substring(0, 4) + `/` + courseid + `/', false, 2)">` + courseid + `</a>`)
-                            })      
+                        let rx = { ug: [], pg: [], both: [] }
+                        list.sort().forEach(dept => {
+                            if (courses[dept][semx]["_attr"]["ug"] && !courses[dept][semx]["_attr"]["pg"]) {
+                                rx["ug"].push(dept)
+                            } else if (!courses[dept][semx]["_attr"]["ug"] && courses[dept][semx]["_attr"]["pg"]) {
+                                rx["pg"].push(dept)
+                            } else {
+                                rx["both"].push(dept)
+                            }
                         })
 
                         res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                        res.end(JSON.stringify({ status: 200, resp: { [courseNameFound]: rx} }))
+                        res.end(JSON.stringify({ status: 200, resp: rx }))
+                        return
+
+                    }
+
+                    let deptx = req.url.substring(9).split("/")[1]
+
+                    if (!(deptx.length === 4 && typeof courses[deptx] != "undefined" && typeof courses[deptx][semx] != "undefined")) {
+                        res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 404 }))
                         return
                     }
+
+                    //TODO: make extraattr show in detail view
+                    let coursex = req.url.substring(9).split("/")[2]
+                    let courseNameFound = ""
+                    Object.keys(courses[deptx][semx]).forEach(courseFullName => {
+                        if (coursex === (courseFullName.split(" ")[0] + courseFullName.split(" ")[1])) courseNameFound = courseFullName
+                    })
+
+                    let extraattrs = extraattr[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]]
+                    if (typeof extraattrs === "undefined") extraattrs = {}
+
+                    if (req.url.substring(9).split('/').length == 2 || (req.url.substring(9).split('/').length == 3 && req.url.substring(9).split('/')[2] == "")) {
+                        let resp = {}
+                        Object.keys(courses[deptx][semx]).forEach(courseFullName => {
+                            if (courseFullName != "_attr") {
+                                resp[courseFullName] = { attr: courses[deptx][semx][courseFullName]["attr"] }
+                                Object.keys(extraattrs).forEach(k => {
+                                    resp[courseFullName].attr[k] = extraattrs[k].join(", ")
+                                })
+                            }
+                        })
+                        res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 200, resp: resp }))
+                        return
+                    }
+
+                    if (!courseNameFound) {
+                        res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 404 }))
+                        return
+                    }
+
+                    let rx = JSON.parse(JSON.stringify(courses[deptx][semx][courseNameFound]))
+                    Object.keys(extraattrs).forEach(k => {
+                        rx.attr[k] = extraattrs[k].join(", ")
+                    })
+
+                    if (typeof insems[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]] != "undefined") {
+                        rx.insem = insems[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]]
+                    }
+
+                    Object.keys(rx.attr).forEach(key => {
+                        Object.keys(courseids).sort().reverse().forEach(courseid => {
+                            rx.attr[key] = rx.attr[key].replaceAll("" + courseid.substring(0, 4) + " " + courseid.substring(4), `<a class="ax" onclick="boot('/course/` + courseids[courseid].SEM + `/` + courseid.substring(0, 4) + `/` + courseid + `/', false, 2)">` + courseid + `</a>`)
+                        })
+                    })
+
+                    res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                    res.end(JSON.stringify({ status: 200, resp: { [courseNameFound]: rx } }))
+                    return
 
                 } else if (!servar.deployed && req.url.startsWith('/!cdn/')) {
                     var filePath = '.\\cdn\\' + decodeURIComponent(req.url.substring(6)).replaceAll("../", "").replaceAll("..\\", "");
@@ -504,9 +561,10 @@ try {
                 } else {
                     res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8', 'Server': 'joutou' })
                     res.end(sharedfx.envar.indexHTML.replace("%script%", `
-                <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chart.umd.js"></script>
-                <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chartjs-plugin-annotation.min.js"></script>
-                `).replace("%gscript%", sharedfx.envar.gscript))
+                    <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chartjs\\chart.umd.js"></script>
+                    <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chartjs-plugin-annotation.min.js"></script>
+                    <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chartjs-chart-graph\\index.umd.js"></script>
+                    `).replace("%gscript%", sharedfx.envar.gscript))
 
                 }
 
@@ -549,6 +607,13 @@ try {
                         course_cache()
                     }, 100)
 
+                } else if (req.url === '/!course_cache_full/') {
+                    res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
+                    res.end(JSON.stringify({ status: 200 }))
+                    setTimeout(() => {
+                        course_cache(true)
+                    }, 100)
+
                 } else if (req.url === '/!course_fetch/') {
                     res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
                     res.end(JSON.stringify({ status: 200 }))
@@ -567,6 +632,7 @@ try {
                         if (typeof r.insems != "undefined") insems = r.insems
                         if (typeof r.courseids != "undefined") courseids = r.courseids
                         if (typeof r.extraattr != "undefined") extraattr = r.extraattr
+                        if (typeof r.coursegroups != "undefined") coursegroups = r.coursegroups
                         console.log("[" + servar.domain + "] cacheing variables updated")
                     }
                     res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
@@ -612,6 +678,11 @@ try {
                         case "extraattr":
                             res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
                             res.end(JSON.stringify({ status: 200, resp: extraattr }))
+                            break
+
+                        case "coursegroups":
+                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify({ status: 200, resp: coursegroups }))
                             break
 
                         default:

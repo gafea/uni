@@ -1,6 +1,9 @@
 @media (prefers-color-scheme: light) {body{background-color:#f8fcff}}
 button{color:black;border:none;padding:1em;border-radius:1em;margin:0;cursor:pointer;font-size:13.25px}
-select, #myInput, input{color: black; cursor: pointer; font-size: 16px; border: 0.15em solid rgba(128,128,128,.3); background: white; text-overflow: ellipsis; padding: 0.5em; flex-grow: 1; border-radius: 0.5em; max-width: 100%}
+select, #myInput, input{transition-duration:0.1s;color: black; font-size: 16px; border: 0.1em solid rgba(128,128,128,.2); background: white; box-shadow:0 0.25em 0.5em rgba(0,0,0,.1); text-overflow: ellipsis; padding: 0.675em 0.75em; flex-grow: 1; border-radius: 0.675em; max-width: 100%}
+select, #myInput, input:not([type=text]):not([type=search]){cursor: pointer}
+input[type=search]{box-shadow:none}
+select:hover, select:focus, input:not([type=search]):hover, input:not([type=search]):focus, .ugpgbox:hover, .ugpgbox:focus{box-shadow:0 0.25em 0.5em rgba(0,0,0,.15)}
 
 .searchimg{max-height:10em;width:100%;max-width:10em;aspect-ratio:1;object-fit:contain;user-select:none}
 #digsrtxt {display:none!important}
@@ -13,7 +16,7 @@ select, #myInput, input{color: black; cursor: pointer; font-size: 16px; border: 
 #fdigbtn form, #digbtn:hover form, #digbtn:active form, #digbtn:focus form, #digbtn:focus-within form{width:calc(100% - 2rem)}
 #mdigbtn form{width:calc(100% - 2rem)}
 #fdigbtn{border-radius:5em;box-shadow:0 0.5em 0.75em rgba(0,0,0,.2);margin:0.35em;margin-top:0;position:-webkit-sticky;position:sticky;top:2.3em}
-#fdigbtn:hover, #fdigbtn:active, #fdigbtn:focus, #fdigbtn:focus-within{box-shadow:0 0.75em 1em rgba(0,0,0,.35)}
+#fdigbtn:active, #fdigbtn:focus, #fdigbtn:focus-within{box-shadow:0 0.75em 1em rgba(0,0,0,.35)}
 #mdigbtn{flex-shrink:0;width:calc(10em + 5%)}
 
 .selbox:hover{z-index:3}
@@ -23,11 +26,11 @@ select, #myInput, input{color: black; cursor: pointer; font-size: 16px; border: 
 .LR_Right, #iL1{width:calc( 100% - 19em )}
 .LR_Left, #iR1{padding:0.5em;pointer-events:none;position:sticky;top:0.75em;left:0;z-index:3;width:17em;overflow-y:auto;height:fit-content}
 .LR_Right{height:fit-content;overflow:clip;padding:0}
-.LR_Left{pointer-events:unset;max-height:calc(95vh - 8em);overflow:overlay}
+.LR_Left{overflow-x:hidden;overflow-y:overlay;pointer-events:unset;max-height:calc(95vh - 8em)}
 .LR_Left_Content{width:17em}
-.ugpgbox{padding:0.5em;border-radius:1.5em;background-color:var(--gbw)} .ugpgbox > button {cursor:pointer;padding:0.25em 1em;border-radius:1em;background:var(--bw);transition-duration:0.05s}
-#myInput{width:calc(100% - 1.3em);margin:0.5em 0;cursor:text;outline:none}
-#myDropdown > button {flex-grow:1;border-radius:0}
+.ugpgbox{transition-duration:0.1s;box-shadow:0 0.15em 0.3em rgba(0,0,0,.1);padding:0.5em;border-radius:1.5em;background-color:var(--gbw)} .ugpgbox > button {cursor:pointer;padding:0.25em 1em;border-radius:1em;background:var(--bw);transition-duration:0.05s}
+#myInput{width:calc(100% - 1.3em);margin-bottom:0.5em;cursor:text;outline:none}
+#myDropdown > button {flex-grow:1;border-radius:0;padding:1em}
 .course_sel{flex-grow:1;max-width:calc(50% - 1em)}
 .course_sel:hover, .course_sel:focus{transform:scale(1.01)}
 .course_sel:hover:active{transform:scale(0.9875)}

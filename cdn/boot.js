@@ -452,8 +452,9 @@ const updateSLV = () => {
             signinlevel = r.summary.signinlevel
         } else if (r.summary.check.cTokenOnly) {
             refresh_cToken()
-        } else if (signinlevel != 0 && r.status === 200 && !r.summary.valid && !r.summary.check.cToken) {
+        } else if (signinlevel >= 1 && r.status === 200 && !r.summary.valid && !r.summary.check.cToken) {
             signinlevel = 0
+            if (typeof signout_reboot_customScript === 'function') setTimeout(() => {signout_reboot_customScript()}, 1)
             setTimeout(() => {reboot()}, 25)
             setTimeout(() => {alert("You have signed out from this browser.")}, 2000)
         }

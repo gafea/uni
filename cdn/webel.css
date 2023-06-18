@@ -40,6 +40,19 @@
     }}
 }
 
+::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 20px;
+    border: transparent;
+}
+
 head, body, html{scroll-behavior:smooth;margin:0;-webkit-text-size-adjust:100%;background-color:var(--bgcolor)}
 *{color-adjust:exact!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;font-family: AppleSDGothicNeo-Regular, PingFangHK-Regular, Calibri, Microsoft JhengHei, Ubuntu, verdana}
 a, .acss{text-decoration:none;color:var(--link-color);background-color:transparent} .acss{font-size:16px} a:hover, .acss:hover{color:var(--link-color-hover)}
@@ -73,7 +86,8 @@ dialog{border:none; border-radius: 1em; padding:1.5em; box-shadow: 0 1em 1em rgb
 .selbox{cursor:pointer;transition-duration: 0.15s;box-shadow: 0 0.5em 1em rgba(0,0,0,.05)}
 .selbox:hover{box-shadow: 0 1em 2em rgba(0,0,0,.15)}
 .picbox{background-repeat: no-repeat; background-position: center center; background-size: cover; object-fit: cover;}
-.textbox{background-color:rgba(128,128,128,.25);border-radius:0.5em;padding:0.25em 0.5em;opacity:1;backdrop-filter:blur(1em);-webkit-backdrop-filter:blur(1em)}
+.textbox{background-color:rgba(128,128,128,.35);border-radius:0.5em;padding:0.25em 0.5em;opacity:1}
+@supports (-webkit-backdrop-filter:blur(1em)) {.textbox{background-color:rgba(128,128,128,.2);-webkit-backdrop-filter:blur(1em)}}
 
 .ckimg{object-fit:cover;width:7.5em;height:3em;filter:brightness(50%);-webkit-filter:brightness(50%)}
 .centerwrp{justify-content:center;min-height:100vh}
