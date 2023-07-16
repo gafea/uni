@@ -123,10 +123,12 @@ Object.keys(xcourses).forEach(courseKey => {
             lesson = xcourses[courseKey][semKey][lessonKey]
 
             if (typeof lesson["section"] != "undefined" && lesson["section"] && Object.keys(lesson["section"])) {
+                let allSectionQuotaAreZero = true
                 Object.keys(lesson["section"]).forEach(sectionKey => {
                     Object.keys(lesson["section"][sectionKey]).forEach(dateKey => {
                         date = lesson["section"][sectionKey][dateKey]
                         roomName = date["Room"].split(" (")[0].split(", Lift ")[0].replace("Lecture Theater ", "LT").replace("Rm ", "Rm")
+                        if (typeof date["Quota"] != "undefined" && date["Quota"] !== "0") allSectionQuotaAreZero = false
                         if (typeof date["Instructor"] === "string" && date["Instructor"] && date["Instructor"] != "TBA") {
                             instructorString = date["Instructor"]
                             instructors = Object.keys(xpeoples).filter(people => (instructorString.includes(people) && Object.keys(xpeoples[people]).includes(semKey)))
@@ -174,6 +176,9 @@ Object.keys(xcourses).forEach(courseKey => {
                         }
                     })
                 })
+                if (allSectionQuotaAreZero) {
+                    xcourses[courseKey][semKey][lessonKey].attr._cancelled = true
+                }
             } else if (typeof lesson["section"] != "undefined" && !(lesson["section"] && Object.keys(lesson["section"]))) {
                 delete xcourses[courseKey][semKey][lessonKey]["section"]
             }
@@ -193,7 +198,7 @@ Object.keys(xcourses).forEach(courseKey => {
 })
 if (Object.keys(missingInstructors)) {
     Object.keys(missingInstructors).forEach(key => {
-        console.log("[courses_cache] the following names are missing in instructors file @ sem " + key + " :")
+        console.log("[courses_cache] info: the following names are missing in instructors file @ sem " + key + " :")
         console.log(JSON.stringify(missingInstructors[key]))
     })
 }
@@ -312,6 +317,12 @@ post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peopl
 
         post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ diffs: xdiffs })).then(r => r.json()).then(r => {
             console.log('[courses_cache] cacheing diff done, used ' + ((new Date()).getTime() - atm2.getTime()) + 'ms')
+
+            if (fs.existsSync("T:\\major.json")) {
+                post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ majorminorreqs: {2022: JSON.parse(fs.readFileSync("T:\\major.json", "utf8"))} })).then(r => r.json()).then(r => {
+                    console.log('[courses_cache] cacheing tempmajor done')
+                })
+            }
         })
     }
 

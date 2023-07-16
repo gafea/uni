@@ -1,10 +1,23 @@
 const fs = require('fs')
+const sharp = require('sharp')
 const post = (url, data) => fetch(url, { method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: data })
 
 const sharedfx = require((!fs.existsSync('./' + __filename.slice(__dirname.length + 1))) ? ('./../sharedfx_node.js') : ('./sharedfx_node.js'))
 if (sharedfx.about() != "sharedfx") { throw new Error('bad sharedfx import') }
 
 const cdnPath = "" + sharedfx.envar.cdn_path + `uni_ai\\`
+
+if (true) {
+    fs.readdirSync(cdnPath + "rawpng\\").forEach(file => {
+        if (file.endsWith(".png")) {
+            sharp(cdnPath + "rawpng\\" + file)
+            .webp()
+            .toFile(cdnPath + "draft\\" + file.split(".")[0] + ".webp")
+        }
+    })
+    return
+}
+
 const aiOption = (courseCode, courseDesc) => {
     return JSON.stringify({ "fn_index": 77, "data": ["task(" + courseCode + ")", "(photo),(masterpiece),(4k)," + courseDesc, "(nsfw), (text), (powerpoint), (screenshot), extra fingers, fused fingers, too many fingers, missing fingers, spider, lowres, bad anatomy, bad hands, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, poorly drawn hands, poorly drawn feet, tiling, bad art, mutated, closed eyes, duplicate, morbid, mutilated, tranny, out of frame, extra fingers, mutated hands, poorly drawn face, mutation, deformed, ugly, blurry, bad proportions, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, fused fingers, too many fingers, long neck, noise, noisy, unfinished,", [], 40, "Euler a", false, false, 1, 1, 8, -1, -1, 0, 0, 0, false, 576, 768, false, 0.7, 2, "Latent", 0, 0, 0, [], "None", false, false, "positive", "comma", 0, false, false, "", "Seed", "", "Nothing", "", "Nothing", "", true, false, false, false, 0, { "session_hash": courseCode }] })
 }
@@ -56,7 +69,7 @@ const v1Option = (courseDesc) => {
 }
 
 let courses = {}, sems = [], todo = [], todoIndex = 0, todoCourse = [], failedCourse = []
-let startDelay = 1000 * 60 * 60 * 0, breakDelay = 1000 * 10, killTime = 1000 * 60 * 60 * 6
+let startDelay = 1000 * 60 * 60 * 0, breakDelay = 1000 * 2, killTime = 1000 * 60 * 60 * 9
 console.log(`[aigen_uni] start delay: ` + Math.round(startDelay/1000) + `s, break between each run: ` + Math.round(breakDelay/1000) + `s, run duration: ` + Math.round(killTime/1000) + `s`)
 killTime = killTime + (new Date()).getTime() + startDelay
 
@@ -88,10 +101,15 @@ function run() {
     let course = todo[todoIndex][0], desc = todo[todoIndex][1]
     console.log("[aigen_uni] aigen: " + course)
     post("http://127.0.0.1:7860/sdapi/v1/txt2img", v1Option('' + desc)).then(r => r.json()).then(r => {
-        let newPath = cdnPath + "draft\\" + course + ".png"
+        let newPath = cdnPath + "draft\\raw\\" + course + ".png"
         fs.writeFileSync(newPath, r.images[0], 'base64')
-        console.log("[aigen_uni] done: " + newPath + ", queue remaining: " + (todo.length - todoIndex - 1))
-        next()
+        sharp(Buffer.from(r.images[0], 'base64'))
+            .webp()
+            .toFile(cdnPath + "draft\\" + course + ".webp")
+            .then(() => {
+                console.log("[aigen_uni] done: " + newPath + ", queue remaining: " + (todo.length - todoIndex - 1))
+                next()
+            })
     }).catch(err => {
         console.log("[aigen_uni] aigen failed: " + course)
         console.log(err)
@@ -102,7 +120,9 @@ function run() {
 
 function next() {
     todoIndex += 1
-    if (todo.length >= todoIndex) {
+    if (fs.existsSync("T:\\stop.txt")) {
+        console.log("[aigen_uni] stopped")
+    } else if (todo.length >= todoIndex) {
         setTimeout(run, breakDelay)
     } else {
         console.log("[aigen_uni] done all")

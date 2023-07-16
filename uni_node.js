@@ -35,6 +35,8 @@ try {
     var courseids = {}
     var extraattr = {}
     var coursegroups = {}
+    var majorminorreqs = {}
+    var coursereqs = {}
 
     //courses_fetch, including course_cache
     function courses_fetch(recur = false) {
@@ -80,6 +82,8 @@ try {
         let tmark = (new Date()).getTime()
         let resultsPending = { courseids: courseids, peoples: Object.keys(peoples), rooms: Object.keys(rooms) }
         query = query.normalize().toLowerCase().split(" ")
+        let lastQuery = query.pop(); if (lastQuery) {query.push(lastQuery)} else {query.push(query.pop() + " ")}; lastQuery = ""
+        let courseFoundIn = {}
 
         query.forEach(q => {
             resultsPending.peoples = resultsPending.peoples.filter(people => people.normalize().toLowerCase().includes(q))
@@ -91,7 +95,13 @@ try {
                 let keepit = false
 
                 Object.keys(courseid).forEach(key => {
-                    if (key != "SEM" && key != "COURSEID") { if (courseid[key].normalize().toLowerCase().includes(q)) keepit = true }
+                    if (key != "SEM" && key != "COURSEID") { 
+                        if (courseid[key].normalize().toLowerCase().includes(q)) {
+                            keepit = true
+                            if (typeof courseFoundIn[CODE] === "undefined") courseFoundIn[CODE] = []
+                            /*if (!courseFoundIn[CODE].includes(key))*/ courseFoundIn[CODE].push(key)
+                        }
+                    }
                 })
 
                 if (keepit) remainingCourseids[CODE] = resultsPending.courseids[CODE]
@@ -102,7 +112,7 @@ try {
         let results = []
         if (Object.keys(resultsPending.courseids).length) {
             Object.keys(resultsPending.courseids).forEach(CODE => {
-                results.push({ type: "course", result: { CODE: CODE, NAME: resultsPending.courseids[CODE].NAME, SEM: resultsPending.courseids[CODE].SEM, DESCRIPTION: resultsPending.courseids[CODE].DESCRIPTION } })
+                results.push({ type: "course", found: courseFoundIn[CODE], result: { CODE: CODE, NAME: resultsPending.courseids[CODE].NAME, SEM: resultsPending.courseids[CODE].SEM, DESCRIPTION: resultsPending.courseids[CODE].DESCRIPTION } })
             })
         }
         if (resultsPending.peoples.length) {
@@ -177,6 +187,47 @@ try {
                         res.end(JSON.stringify({ status: 200, resp: results }))
                         return
                     }
+
+                } else if (req.url.startsWith('/!plan/') && !req.url.includes("..")) {
+                    let path = decodeURIComponent(req.url).substring(7)
+                    let paths = path.split('/')
+                    let year = -1, majorminor = ""
+                    if (paths[0] && !isNaN(paths[0]) && !isNaN(parseFloat(paths[0]))) year = parseInt(paths[0])
+                    if (typeof paths[1] != "undefined" && paths[1]) majorminor = paths[1]
+
+                    if (!Object.keys(majorminorreqs).length) {
+                        res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 404 }))
+                        return
+                    }
+
+                    if (year < 0) {
+                        res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 200, resp: Object.keys(majorminorreqs).sort().reverse()  }))
+                        return
+                    }
+
+                    if (typeof majorminorreqs[year] === "undefined") {
+                        res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 404 }))
+                        return
+                    }
+
+                    if (!majorminor) {
+                        res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 200, resp: Object.keys(majorminorreqs[year]).sort() }))
+                        return
+                    }
+
+                    if (typeof majorminorreqs[year][majorminor] === "undefined") {
+                        res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 404 }))
+                        return
+                    }
+
+                    res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                    res.end(JSON.stringify({ status: 200, resp: majorminorreqs[year][majorminor] }))
+                    return
 
                 } else if (req.url.startsWith('/!people/') && !req.url.includes("..")) {
                     let path = decodeURIComponent(req.url).substring(9)
@@ -475,18 +526,22 @@ try {
                     }
 
                     let rx = JSON.parse(JSON.stringify(courses[deptx][semx][courseNameFound]))
-                    Object.keys(extraattrs).forEach(k => {
-                        rx.attr[k] = extraattrs[k].join(", ")
-                    })
+                    if (typeof rx.section != "undefined") {
+                        Object.keys(extraattrs).forEach(k => {
+                            rx.attr[k] = extraattrs[k].join(", ")
+                        })
+                    }
 
                     if (typeof insems[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]] != "undefined") {
                         rx.insem = insems[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]]
                     }
 
                     Object.keys(rx.attr).forEach(key => {
-                        Object.keys(courseids).sort().reverse().forEach(courseid => {
-                            rx.attr[key] = rx.attr[key].replaceAll("" + courseid.substring(0, 4) + " " + courseid.substring(4), `<a class="ax" onclick="boot('/course/` + courseids[courseid].SEM + `/` + courseid.substring(0, 4) + `/` + courseid + `/', false, 2)">` + courseid + `</a>`)
-                        })
+                        if (!key.startsWith("_")) {
+                            Object.keys(courseids).sort().reverse().forEach(courseid => {
+                                rx.attr[key] = rx.attr[key].replaceAll("" + courseid.substring(0, 4) + " " + courseid.substring(4), `<a class="ax" onclick="boot('/course/` + courseids[courseid].SEM + `/` + courseid.substring(0, 4) + `/` + courseid + `/', false, 2)">` + courseid + `</a>`)
+                            })
+                        }
                     })
 
                     res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
@@ -633,6 +688,8 @@ try {
                         if (typeof r.courseids != "undefined") courseids = r.courseids
                         if (typeof r.extraattr != "undefined") extraattr = r.extraattr
                         if (typeof r.coursegroups != "undefined") coursegroups = r.coursegroups
+                        if (typeof r.majorminorreqs != "undefined") majorminorreqs = r.majorminorreqs
+                        if (typeof r.coursereqs != "undefined") coursereqs = r.coursereqs
                         console.log("[" + servar.domain + "] cacheing variables updated")
                     }
                     res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
@@ -683,6 +740,16 @@ try {
                         case "coursegroups":
                             res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
                             res.end(JSON.stringify({ status: 200, resp: coursegroups }))
+                            break
+
+                        case "majorminorreqs":
+                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify({ status: 200, resp: majorminorreqs }))
+                            break
+
+                        case "coursereqs":
+                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify({ status: 200, resp: coursereqs }))
                             break
 
                         default:

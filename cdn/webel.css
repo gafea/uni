@@ -8,6 +8,7 @@
     --gbgw: #fcfcfc;
     --wb: black;
     --twtb: rgba(255,255,255,.95);
+    --ttwttb: #fff8;
     --bg-def: rgba(239,239,239,.9);
     --bg-grd-def: radial-gradient(farthest-corner at 50% -2em,rgba(255,255,255,95),rgba(255,255,255,.75),rgba(255,255,255,.2));
     --border-def: rgba(255,255,255,.5);
@@ -27,6 +28,7 @@
         --gbgw: #0f0c09;
         --wb: white;
         --twtb: rgba(0,0,0,.95);
+        --ttwttb: #0006;
         --bg-def: rgba(0,0,0,.9);
         --bg-grd-def: radial-gradient(farthest-corner at 50% -2em, rgba(255,255,255,.15), transparent);
         --border-def: rgba(255,255,255,.25);
@@ -66,7 +68,7 @@ a, .acss{text-decoration:none;color:var(--link-color);background-color:transpare
 .label{padding:0.25em 0.5em;border-radius:0.5em;white-space:nowrap;width:min-content}
 .content{flex: 1 0 auto;outline:none;opacity:1!important;height:auto!important;overflow:unset!important}
 .symbol{font-family: -apple-system, BlinkMacSystemFont, Calibri, Roboto, Ubuntu, verdana !important; font-weight: bold}
-#no_css, .no_desktop{display:none!important}
+#no_css, .no_desktop, .only_mobile{display:none!important}
 .bufLR{padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left)}
 #divheadbuffer{height:calc(5vh + 4.5em)}
 img{object-fit:cover;opacity:1;transition-duration:.375s;transition-timing-function:cubic-bezier(.19,1,.22,1)}
@@ -86,8 +88,7 @@ dialog{border:none; border-radius: 1em; padding:1.5em; box-shadow: 0 1em 1em rgb
 .selbox{cursor:pointer;transition-duration: 0.15s;box-shadow: 0 0.5em 1em rgba(0,0,0,.05)}
 .selbox:hover{box-shadow: 0 1em 2em rgba(0,0,0,.15)}
 .picbox{background-repeat: no-repeat; background-position: center center; background-size: cover; object-fit: cover;}
-.textbox{background-color:rgba(128,128,128,.35);border-radius:0.5em;padding:0.25em 0.5em;opacity:1}
-@supports (-webkit-backdrop-filter:blur(1em)) {.textbox{background-color:rgba(128,128,128,.2);-webkit-backdrop-filter:blur(1em)}}
+.textbox{background-color:rgba(128,128,128,.3);border-radius:0.5em;padding:0.25em 0.5em;opacity:1;backdrop-filter:blur(0.25em)}
 
 .ckimg{object-fit:cover;width:7.5em;height:3em;filter:brightness(50%);-webkit-filter:brightness(50%)}
 .centerwrp{justify-content:center;min-height:100vh}
@@ -177,7 +178,7 @@ input:disabled ~ .checkmark, input:disabled ~ .checkmark:hover{cursor:default!im
 .bottom_wrp > a > .ckimg{object-fit:cover;filter:brightness(50%)}
 
 .dwhi{width:1.75em;height:1.75em;vertical-align:middle;margin-right:0.1em;pointer-events:none;object-fit:contain}
-.topbar{z-index:99999;min-height:45px;flex-flow:initial!important;border-bottom:0.16em solid rgba(128,128,128,.3);padding:2em calc( 5% + 5em ) calc( 0.5em - 0.08em ) calc( 5% + 5em - 0.5em );padding:max(calc(env(safe-area-inset-top) + 0.5em), 2em) calc( 5% + 5em + env(safe-area-inset-right)) calc( 0.5em - 0.08em ) calc( 5% + 5em - 0.5em + env(safe-area-inset-left));position:-webkit-sticky;position:sticky;top:calc( env(safe-area-inset-top) - 1.5em );box-shadow:0 0.75em 0.75em rgba(0,0,0,.15)}
+.topbar{border:0 solid #aaa2;z-index:99999;min-height:45px;flex-flow:initial!important;border-bottom:0.16em solid rgba(128,128,128,.3);padding:2em calc( 5% + 5em ) calc( 0.5em - 0.08em ) calc( 5% + 5em - 0.5em );padding:max(calc(env(safe-area-inset-top) + 0.5em), 2em) calc( 5% + 5em + env(safe-area-inset-right)) calc( 0.5em - 0.08em ) calc( 5% + 5em - 0.5em + env(safe-area-inset-left));position:-webkit-sticky;position:sticky;top:calc( env(safe-area-inset-top) - 1.5em );box-shadow:0 0.75em 0.75em rgba(0,0,0,.15)}
 .dwhdt{flex-grow:2;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;padding:0 0.25em}
 /* .dwhdto{flex-flow:nowrap} */
 .dwhdt img{height:1.625rem;width:1.625rem;margin-right:0.375em;user-select:none}
@@ -350,6 +351,7 @@ h3{font-size:1.5rem}
 
 @media (max-width:520px) {
 .no_mobile{display:none!important}
+.only_mobile{display:block!important}
 .centerwrp{height:unset}
 .centerwrp-header{margin:0.25em}
 .postboxwrp{max-width:100vw;min-width:0;width:100vw;margin-bottom:0;border-radius:1.5em 1.5em 0 0;border:none;box-shadow:0 0 0 rgba(0,0,0,0)}

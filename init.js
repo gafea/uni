@@ -36,11 +36,16 @@ function getPageHTML_404() {
 
 document.body.style.overflowY = "scroll" //make scrollbar always visible
 
-let disableSigninRequirement = true, scrollIntoView = false, doNotCheckUGPG = false, room_show_textbox = false
+let disableSigninRequirement = true, scrollIntoView = false, doNotCheckUGPG = false
 let studprog = "ug", listMode = "card", config = {}
 let allSems = [], allSemsF = [], deptx = "ACCT"
 let rooms = [], roomx = "LTA"
-let peoples = [], default_people = "CHAN, Ki Cecia", peoplex = default_people
+let peoples = [], peoplex = ""
+let majorminorreqs = {}
+let experiments = {
+    plan_beta: false,
+    room_show_textbox: false, //demo of experiments
+}
 
 var prev_call = 'none'
 function init(path) {
@@ -49,25 +54,58 @@ function init(path) {
 
         prev_call = path
 
+        let exphtml = ""
+        Object.keys(experiments).forEach(experiment => {
+            exphtml += `
+            <div class="flx" style="justify-content:flex-start;gap:0.5em;margin-top:0.75em">
+                <label class="switch">
+                    <input id="` + experiment + `" type="checkbox" ` + ((experiments[experiment]) ? " checked" : "") + ` onclick="experiments.` + experiment + ` = !experiments.` + experiment
+
+            switch (experiment) {
+                case "room_show_textbox":
+                    exphtml += `; if (window.location.pathname.toLowerCase().startsWith('/room')) setTimeout(reboot, 120)`
+                    break
+
+                case "plan_beta":
+                    exphtml += `; if (window.location.pathname.toLowerCase().startsWith('/plan')) setTimeout(reboot, 120)`
+                    break
+            }
+
+            exphtml += `">
+                    <span class="slider"></span>
+                </label>
+                <label for="` + experiment + `" style="cursor:pointer"><p2>` + experiment + `</p2></label>
+            </div>
+            `
+        })
+
         if (path == '/' || path == '') { //home page, not decided what to do yet so redir to /course/ ;)
+            setTimeout(() => {
+                boot("/course/", true, 2)
+            }, 150); return ""
             return `<meta http-equiv="refresh" content="0;URL=/course/">`
 
         } else if (path.toLowerCase().startsWith("/me/")) { //me page
             return `<div id="me_wrp"></div>` + renderBottomBar('me')
 
         } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/group/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/")) { //course + people + room
-
             return `<div id="courses_select_wrp">
                 <div class="edge2edge flxb" id="courses_select_main" style="transition-timing-function:cubic-bezier(.65,.05,.36,1);transition-duration:0.6s">
                     <div class="LR_Left" id="courses_select_left">
                         <div class="LR_Left_Content">
                             <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0">
                                 <button onclick="boot('/course/', false, 2)">course</button>
-                                <button onclick="peoplex='` + default_people + `';boot('/people/', false, 2)">people</button>
+                                <button onclick="peoplex='';boot('/people/', false, 2)">people</button>
                                 <button onclick="roomx='LTA';boot('/room/', false, 2)">room</button>
                             </div>
                             <div id="courses_select_left_top"></div>
                             <div class="flx" style="justify-content:center;gap:0.5em;margin:0.5em 0;border-top:0.15em dotted rgba(128,128,128,.2);padding-top:0.75em" id="courses_select_left_optionBox"></div>
+                            <div id="courses_select_left_extra">
+                                <div class="box" style="margin:1em 0">
+                                    <h4>Experiments</h4>
+                                    ` + exphtml + `
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="LR_Right" id="courses_select_right"></div>
@@ -98,6 +136,12 @@ function init(path) {
                             <br>
                             <div id="courses_select_left_top"></div>
                             <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
+                            <div id="courses_select_left_extra">
+                                <div class="box" style="margin:1em 0">
+                                    <h4>Experiments</h4>
+                                    ` + exphtml + `
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="LR_Right" id="courses_select_right">
@@ -256,6 +300,30 @@ const exe_me = (path) => wait_allSems(render_me, path, "Me - uni")
 const exe_search = (path) => wait_allSems(render_search, path, "Search - uni")
 const exe_plan = (path) => wait_allSems(render_plan, path, "Planning - uni")
 
+const courseCodeNamedb = JSON.parse('{"ACCT":"Accounting","BIBU":"Biotechnology and Business","BIEN":"Bioengineering","BIPH":"Biological Physics","CENG":"Chemical and Biological Engineering","CHEM":"Chemistry","CIVL":"Civil and Environmental Engineering","COMP":"Computer Science and Engineering","CORE":"Common Core","CPEG":"Computer Engineering","DASC":"Data Analytics in Science","DSCT":"Data Science and Technology","ECON":"Economics","ELEC":"Electronic and Computer Engineering","EMIA":"Emerging Interdisciplinary Areas","ENEG":"Energy","ENGG":"School of Engineering","ENTR":"Entrepreneurship","ENVR":"Environment","ENVS":"Environmental Science","FINA":"Finance","FYTG":"HKUST Fok Ying Tung Graduate School","GBUS":"Global Business","GNED":"General Education","HART":"Studio Arts courses offered by HUMA","HLTH":"Health and Physical Education","HUMA":"Humanities","IDPO":"Interdisciplinary Programs Office","IEDA":"Industrial Engineering and Decision Analytics","IIMP":"Individualized Interdisciplinary Major","IROP":"International Research Opportunities Program","ISDN":"Integrative Systems and Design","ISOM":"Information Systems, Business Statistics and Operations Management","LABU":"Language for Business","LANG":"Language","LEGL":"Legal Education","LIFS":"Life Science","MARK":"Marketing","MATH":"Mathematics","MECH":"Mechanical and Aerospace Engineering","MGMT":"Management","OCES":"Ocean Science","PHYS":"Physics","PPOL":"Public Policy","RMBI":"Risk Management and Business Intelligence","SBMT":"School of Business and Management","SCIE":"School of Science","SHSS":"School of Humanities and Social Science","SISP":"Summer Institute for Secondary School Students","SOSC":"Social Science","SUST":"Sustainability","TEMG":"Technology and Management","UROP":"Undergraduate Research Opportunities Program","WBBA":"SF program in World Business"}')
+const courseCode_to_fullName = (code) => {
+    if (typeof courseCodeNamedb[code] === 'undefined')
+        return code
+    else
+        return courseCodeNamedb[code]
+}
+
+function generate_course_selbox(courseCode = "COMP 3511", courseName = "Operating Systems", sem = "2230", picbox_inner_up_html = "") { //this only support courses
+    let code = courseCode.replaceAll(" ", ""), url = "" + resourceNETpath + `uni_ai/` + code + `.webp`, deptName = courseCode_to_fullName(courseCode.split(" ")[0])
+
+    if (courseCode == "COMP 3511") url = `https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`
+
+    return `<button id="` + code + `" aria-label="Course selection button. ` + courseCode.replace(new RegExp(`.{${1}}`, 'g'), '$&' + " ") + ", " + courseName + `. A` + ((deptName[0] == "A" || deptName[0] == "E" || deptName[0] == "I" || deptName[0] == "O" || deptName[0] == "U") ? "n " : " ") + deptName + ` course, offered in ` + ustTimeToString(sem).replace("-", " to ") + `. Double click for details." class="course_sel selbox picbox" onclick="boot('/course/` + sem + "/" + courseCode.split(' ')[0] + "/" + code + `/', false, 2)">
+        <img src="` + url + `" loading="lazy" fetchpriority="low" onerror="this.onerror=null;this.src=emptyimg">    
+        <div class="picbox_inner flx">
+            <div class="picbox_inner_up flx">
+                ` + picbox_inner_up_html + `
+            </div>
+            <div><h4>` + courseCode + `</h4><h5>` + courseName + `</h5></div>
+        </div>
+    </button>`
+}
+
 function courseStringToParts(course) {
     let dept = course.split(" ")[0]
     let code = course.split(" - ")[0]
@@ -292,21 +360,25 @@ function render_search(path) {
     let tmark = (new Date()).getTime()
     fetch("/!search/" + encodeURIComponent(path)).then(r => r.json()).then(r => {
         switch (r.status) {
+            case 404:
+                r.resp = []
             case 200:
                 document.getElementById("search_result").innerHTML = `<br><p3 style="margin-left:0.5em">Total ` + r.resp.length + ` result` + ((r.resp.length === 1) ? "" : "s") + ` (` + ((new Date()).getTime() - tmark) + ` ms).</p3><br><div class="flx" id="search_out"><div id="d_loading"></div></div>`
-
                 setTimeout(() => {
-                    let draft = ""
-                    r.resp.forEach(ans => {
+                    let draft = [], scores = [], score = 0, queryAmt = query.split(" "), lastQueryAmt = queryAmt.pop(), qLength = queryAmt.length; if (lastQueryAmt) qLength++
+                    r.resp.sort((a, b) => { return parseInt(b.result.SEM) - parseInt(a.result.SEM) }).forEach(ans => {
                         switch (ans.type) {
                             case "course":
                                 if (r.resp.length === 1) {
                                     boot(`/course/` + ans.result.SEM + "/" + ans.result.CODE.substring(0, 4) + "/" + ans.result.CODE + `/`, true, 2)
                                     return
                                 }
-                                draft += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((ans.result.CODE === "COMP3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + ans.result.CODE + `.png`)) + `)" id="` + ans.result.CODE + `" class="course_sel selbox picbox" onclick="boot('/course/` + ans.result.SEM + "/" + ans.result.CODE.substring(0, 4) + "/" + ans.result.CODE + `/', false, 2)" title="` + ans.result.DESCRIPTION.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
-                                <div class="picbox_inner_up"><h5 style="opacity:0.85"> </h5></div>
-                                <div><h4>` + ans.result.CODE + `</h4><h5>` + ans.result.NAME + `</h5></div></div></div>`
+                                score = 0
+                                ans.found.forEach(f => {
+                                    if (f === "CODE") score += 1 / qLength
+                                    if (f === "NAME") score += 0.6 / qLength / qLength + 0.3 / qLength / qLength + 0.1 / qLength / qLength
+                                })
+                                draft.push({ score: score, html: generate_course_selbox(ans.result.CODE.substring(0, 4) + " " + ans.result.CODE.substring(4), ans.result.NAME, ans.result.SEM, "") /*+ score /* + ", " + JSON.stringify(ans.found) */ })
                                 break;
 
                             case "people":
@@ -315,9 +387,12 @@ function render_search(path) {
                                     boot(`/people/` + ans.result + `/`, true, 2)
                                     return
                                 }
-                                draft += `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="peoplex='` + ans.result + `';boot('/people/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
-                                <div class="picbox_inner_up"><h5 style="opacity:0.85"></h5></div>
+                                score = 1
+                                draft.push({
+                                    score: score, html: `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="peoplex='` + ans.result + `';boot('/people/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
+                                <div class="picbox_inner_up flx"><h5 style="opacity:0.85"> </h5></div>
                                 <div><h4>` + ans.result + `</h4></div></div></div>`
+                                })
                                 break;
 
                             case "room":
@@ -326,21 +401,32 @@ function render_search(path) {
                                     boot(`/room/` + ans.result + `/`, true, 2)
                                     return
                                 }
-                                draft += `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="roomx='` + ans.result + `';boot('/room/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
-                                <div class="picbox_inner_up"><h5 style="opacity:0.85"></h5></div>
+                                score = 1
+                                draft.push({
+                                    score: score, html: `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="roomx='` + ans.result + `';boot('/room/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
+                                <div class="picbox_inner_up flx"><h5 style="opacity:0.85"> </h5></div>
                                 <div><h4>` + ans.result + `</h4></div></div></div>`
+                                })
                                 break;
 
                             default:
-                                draft += `<div class="box">` + JSON.stringify(ans) + "</div>"
+                                score = 0
+                                draft.push({ score: score, html: `<div class="box">` + JSON.stringify(ans) + "</div>" })
                                 break;
                         }
+                        if (!scores.includes(score)) scores.push(score)
                     })
-                    document.getElementById("search_out").innerHTML = draft
+                    let maxScoreDraft = "", normDraft = "", oldDraft = "", maxScore = scores.sort().reverse()[0], tHold = Math.min((0.6 + 0.3 + 0.1) / qLength, Math.max(1 / qLength, maxScore))//; console.log(tHold)
+                    draft.sort((a, b) => { return b.score - a.score }).forEach(d => { if (d.score >= tHold) { maxScoreDraft += d.html } else if (d.score < 0) { oldDraft += d.html } else { normDraft += d.html } })
+                    document.getElementById("search_out").innerHTML = ""
+                    if (maxScoreDraft) {
+                        document.getElementById("search_out").innerHTML += `<div style="width:100%;margin-top:0.75em;padding-top:0.75em;border-top:0.15em dotted #8886"><h4>✨ Best Matches</h4><div class="flx">` + maxScoreDraft + `</div></div>`
+                    } else {
+                        document.getElementById("search_out").innerHTML += `<div style="width:100%"><br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch_empty.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>` + ((!r.resp.length && query === "keywords") ? `sure.` : `Not much great matches were found. Try again with different keywords?`) + `</b></p1></center><br></div>`
+                    }
+                    if (normDraft) document.getElementById("search_out").innerHTML += `<div style="width:100%;margin-top:0.75em;padding-top:0.75em;border-top:0.15em dotted #8886"><h4 style="padding-left:0.5em">` + (maxScoreDraft ? "Other" : "Related") + ` Matches</h4><div class="flx">` + normDraft + `</div></div>`
+                    if (oldDraft && signinlevel > 1) document.getElementById("search_out").innerHTML += `<div style="width:100%;margin-top:0.75em;padding-top:0.75em;border-top:0.15em dotted #8886"><h4 style="padding-left:0.5em">Undecodable Matches (Admin)</h4><div class="flx">` + oldDraft + `</div></div>`
                 }, 10)
-                break;
-            case 404:
-                document.getElementById("search_result").innerHTML = `<br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch_empty.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Not much great matches were found. Try again with different keywords?</b></p1></center>`
                 break;
             default:
                 document.getElementById("search_result").innerHTML = `<br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch_empty.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Server error, try again later</b></p1></center>`
@@ -354,56 +440,124 @@ function render_search(path) {
 
 function render_plan(path) {
     document.getElementById("courses_select_left_top").innerHTML = "<h2>Planning</h2>"
-    document.getElementById("courses_select_left_optionBox").innerHTML = "coming soon!"
-    document.getElementById("courses_select_right").innerHTML = `<div class="box" style="aspect-ratio:2.25"><canvas id="canvas"></canvas></div>`
 
-    let colors = ["red", "green", "green", "green", "green", "green", "grey", "red", "green", "red", "green", "green", "green", "red", "red", "grey", "grey", "green"]
-    const chart = new Chart(document.getElementById('canvas').getContext('2d'), {
-        type: 'tree',
-        data: {
-            labels: ["Start", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q"],
-            datasets: [
-                {
-                    pointBackgroundColor: colors,
-                    pointBorderColor: colors,
-                    edgeLineBorderColor: colors.slice(1),
-                    edgeLineBorderWidth: [1, 1, 1, 1, 1, 0.25, 3, 1, 3, 1, 1, 1, 3, 3, 0.25, 0.25, 1],
-                    pointRadius: [9, 6, 6, 6, 6, 6, 7, 9, 6, 9, 6, 6, 6, 9, 9, 7, 7, 6],
-                    pointStyle: ["rectRounded", "circle", "circle", "circle", "circle", "circle", "crossRot", "rectRounded", "circle", "rectRounded", "circle", "circle", "circle", "rectRounded", "rectRounded", "crossRot", "crossRot", "circle"],
-                    pointHoverRadius: 10,
-                    data: [
-                        { name: "Start", },
-                        { name: "A", parent: 0 },
-                        { name: "B", parent: 1 },
-                        { name: "C", parent: 1 },
-                        { name: "D", parent: 0 },
-                        { name: "E", parent: 4 },
-                        { name: "F", parent: 4 },
-                        { name: "G", parent: 0 },
-                        { name: "H", parent: 7 },
-                        { name: "I", parent: 7 },
-                        { name: "J", parent: 2 },
-                        { name: "K", parent: 2 },
-                        { name: "L", parent: 2 },
-                        { name: "M", parent: 9 },
-                        { name: "N", parent: 9 },
-                        { name: "O", parent: 6 },
-                        { name: "P", parent: 6 },
-                        { name: "Q", parent: 9 },
-                    ]
+    if (!experiments.plan_beta && signinlevel < 2) {
+        document.getElementById("courses_select_left_optionBox").innerHTML = "coming soon!"
+        document.getElementById("courses_select_right").innerHTML = `<div class="box" style="aspect-ratio:2.25"><canvas id="canvas"></canvas></div>`
+
+        let colors = ["red", "green", "green", "green", "green", "green", "grey", "red", "green", "red", "green", "green", "green", "red", "red", "grey", "grey", "green"]
+        const chart = new Chart(document.getElementById('canvas').getContext('2d'), {
+            type: 'tree',
+            data: {
+                labels: ["Start", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q"],
+                datasets: [
+                    {
+                        pointBackgroundColor: colors,
+                        pointBorderColor: colors,
+                        edgeLineBorderColor: colors.slice(1),
+                        edgeLineBorderWidth: [1, 1, 1, 1, 1, 0.25, 3, 1, 3, 1, 1, 1, 3, 3, 0.25, 0.25, 1],
+                        pointRadius: [9, 6, 6, 6, 6, 6, 7, 9, 6, 9, 6, 6, 6, 9, 9, 7, 7, 6],
+                        pointStyle: ["rectRounded", "circle", "circle", "circle", "circle", "circle", "crossRot", "rectRounded", "circle", "rectRounded", "circle", "circle", "circle", "rectRounded", "rectRounded", "crossRot", "crossRot", "circle"],
+                        pointHoverRadius: 10,
+                        data: [
+                            { name: "Start", },
+                            { name: "A", parent: 0 },
+                            { name: "B", parent: 1 },
+                            { name: "C", parent: 1 },
+                            { name: "D", parent: 0 },
+                            { name: "E", parent: 4 },
+                            { name: "F", parent: 4 },
+                            { name: "G", parent: 0 },
+                            { name: "H", parent: 7 },
+                            { name: "I", parent: 7 },
+                            { name: "J", parent: 2 },
+                            { name: "K", parent: 2 },
+                            { name: "L", parent: 2 },
+                            { name: "M", parent: 9 },
+                            { name: "N", parent: 9 },
+                            { name: "O", parent: 6 },
+                            { name: "P", parent: 6 },
+                            { name: "Q", parent: 9 },
+                        ]
+                    },
+                ],
+            },
+            options: {
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'nearest',
+                    axis: 'xy'
                 },
-            ],
-        },
-        options: {
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 }
             }
+        })
+        return
+    }
+
+    function find_in_local_cache(year, majorminor, cb) {
+        if (majorminor && year > -1) { //return major/minor data of that year
+            if (typeof majorminorreqs[year][majorminor] != "undefined" && Object.keys(majorminorreqs[year][majorminor]).length) { cb(majorminorreqs[year][majorminor]); return }
+            fetch("/!plan/" + year.toString() + "/" + majorminor + "/").then(r => r.json()).then(r => {
+                if (r.status != 200) { cb({}); return }
+                majorminorreqs[year][majorminor] = JSON.parse(JSON.stringify(r.resp))
+                cb(r.resp)
+            })
+
+        } else if (majorminor && year <= 0) { //return year of offerings of that major/minor
+            cb("unsupported-yet")
+
+        } else if (!majorminor && year > -1) { //return major/minor offerings of that year
+            if (typeof majorminorreqs[year] != "undefined" && Object.keys(majorminorreqs[year]).length) { cb(Object.keys(majorminorreqs[year])); return }
+            fetch("/!plan/" + year.toString() + "/").then(r => r.json()).then(r => {
+                if (r.status != 200) { cb([]); return }
+                if (typeof majorminorreqs[year] === "undefined") majorminorreqs[year] = {}
+                r.resp.forEach(mmid => majorminorreqs[year][mmid] = {})
+                cb(r.resp)
+            })
+
+        } else { //return years keys only
+            if (Object.keys(majorminorreqs).length) { cb(Object.keys(majorminorreqs)); return }
+            fetch("/!plan/").then(r => r.json()).then(r => {
+                if (r.status != 200) { cb([]); return }
+                r.resp.forEach(year => majorminorreqs[year] = {})
+                cb(r.resp)
+            })
         }
+    }
+
+    let paths = path.split("/")
+    let yearx = -1, majorminorx = "", mmdraft = ""
+    if (paths[0] && !isNaN(paths[0]) && !isNaN(parseFloat(paths[0]))) yearx = parseInt(paths[0])
+    if (typeof paths[1] != "undefined" && paths[1]) majorminorx = decodeURIComponent(paths[1]).replaceAll("-", " ")
+
+    find_in_local_cache(-1, "", (years) => {
+        if (yearx < 0) { setTimeout(() => { boot("/plan/" + years[0] + "/", true, 3) }, 150); return }
+        mmdraft = JSON.stringify(years) + "<br>"
+        find_in_local_cache(yearx, "", (majorminors) => {
+            if (!majorminorx) { setTimeout(() => { boot("/plan/" + yearx + "/" + majorminors[0].replaceAll(" ", "-") + "/", true, 3) }, 150); return }
+            majorminors.forEach(mm => {
+                mmdraft += `<button onclick="boot('/plan/` + yearx + `/` + mm.replaceAll(" ", "-") + `/', false, 3)">` + mm + `</button>`
+            })
+            document.getElementById("courses_select_left_optionBox").innerHTML = mmdraft
+            find_in_local_cache(yearx, majorminorx, (reqs) => {
+                document.getElementById("courses_select_right").innerHTML = JSON.stringify(reqs)
+            })
+        })
     })
 }
+
+const mergeExisting = (obj1, obj2) => {
+    const mutableObject1 = Object.assign({}, obj1)
+    const mutableObject2 = Object.assign({}, obj2)
+    mergeFunction(mutableObject1, mutableObject2)
+    return mutableObject1
+}
+const mergeFunction = (obj1, obj2) => Object.keys(obj2).forEach(key => ((typeof obj1[key] === 'object') ? mergeFunction(obj1[key], obj2[key]) : obj1[key] = obj2[key]))
 
 function render_me(path) {
     document.title = "Me - uni"
@@ -446,13 +600,13 @@ function render_me(path) {
             </div>
 
             <div class="box">
-                <h4>Special Approvals</h4><br>
-                <div id="me_profile_specialApproval"></div>
-            </div>
-
-            <div class="box">
                 <h4>Past Qualifications</h4><br>
                 <div id="me_profile_pastQuali"></div>
+            </div>
+
+            <div class="box" style="opacity:0.3">
+                <h4>Special Approvals (Coming soon)</h4><br>
+                <div id="me_profile_specialApproval"></div>
             </div>
 
             </div>`
@@ -462,11 +616,63 @@ function render_me(path) {
             let pastQualiHTML = document.getElementById("me_profile_pastQuali")
             let specialApprovalHTML = document.getElementById("me_profile_specialApproval")
 
+            if (typeof config.profile === "undefined") config.profile = {}
             let configTemp = JSON.parse(JSON.stringify(config))
-            if (typeof configTemp.profile === "undefined") configTemp.profile = { currentStudies: {}, pastQuali: {}, specialApproval: {} }
-            if (typeof configTemp.profile.currentStudies === "undefined") configTemp.profile.currentStudies = {}
-            if (typeof configTemp.profile.pastQuali === "undefined") configTemp.profile.pastQuali = {}
-            if (typeof configTemp.profile.specialApproval === "undefined") configTemp.profile.specialApproval = {}
+            configTemp.profile = mergeExisting({
+                currentStudies: {
+                    studyProgram: "",
+                    yearOfIntake: ""
+                },
+                pastQuali: {
+                    HKDSE: {
+                        "Chinese Language": {
+                            "Reading": "",
+                            "Writing": "",
+                            "Listening": "",
+                            "Speaking": ""
+                        },
+                        "English Language": {
+                            "Reading": "",
+                            "Writing": "",
+                            "Listening": "",
+                            "Speaking": ""
+                        },
+                        "Mathematics (Compulsory Part)": "",
+                        "Mathematics Extended Part (M1: Calculus and Statistics)": "",
+                        "Mathematics Extended Part (M2: Algebra and Calculus)": "",
+                        "Liberal Studies": "",
+                        "Biology": "",
+                        "Business, Accounting and Financial Studies": "",
+                        "Business, Accounting and Financial Studies (Accounting)": "",
+                        "Business, Accounting and Financial Studies (Business Management)": "",
+                        "Chemistry": "",
+                        "Chinese History": "",
+                        "Chinese Literature": "",
+                        "Combined Science (Chemistry + Biology)": "",
+                        "Combined Science (Physics + Biology)": "",
+                        "Combined Science (Physics + Chemistry)": "",
+                        "Design and Applied Technology": "",
+                        "Economics": "",
+                        "Ethics and Religious Studies": "",
+                        "Geography": "",
+                        "Health Management and Social Care": "",
+                        "History": "",
+                        "Information and Communication Technology": "",
+                        "Integrated Science": "",
+                        "Literature in English": "",
+                        "Music": "",
+                        "Physical Education": "",
+                        "Physics": "",
+                        "Technology and Living (Fashion, Clothing and Textiles)": "",
+                        "Technology and Living (Food Science and Technology)": "",
+                        "Tourism and Hospitality Studies": "",
+                        "Visual Arts": ""
+                    }
+                },
+                specialApproval: {
+
+                }
+            }, config.profile)
 
             htmlp += `<div><p2>
             Study Program: 
@@ -481,18 +687,89 @@ function render_me(path) {
                 ` + generate_year_of_intake_select((typeof configTemp.profile.currentStudies.yearOfIntake === "undefined") ? "" : configTemp.profile.currentStudies.yearOfIntake) + `
             </select>
             </p2></div>`
+
+            htmlp += `<textarea id="configTemp" style="display:none">` + JSON.stringify(configTemp) + `</textarea>`
+
             currentStudiesHTML.innerHTML = htmlp
             htmlp = ""
 
+            let dseTemplate = `<div class="flx" style="gap:0.5em;align-items:flex-end">`
+            Object.keys(configTemp.profile.pastQuali.HKDSE).forEach((subject, i) => {
+                if (typeof configTemp.profile.pastQuali.HKDSE[subject] === "object") {
+                    dseTemplate += `<div class='flx' style="align-items:baseline;gap:0.5em;border-bottom:0.15em dotted #8882;padding-bottom:0.5em;width:calc(50% - 0.5em);` + ((i % 1) ? "background-color:#8882" : "") + `"><p2><b> ` + subject + `</b></p2><div style="flex-grow:1">`;
+                    ["Overall", ...Object.keys(configTemp.profile.pastQuali.HKDSE[subject]).filter(a => a != "Overall")].forEach((subsubject, j) => {
+                        let mval = (typeof configTemp.profile.pastQuali.HKDSE[subject][subsubject] != "undefined") ? configTemp.profile.pastQuali.HKDSE[subject][subsubject] : ""
+                        dseTemplate += `<div class='flx' style="justify-content:flex-end;gap:0.5em;padding:0.25em 0;width:100%">` + ( (j) ? (`<p2>` + subsubject + `</p2>`) : (`<p2><b>` + subsubject + `</b></p2>`) ) + `
+                        <select style="max-width:15em;min-width:7.5em" id="me_profile_pastQuali_HKDSE_` + subject.replaceAll(" ", "") + "_" + subsubject.replaceAll(" ", "") + `" name="me_profile_pastQuali_HKDSE_` + subject.replaceAll(" ", "") + `" onchange="
+                            let configTemp = JSON.parse(document.getElementById('configTemp').innerHTML);
+                            configTemp.profile.pastQuali.HKDSE['` + subject + `']['` + subsubject + `'] = document.getElementById('me_profile_pastQuali_HKDSE_` + subject.replaceAll(" ", "") + "_" + subsubject.replaceAll(" ", "") + `').value;
+                            document.getElementById('configTemp').innerHTML = JSON.stringify(configTemp);
+                            Object.keys(configTemp.profile.pastQuali.HKDSE).forEach(a => {
+                                if (typeof configTemp.profile.pastQuali.HKDSE[a] === 'object') {
+                                    Object.keys(configTemp.profile.pastQuali.HKDSE[a]).forEach(b => {
+                                        if (typeof configTemp.profile.pastQuali.HKDSE[a][b] != 'object' && !configTemp.profile.pastQuali.HKDSE[a][b]) delete configTemp.profile.pastQuali.HKDSE[a][b]
+                                    })
+                                    if (!Object.keys(configTemp.profile.pastQuali.HKDSE[a]).length) delete configTemp.profile.pastQuali.HKDSE[a]
+                                } else {
+                                    if (!configTemp.profile.pastQuali.HKDSE[a]) delete configTemp.profile.pastQuali.HKDSE[a]
+                                }
+                            })
+                            updateProfile('pastQuali', 'HKDSE', configTemp.profile.pastQuali.HKDSE);
+                        ">
+                            <option value="" ` + ((!["5**", "5*", "5", "4", "3", "2", "1", "U"].includes(mval)) ? " selected" : "") + `> </option>
+                            <option value="5**"` + ((mval === "5**") ? " selected" : "") + `>5**</option>
+                            <option value="5*"` + ((mval === "5*") ? " selected" : "") + `>5*</option>
+                            <option value="5"` + ((mval === "5") ? " selected" : "") + `>5</option>
+                            <option value="4"` + ((mval === "4") ? " selected" : "") + `>4</option>
+                            <option value="3"` + ((mval === "3") ? " selected" : "") + `>3</option>
+                            <option value="2"` + ((mval === "2") ? " selected" : "") + `>2</option>
+                            <option value="1"` + ((mval === "1") ? " selected" : "") + `>1</option>
+                            <option value="U"` + ((mval === "U") ? " selected" : "") + `>U</option>
+                        </select></div>`
+                    })
+                    dseTemplate += `</div></div>`
+
+
+                } else {
+                    let mval = (typeof configTemp.profile.pastQuali.HKDSE[subject] != "undefined") ? configTemp.profile.pastQuali.HKDSE[subject] : ""
+                    dseTemplate += `<div class='flx' style="gap:0.5em;border-bottom:0.15em dotted #8882;padding-bottom:0.5em;width:calc(50% - 0.5em);` + ((i % 1) ? "background-color:#8882" : "") + `"><p2><b> ` + subject + `</b></p2>
+                        <select style="max-width:15em;min-width:7.5em" id="me_profile_pastQuali_HKDSE_` + subject.replaceAll(" ", "") + `" name="me_profile_pastQuali_HKDSE_` + subject.replaceAll(" ", "") + `" onchange="
+                            let configTemp = JSON.parse(document.getElementById('configTemp').innerHTML); 
+                            configTemp.profile.pastQuali.HKDSE['` + subject + `'] = document.getElementById('me_profile_pastQuali_HKDSE_` + subject.replaceAll(" ", "") + `').value;
+                            document.getElementById('configTemp').innerHTML = JSON.stringify(configTemp);
+                            Object.keys(configTemp.profile.pastQuali.HKDSE).forEach(a => {
+                                if (typeof configTemp.profile.pastQuali.HKDSE[a] != 'object' && !configTemp.profile.pastQuali.HKDSE[a]) delete configTemp.profile.pastQuali.HKDSE[a]
+                            })
+                            updateProfile('pastQuali', 'HKDSE', configTemp.profile.pastQuali.HKDSE);
+                        ">
+                            <option value="" ` + ((!["5**", "5*", "5", "4", "3", "2", "1", "U"].includes(mval)) ? " selected" : "") + `> </option>
+                            <option value="5**"` + ((mval === "5**") ? " selected" : "") + `>5**</option>
+                            <option value="5*"` + ((mval === "5*") ? " selected" : "") + `>5*</option>
+                            <option value="5"` + ((mval === "5") ? " selected" : "") + `>5</option>
+                            <option value="4"` + ((mval === "4") ? " selected" : "") + `>4</option>
+                            <option value="3"` + ((mval === "3") ? " selected" : "") + `>3</option>
+                            <option value="2"` + ((mval === "2") ? " selected" : "") + `>2</option>
+                            <option value="1"` + ((mval === "1") ? " selected" : "") + `>1</option>
+                            <option value="U"` + ((mval === "U") ? " selected" : "") + `>U</option>
+                        </select>
+                    </div>`
+                }
+            })
+            dseTemplate += `</div>`
+
             pastQualiHTML.innerHTML = `<div><p2>
-            HKDSE<br>
+            <b>HKDSE</b><br><br>
+            ` + dseTemplate + `
+            <br>
+            <div style="opacity:0.3">
+            <b>Others (Coming soon)</b><br><br>
             HKALE<br>
             HKASLE<br>
             HKCEE<br>
-            <br>
             IELTS<br>
             GCE-A<br>
             JEE<br>
+            </div>
             </p2></div>`
 
             specialApprovalHTML.innerHTML = `<div><p2>
@@ -511,10 +788,14 @@ function render_me(path) {
 
         case "course":
             document.title = "My Courses - uni"
-            me_wrp.innerHTML = `<div class="edge2edge_page" style="padding-bottom:0">
+            me_wrp.innerHTML = `<div class="edge2edge_page" style="padding-bottom:0;background:var(--bw)">
             <button onclick="boot('/me/', false, 1)">home</button>
             <button onclick="boot('/me/course/', false, 1)">my courses</button>
             <button onclick="boot('/me/profile/', false, 1)">my profile</button>
+            </div>
+            <div class="edge2edge_page" style="padding-bottom:0;background:var(--bw)">
+            <h3>My Courses</h3>
+            <div id="titlecard_subtitle"></div>
             </div>
             
             <div id="my_courses"></div>`
@@ -522,7 +803,7 @@ function render_me(path) {
 
             let htmld = "", total_cred = 0, total_passed_cred = 0, total_gpacred = 0, total_grade_points = 0
             if (typeof config.courses === "undefined" || Object.keys(config.courses).length === 0) {
-                htmld = `<div class="edge2edge_page" style="padding-top:0"><p2>No courses found!</p2></div>`
+                htmld = `<div class="edge2edge_page"><p2>No courses found!</p2></div>`
             } else {
                 let semsdb = {}
 
@@ -539,12 +820,7 @@ function render_me(path) {
                         let cred = parseInt(semsdb[sem][course].units)
                         let actualcred = cred
                         if (typeof semsdb[sem][course].actual_cred != "undefined") actualcred = parseInt(semsdb[sem][course].actual_cred)
-                        mhtmld += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course == "COMP 3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.replace(" ", "") + `.png`)) + `)" id="` + course.replace(" ", "") + `" class="course_sel selbox picbox" onclick="boot('/course/` + sem + "/" + course.split(' ')[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title=""><div class="picbox_inner flx">
-                        <div class="picbox_inner_up flx" style="width:calc(100% - 1.6em)">
-                            ` + ((semsdb[sem][course].grade === "----") ? (`<style>#` + course.replace(" ", "") + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">`) : (`<h5 class="textbox">`)) + `
-                            ` + semsdb[sem][course].grade + `</h5>
-                            <h5 style="opacity:0.85">` + ((actualcred != cred) ? ("" + actualcred + " of ") : "") + semsdb[sem][course].units + ` unit` + ((semsdb[sem][course].units === "1") ? '' : 's') + `</h5>
-                        </div><div><h4>` + course + `</h4><h5>` + semsdb[sem][course].name + `</h5></div></div></div>`
+                        mhtmld += generate_course_selbox(course, semsdb[sem][course].name, sem, `` + ((semsdb[sem][course].grade === "----") ? (`<style>#` + course.replace(" ", "") + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">`) : (`<h5 class="textbox">`)) + semsdb[sem][course].grade + `</h5><h5 style="opacity:0.85">` + ((actualcred != cred) ? ("" + actualcred + " of ") : "") + semsdb[sem][course].units + ` unit` + ((semsdb[sem][course].units === "1") ? '' : 's') + `</h5>`)
                         total_term_cred += actualcred
                         total_cred += actualcred
                         termcredload += actualcred
@@ -571,10 +847,14 @@ function render_me(path) {
                             if (semsdb[sem][course].grade === "W") termcredload -= actualcred
                         }
                     })
-                    htmld += `<div class="edge2edge_page" style="padding-top:0"><div class="flx"><h3>` + ustTimeToString(sem) + `</h3><h5>` + ((gpacred) ? (`TGA <span class="textbox"` + (haveunfilled ? ` title="There are courses missing grade information">⌛ ` : ">") + (gpasum / gpacred).toFixed(3) + `</span> `) : "") + ((termcredload != total_term_cred) ? (`Actual Credit Load <span class="textbox" title="The actual credit load after deducting transferred credits">` + termcredload + `</span> `) : "") + `Credits <span class="textbox">` + total_term_cred + `</span></h5></div><div class="flx">` + mhtmld + `</div></div>`
+                    htmld += `<div class="edge2edge_page"><div class="flx"><h3>` + ustTimeToString(sem) + `</h3><div class="flx" style="gap:0.5em">` + ((gpacred) ? (`<h5>TGA <span class="textbox"` + (haveunfilled ? ` title="There are courses missing grade information">⌛ ` : ">") + (gpasum / gpacred).toFixed(3) + `</span></h5>`) : "") + ((termcredload != total_term_cred) ? (`<h5>Actual Credit Load <span class="textbox" title="The actual credit load after deducting transferred credits">` + termcredload + `</span></h5>`) : "") + `<h5>Credits <span class="textbox">` + total_term_cred + `</span></h5></div></div><div class="flx">` + mhtmld + `</div></div>`
                 })
             }
-            my_courses.innerHTML = `<div class="edge2edge_page"><div class="flx" style="align-items:end"><div><h3>My Courses</h3><br>add course</div><h5>` + ((total_gpacred) ? (`CGA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span> `) : "") + `Passed Credits <span class="textbox">` + total_passed_cred + `</span> Total Credits <span class="textbox">` + total_cred + `</span></h5></div><br><hr></div>` + htmld
+            let courseSum = `<div class="flx" style="gap:0.5em;width:fit-content">` + ((total_gpacred) ? (`<h5>CGA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span></h5>`) : "") + `<h5>Passed Credits <span class="textbox">` + total_passed_cred + `</span></h5><h5>Total Credits <span class="textbox">` + total_cred + `</span></h5></div>`
+            let buttonHTML = `<button>add course</button>`
+            document.getElementById("titlecard_subtitle").innerHTML = `<div class="only_mobile" style="padding:0.25em 0"><br>` + courseSum + `</div>`
+            my_courses.innerHTML = renderTopBar(`<div class="no_mobile" style="padding:0.25em 0">` + courseSum + `</div>`, " ", buttonHTML, false, "", false, "", true) + htmld
+            setLoadingStatus("hide")
             break
     }
 }
@@ -753,7 +1033,12 @@ function submitCourseUpdate(remove = false) {
     if (typeof newConfig.courses[formData.code] === "undefined") newConfig.courses[formData.code] = {}
     if (typeof newConfig.courses[formData.code][formData.sem] === "undefined") newConfig.courses[formData.code][formData.sem] = {}
     newConfig.courses[formData.code][formData.sem] = { grade: formData.grade, units: formData.units, name: formData.name, actual_cred: formData.actual_cred }
-    newConfig.courses[formData.code][formData.sem].is_SPO = (!!(typeof formData.is_SPO !== "undefined" && formData.is_SPO))
+
+    if (!!(typeof formData.is_SPO !== "undefined" && formData.is_SPO)) {
+        newConfig.courses[formData.code][formData.sem].is_SPO = true
+    } else if (typeof newConfig.courses[formData.code][formData.sem].is_SPO !== "undefined") {
+        delete newConfig.courses[formData.code][formData.sem].is_SPO
+    }
 
     update_config("courses", newConfig.courses, (err) => {
         if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); return }
@@ -977,7 +1262,7 @@ function render_courses_specific(path, insideCoursePage = false) {
                 Object.keys(r.resp[course].section[sectionName]).forEach(time => {
                     resp[time] = { Room: r.resp[course].section[sectionName][time].Room, Instructor: r.resp[course].section[sectionName][time].Instructor }
                 })
-                htmlsd += `` + renderTimetableGrid(resp, "courseDetail") + `</div>`
+                htmlsd += `` + renderTimetableGrid(resp, "courseDetail", path.split("/")[0]) + `</div>`
 
                 htmls[lessonToType(sectionName)].push(htmlsd)
             })
@@ -992,7 +1277,11 @@ function render_courses_specific(path, insideCoursePage = false) {
             }
         })
 
-        html_draft += `<style>#courses_detail_content .uniroomtime{display:none} #courses_detail_content .uniroomweek{position:unset;margin-top:1em} #courses_detail_content .uniroomgrid{display:block}</style></div>`
+        html_draft += `<style>
+        #courses_detail_content .uniroomtime{display:none} 
+        #courses_detail_content .uniroomweek{position:unset;margin-top:1em} 
+        #courses_detail_content .uniroomgrid{display:block}
+        </style></div>`
 
         document.getElementById("courses_detail_content").innerHTML = html_draft
 
@@ -1040,6 +1329,16 @@ function render_courses_specific(path, insideCoursePage = false) {
         #courses_select_left{padding:0; max-width:0; width:0; height:0; opacity:0; overflow:clip}
         #courses_select_right{width:100%}
         #courses_detail_content{width:100vw; width:100dvw}
+
+        .topbar{
+            abox-shadow: 0 0.75em 0.75em rgba(0,0,0,0);
+            aborder-bottom: 0.16em solid #8880;
+            abackground: var(--transbg);
+            backdrop-filter: blur(1.5em);
+            border-radius: 0;
+        }
+
+        #courses_detail_content .box {margin: 0.5em 0}
         @media (max-width:1020px) {#courses_select_left{display:none}}
         </style>`
         setTimeout(() => { document.getElementById("course_detail_topbar_specialStyles").innerHTML += "<style>#btn_back{transition-duration:0.1s!important}</style>" }, 500)
@@ -1080,12 +1379,17 @@ function render_courses_details(path, scrollIntoView = false, isGroup = false) {
         Object.keys(r.resp).forEach((course, ix) => {
             if ((studprog === "ug" && parseInt(course[5]) > 0 && parseInt(course[5]) < 5) || (studprog === "pg" && parseInt(course[5]) >= 5)) {
                 if (listMode === "card") {
-                    html_draft += `<div style="padding:0;page-break-inside:avoid;background-image:url(` + ((course.split(" ")[0] == "COMP" && course.split(" ")[1] == "3511") ? (`https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`) : (resourceNETpath + `uni_ai/` + course.split(" ")[0] + course.split(" ")[1] + `.png`)) + `)" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="course_sel selbox picbox" onclick="boot('/course/` + path.split('/')[0] + "/" + course.split(" ")[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)" title="` + course.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + "\n\n" + r.resp[course].attr.DESCRIPTION.replaceAll('>', "").replaceAll('<', "").replaceAll('"', "'") + `"><div class="picbox_inner flx">
-                    <div class="picbox_inner_up` + ((typeof config.courses != "undefined" && typeof config.courses[course.split(" - ")[0]] != "undefined" && typeof config.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (` flx" style="width:calc(100% - 1.6em)"><style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + config.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : (`">`)) + `<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"]) + `</h5></div>
-                    <div><h4>` + course.split(" (")[0].split(" - ")[0] + `</h4><h5>` + course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" (")) + `</h5></div></div></div>`
+                    let courseParts = courseStringToParts(course)
+                    html_draft += generate_course_selbox(courseParts.code, courseParts.name, path.split('/')[0], "" + ((typeof config.courses != "undefined" && typeof config.courses[course.split(" - ")[0]] != "undefined" && typeof config.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (`<style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + config.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : "<h5></h5>") + ((typeof r.resp[course].attr._cancelled != "undefined" && r.resp[course].attr._cancelled) ? `<div class="textbox"><h5>❌ Cancelled</h5></div>` : (`<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"])) + "</h5>"))
                 } else {
-                    html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + course.split(" ")[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)"><div><div><h4>` + course + `</h4><p2 class="no_mobile">` + r.resp[course].attr.DESCRIPTION + `</p2></div>
-                    <div class="no_mobile">` + renderCourseAttr(r.resp[course].attr, course) + `</div></div></div></div>`
+                    html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + course.split(" ")[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)">
+                    <div>
+                        <div>
+                            <div class="flx"><h4>` + course + `</h4>` + ((typeof r.resp[course].attr._cancelled != "undefined" && r.resp[course].attr._cancelled) ? `<div class="textbox" style="margin:0.25em"><h5>❌ Cancelled</h5></div>` : "") + `</div>
+                            <p2 class="no_mobile">` + r.resp[course].attr.DESCRIPTION + `</p2>
+                        </div>
+                        <div>` + renderCourseAttr(r.resp[course].attr, course) + `</div>
+                    </div></div></div>`
                 }
             }
         })
@@ -1111,6 +1415,8 @@ function render_courses_details(path, scrollIntoView = false, isGroup = false) {
             .topbar{padding: max(calc(env(safe-area-inset-top) + 0.5em), 2em) max(calc(env(safe-area-inset-right) + 0.5em), calc(16px + 1em)) calc( 0.5em - 0.08em ) max(calc(env(safe-area-inset-left) + 0.5em), calc(16px + 1em))}
         }
         </style>`
+
+        document.getElementById("topbar_title").focus()
     }).catch(error => {
         console.log(error)
         setLoadingStatus("error", false, "failed to contact server or script crashed")
@@ -1153,15 +1459,15 @@ function render_courses(pathF) {
     let html_draft = ""
 
     if (isGroup) {
-        html_draft += `<p5><b><div class="ugpgbox flx" style="margin-bottom:0.3em">
-        <button style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="boot('/course/' + document.getElementById('timeid').value + '/', true, 2)">Dept</button>
-        <button style="background:rgba(255,160,64,.4);cursor:default">Group</button>
-        </div></b></p5>`
+        html_draft += `<div class="flx" style="padding:0.35em;width:100%;max-width:18em;border-radius:1.4em;box-shadow:0 0.25em 0.5em rgba(0,0,0,.1);background:var(--gbw)">
+        <button style="padding:0.35em;flex-grow:1;min-width:50%;background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="boot('/course/' + document.getElementById('timeid').value + '/', true, 2)">Department</button>
+        <button style="padding:0.35em;flex-grow:1;min-width:50%;border-radius:1em;background:rgba(255,160,64,.4);cursor:default">Group</button>
+        </div>`
     } else {
-        html_draft += `<p5><b><div class="ugpgbox flx" style="margin-bottom:0.3em">
-        <button style="background:rgba(255,160,64,.4);cursor:default">Dept</button>
-        <button style="background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="boot('/group/' + document.getElementById('timeid').value + '/', true, 2)">Group</button>
-        </div></b></p5>`
+        html_draft += `<div class="flx" style="padding:0.35em;width:100%;max-width:18em;border-radius:1.4em;box-shadow:0 0.25em 0.5em rgba(0,0,0,.1);background:var(--gbw)">
+        <button style="padding:0.35em;flex-grow:1;min-width:50%;border-radius:1em;background:rgba(255,160,64,.4);cursor:default">Department</button>
+        <button style="padding:0.35em;flex-grow:1;min-width:50%;background:var(--gbw);cursor:pointer;pointer-events:unset" onclick="boot('/group/' + document.getElementById('timeid').value + '/', true, 2)">Group</button>
+        </div>`
     }
 
     html_draft += `<select style="width:100%" name="timeid" id="timeid" title="Select Semester" onchange="boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/' + deptx + '/', false, 2)">`
@@ -1224,7 +1530,7 @@ function render_courses(pathF) {
 
         html_draft += `<div id="myDropdown" class="flx"><input type="text" style="position:sticky;top:0.5em" placeholder="Filter..." id="myInput" onkeyup="filterFunction()">`
         depts.forEach(dept => {
-            html_draft += `<button onclick="scrollIntoView = true, doNotCheckUGPG = false; boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/` + dept + `/', false, 2)"`
+            html_draft += `<button title="` + courseCode_to_fullName(dept) + `" onclick="scrollIntoView = true, doNotCheckUGPG = false; boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/` + dept + `/', false, 2)"`
             if (dept == deptx) {
                 document.title = "" + deptx + " - " + ustTimeToString(semx) + " - uni"
                 history.replaceState(null, window.title, "/" + (isGroup ? "group" : "course") + "/" + semx + "/" + deptx + "/")
@@ -1261,44 +1567,53 @@ function render_people(path) {
     document.getElementById("courses_select_left_top").innerHTML = `<h2>Instructors</h2>`
 
     let html_draft = ""
-    let path_hv_people_match = false
-    let target_people = default_people
+    let target_people = decodeURI(path.split("/")[0])
+    let randomPeople = false
     html = document.getElementById("courses_select_left_optionBox")
+
+    if (!target_people) {
+        target_people = peoples[Math.floor(Math.random() * peoples.length)]
+        randomPeople = true
+    }
+    peoplex = target_people
+    document.title = "" + target_people + " - uni"
 
     let hdraft = ""
     peoples.forEach(people => {
         hdraft += `<button onclick="peoplex='` + people + `';boot('/people/` + people + `/' + document.getElementById('timeid').value + '/', false, 2)" style="display:none;`
-        if (decodeURI(path.split("/")[0]) != "" && people === decodeURI(path.split("/")[0])) {
-            target_people = decodeURI(path.split("/")[0])
-            document.title = "" + target_people + " - uni"
+        if (people == target_people) {
             hdraft += ` background:rgba(255,255,0,.4)`
-            path_hv_people_match = true
         }
         hdraft += `">` + people + `</button>`
     })
     hdraft += `</div>`
-    if (!path_hv_people_match) {
-        hdraft = hdraft.replace(`<option value="` + default_people + `">`, `<option value="` + default_people + `" selected>`)
-        document.title = "" + default_people + " - uni"
-    }
-    html_draft += `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" style="position:sticky;top:0.5em" placeholder="Search.." id="myInput" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_people + `">` + hdraft + `</select>`
+    html_draft += `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" style="position:sticky;top:0.5em;margin-bottom:0" placeholder="Search.." id="myInput" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_people + `">` + hdraft + `</select>`
 
     fetch("/!people/" + target_people + "/").then(r => r.json()).then(r => {
         if (r.status != 200) { html.innerHTML = "failed to contact server"; return }
         let peopleAvilSems = r.resp
 
+        let absDeadline = 2000
+
+        if (randomPeople && parseInt(peopleAvilSems[0]) < absDeadline) {
+            setTimeout(() => {
+                boot("/people/", true, 2)
+            }, 1)
+            return
+        }
+
         let skippeopleRestriction = true
         let maxSem = Math.max(parseInt(allSems[0]), parseInt(peopleAvilSems[0]))
-        let peopleMinSem = ((signinlevel === 0) ? (parseInt(allSems[0]) - 99) : 2000)
+        let peopleMinSem = ((signinlevel === 0) ? (parseInt(allSems[0]) - 99) : Math.min(absDeadline, parseInt(peopleAvilSems[0])))
         let target_time = ((peopleAvilSems.includes(allSems[0])) ? allSems[0] : peopleAvilSems[0])
         if (peopleAvilSems.filter(n => parseInt(n) > peopleMinSem).length === 0) skippeopleRestriction = true
         if (skippeopleRestriction) {
-            allSems = allSems.filter(n => parseInt(n) > 2000)
+            allSems = allSems.filter(n => parseInt(n) > (Math.min(absDeadline, parseInt(peopleAvilSems[0])) - 1))
         } else {
             allSems = peopleAvilSems.filter(n => parseInt(n) > peopleMinSem)
         }
         html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="boot('/people/' + peoplex + '/' + document.getElementById('timeid').value + '/', false, 2)">`
-        if (path.split("/")[1] && ((!skippeopleRestriction && parseInt(decodeURI(path.split("/")[1])) < peopleMinSem) || ustTimeToString(decodeURI(path.split("/")[1])) === '----')) {
+        if ((path.split("/")[1] && ((!skippeopleRestriction && parseInt(decodeURI(path.split("/")[1])) < peopleMinSem) || ustTimeToString(decodeURI(path.split("/")[1])) === '----'))) {
             html_draft += `<option value="1009" selected disabled hidden>` + ustTimeToString(decodeURI(path.split("/")[1])) + `</option>`
             history.replaceState(null, window.title, "/people/" + target_people + "/" + decodeURI(path.split("/")[1]) + "/")
             target_time = decodeURI(path.split("/")[1])
@@ -1306,7 +1621,7 @@ function render_people(path) {
             allSems.push(decodeURI(path.split("/")[1]))
             allSems.sort()
             allSems.reverse()
-        } else if (!path.split("/")[1]) {
+        } else if (!path.split("/")[1] || (parseInt(peopleAvilSems[0]) < 2200)) {
             history.replaceState(null, window.title, "/people/" + target_people + "/" + target_time + "/")
         }
         let prevSem = '----'
@@ -1386,7 +1701,7 @@ function render_room(path) {
     let target_room = "LTA"
     html = document.getElementById("courses_select_left_optionBox")
 
-    if (room_show_textbox) {
+    if (experiments.room_show_textbox) {
         let hdraft = ""
         rooms.forEach(room => {
             hdraft += `<button onclick="roomx='` + room + `';boot('/room/` + room + `/' + document.getElementById('timeid').value + '/', false, 2)" style="display:none;`
@@ -1402,7 +1717,7 @@ function render_room(path) {
         if (!path_hv_room_match) {
             document.title = "LTA - uni"
         }
-        html_draft = `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" placeholder="Search.." id="myInput" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_room + `">` + hdraft + `</select>`
+        html_draft = `<div id="myDropdown" class="flx" style="flex-grow:1"><input type="text" placeholder="Search.." id="myInput" style="position:sticky;top:0.5em;margin-bottom:0" onclick="this.select()" onkeyup="filterFunction(true)" value="` + target_room + `">` + hdraft + `</select>`
 
     } else {
         html_draft = `<select name="roomid" id="roomid" title="Select Room" onchange="boot('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/', false, 2)">`
@@ -1429,15 +1744,15 @@ function render_room(path) {
 
         let skipRoomRestriction = true
         let maxSem = Math.max(parseInt(allSems[0]), parseInt(roomAvilSems[0]))
-        let roomMinSem = ((signinlevel === 0) ? (parseInt(allSems[0]) - 99) : 2000)
+        let roomMinSem = ((signinlevel === 0) ? (parseInt(allSems[0]) - 99) : 2200)
         let target_time = ((roomAvilSems.includes(allSems[0])) ? allSems[0] : roomAvilSems[0])
         if (roomAvilSems.filter(n => parseInt(n) > roomMinSem).length === 0) skipRoomRestriction = true
         if (skipRoomRestriction) {
-            allSems = allSems.filter(n => parseInt(n) > 2000)
+            allSems = allSems.filter(n => parseInt(n) > 2200)
         } else {
             allSems = roomAvilSems.filter(n => parseInt(n) > roomMinSem)
         }
-        if (room_show_textbox) {
+        if (experiments.room_show_textbox) {
             html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="boot('/room/' + roomx + '/' + document.getElementById('timeid').value + '/', false, 2)">`
         } else {
             html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="boot('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/', false, 2)">`
@@ -1484,7 +1799,7 @@ function render_room(path) {
             html_draft += `>` + thisSem + `</option>`
             return true
         })
-        html_draft += `</optgroup></select></div>`
+        html_draft += `</optgroup></select>`
         html.innerHTML = html_draft
 
         html = document.getElementById("courses_select_right")
@@ -1599,7 +1914,7 @@ const chartOptions = (timeRange) => {
 const renderCourseAttr = (attrs, course) => {
     let html_draft = ``
     Object.keys(attrs).forEach(attr => {
-        if (attr != "DESCRIPTION") {
+        if (attr != "DESCRIPTION" && !attr.startsWith("_")) {
             if (attr === "INTENDED LEARNING OUTCOMES") { html_draft += `</div><div>` }
             html_draft += `<div style="margin:0.5em;border-radius:0.5em;padding:0.5em;padding-top:0.25em;border:0.1em solid rgba(128,128,128,.3)"><div style="padding:0.25em 0em;border-bottom:0.1em dotted #888;margin-bottom:0.25em"><p4>`
             switch (attr) {
@@ -1759,8 +2074,17 @@ function renderTimetableGrid(resp, type, target_time = 0) {
             } else if (type === "courseDetail") {
                 html_draft += `<div style="margin:0.75em 0.5em 0.75em 0.25em;padding:0.25em 0.5em 0.25em 0.75em;border-left:0.25em solid #ff888888">
                 <h4>` + lesson.date.substring(0, 25) + `</h4><h5>` + lesson.date.slice(25) + `</h5>
-                <p2>Room: ` + lesson.Room + `<br><i>Instructor: ` + JSON.stringify(lesson.Instructor) + `</i></p2>
-                </div>`
+                <p2>Room: ` + lesson.Room + `<br><i>Instructor: `
+                if (Array.isArray(lesson.Instructor)) {
+                    let tmparr = []
+                    lesson.Instructor.forEach((inst) => {
+                        tmparr.push(`<button onclick="boot('/people/` + inst + `/` + target_time + `/', false, 2)">` + inst + "</button>")
+                    })
+                    html_draft += tmparr.join(" ")
+                } else {
+                    html_draft += JSON.stringify(lesson.Instructor)
+                }
+                html_draft += `</i></p2></div>`
             }
         })
         html_draft += `</div></div>`
@@ -1836,7 +2160,17 @@ function renderTimetableGrid(resp, type, target_time = 0) {
                 } else if (type === "people") {
                     html_draft += lesson.course.split(" - ")[0] + ` - ` + lesson.section + `<br><i>` + lesson.course.replace(lesson.course.split(" - ")[0] + " - ", "").slice(0, -9) + `</i><small><br>` + lesson.room + `</small>`
                 } else if (type === "courseDetail") {
-                    html_draft += `Room: ` + lesson.Room + `<br><i>Instructor: ` + JSON.stringify(lesson.Instructor) + `</i>`
+                    html_draft += `Room: ` + lesson.Room + `<br><i>Instructor: `
+                    if (Array.isArray(lesson.Instructor)) {
+                        let tmparr = []
+                        lesson.Instructor.forEach((inst) => {
+                            tmparr.push(`<button onclick="boot('/people/` + inst + `/` + target_time + `/', false, 2)">` + inst + "</button>")
+                        })
+                        html_draft += tmparr.join(" ")
+                    } else {
+                        html_draft += JSON.stringify(lesson.Instructor)
+                    }
+                    html_draft += `</i>`
                 }
                 html_draft += `</p2></div></div>`
             })

@@ -1,4 +1,4 @@
-function renderTopBar(title = ' ', subtitle = '', buttonHTML = '', showSearch = false, additionalHTML = '', showBack = true, searchSubmitJS = `boot('/_dig/'.concat(document.getElementById('search_box').value))`) {
+function renderTopBar(title = ' ', subtitle = '', buttonHTML = '', showSearch = false, additionalHTML = '', showBack = true, searchSubmitJS = `boot('/_dig/'.concat(document.getElementById('search_box').value))`, embedMode = false) {
     return `<div class="` + ((!(buttonHTML || showSearch)) ? 'topbar_mobilefix ' : '') + `topbar flx">` + ((showBack) ? `<button onclick="window.history.back();" class="acss aobh no_print" id="btn_back" tabindex="0" title="back"><b>く<span class="no_mobile"> back</span></b></button>` : "") + `
     <div id="topbar_loading">
         <div id="topbar_loading_show"></div>
@@ -27,7 +27,14 @@ function renderTopBar(title = ' ', subtitle = '', buttonHTML = '', showSearch 
     </div>` : ``) + additionalHTML + ((showBack && !(buttonHTML || showSearch)) ? `<style>
     @media (max-width: 520px) {#btn_back {order:unset} .dwhdto {width:calc(100% - 3.5em)} .topbar_mobilefix > .dwhdto {min-height:2.75em}}
     @container (max-width:520px) {#btn_back {order:unset} .dwhdto {width:calc(100% - 3.5em)} .topbar_mobilefix > .dwhdto {min-height:2.75em}}
-    </style>` : '') + `</div>`
+    </style>` : '') + (embedMode ? `<style>
+    .topbar{padding-top:0.5em;top:0}
+    @media (max-width: 520px) {
+        .dwhdto{min-height:0;padding-bottom:0}
+        .dwhdto > .dwhdt {padding:0}
+        #topbar_title_inwarp_sec_buf{height:0!important}
+    }
+    </style>` : "") + `</div>`
 }
 
 function checkSafariToken() {
@@ -227,6 +234,8 @@ async function sha512(message) {
     return bufferToHex(hash).toUpperCase();
 }
 
+const emptyimg = `data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==`
+
 var popArray = []
 
 var LoadingStatusQueue = 0
@@ -273,6 +282,7 @@ function setLoadingStatus(type, presistant = false, title = '', subtitle = '', j
             setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.grow }, 1300)
             setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.dim }, 2000)
             setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.grow }, 2700)
+            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.dim }, presistTime - 350)
             break
         case 'error':
             setLoadingStatus('show', false, '', '', setLoadingStatusCSS.error.show)
