@@ -603,7 +603,7 @@ try {
 
                 } else if (req.url.toLowerCase() === '/init.js') {
                     res.writeHead(200, { 'Content-Type': 'application/javascript', 'Server': 'joutou', 'Cache-Control': 'max-age=7200' })
-                    fs.readFile('' + __dirname + path.sep + req.url.toLowerCase(), 'utf8', (err, data) => { (err) ? res.end("") : res.end(data) })
+                    fs.readFile('' + __dirname + "/init.js", 'utf8', (err, data) => { (err) ? res.end("") : res.end(data) })
 
                 } else if (req.url.toLowerCase() === '/robots.txt') {
                     res.writeHead(200, { 'Content-Type': 'text/plain', 'Server': 'joutou' })

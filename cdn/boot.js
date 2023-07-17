@@ -68,7 +68,7 @@ window.addEventListener('message', function (e) { //for getting account cToken u
             document.getElementById("OverlayContent").innerHTML = `<center style="padding:4.25em;display:block;width:max-content"><a target="_parent" class="aobh" href="https://me.gafea.net/_update_cToken">click here to sign back in to your account</a></center>`
             checkSafariToken()
         } else {
-            document.getElementById("OverlayContent").innerHTML = `<center style="padding:2.25em">❌ failed<br><small>(` + r.msg + `)</small><br><br><a target="_parent" class="aobh" href="https://me.gafea.net/_signOut">sign out</a> | <a class="aobh" onclick="setOverlayStatus('hide',true)">cancel</a></center>`
+            document.getElementById("OverlayContent").innerHTML = `<center style="padding:2.25em">❌ failed<br><small>(` + JSON.stringify(r.msg) + `)</small><br><br><a target="_parent" class="aobh" href="https://me.gafea.net/_signOut">sign out</a> | <a class="aobh" onclick="setOverlayStatus('hide',true)">cancel</a></center>`
             alert("you are no longer signed in, did you remove this device?\n\n(error message: ".concat(r.msg).concat(")"))
         }
     } else if (r.fx === 'signOut') {
