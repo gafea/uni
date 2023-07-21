@@ -557,7 +557,7 @@ const mergeExisting = (obj1, obj2) => {
     mergeFunction(mutableObject1, mutableObject2)
     return mutableObject1
 }
-const mergeFunction = (obj1, obj2) => Object.keys(obj2).forEach(key => ((typeof obj1[key] === 'object') ? mergeFunction(obj1[key], obj2[key]) : obj1[key] = obj2[key]))
+const mergeFunction = (obj1, obj2) => Object.keys(obj2).forEach(key => ((typeof obj1[key] === 'object') ? mergeFunction(obj1[key], obj2[key]) : obj1[key] = JSON.parse(JSON.stringify(obj2[key]))))
 
 function render_me(path) {
     document.title = "Me - uni"
@@ -1074,7 +1074,7 @@ function enroll_course(sem, course, make_switch = false, is_SPO = false, possibl
         if (typeof newConfig.courses === "undefined") newConfig.courses = {}
         if (typeof newConfig.courses[courseParts.code] === "undefined") newConfig.courses[courseParts.code] = {}
         if (make_switch) {
-
+            //TODO: make this less ugly and a unified way of calling "add new course" dialog
             let unit = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[courseParts.code] != "undefined" && typeof newConfig.courses[courseParts.code][sem] != "undefined" && typeof newConfig.courses[courseParts.code][sem].units != "undefined") ? newConfig.courses[courseParts.code][sem].units : courseParts.units.split(" ")[0])
             model.innerHTML = `<dialog id="course_update_dialog">
             <form id="course_update_dialog_form" action="javascript:void(0);">
@@ -1084,7 +1084,7 @@ function enroll_course(sem, course, make_switch = false, is_SPO = false, possibl
                     <input readonly name="actual_cred" type="hidden" value="` + (actual_cred.length ? actual_cred[parseInt("" + sem[2]) - 1] : unit) + `"><input readonly name="currentsem" type="hidden" value="` + document.getElementById("timeidx").value + `"><input readonly name="name" type="hidden" value="` + courseParts.name + `"><input hidden type="checkbox" id="is_SPO" name="is_SPO" value="yes"` + (is_SPO ? " checked" : "") + `>
                     <input name="units" type="hidden" min="0" value="` + unit + `">
                     Course: <input readonly name="code" type="text" value="` + courseParts.code + `"><br>
-                    Semester: <select id="course_update_sem" name="sem" onchange="enroll_course(document.getElementById('course_update_sem').value, '` + course.replace("'", '"') + `', ` + make_switch + `, ` + is_SPO + `, ` + JSON.stringify(possibleGrades).replaceAll('"', "'") + `, ` + JSON.stringify(actual_cred).replaceAll('"', "'") + `)">` + document.getElementById("timeidx").innerHTML + `</select><br>
+                    Semester: <select id="course_update_sem" name="sem" onchange="enroll_course(document.getElementById('course_update_sem').value, '` + course.replaceAll("'", '"') + `', ` + make_switch + `, ` + is_SPO + `, ` + JSON.stringify(possibleGrades).replaceAll('"', "'") + `, ` + JSON.stringify(actual_cred).replaceAll('"', "'") + `)">` + document.getElementById("timeidx").innerHTML + `</select><br>
                     Grade: <select name="grade">` + generate_grade_selection((Object.keys(newConfig.courses[courseParts.code]).includes(sem) ? newConfig.courses[courseParts.code][sem].grade : "----"), possibleGrades) + `</select><br>
                     <div class="box" style="display:none">
                         <p2>Lec: </p2><br>
