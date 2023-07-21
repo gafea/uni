@@ -149,22 +149,28 @@ def switch(action, code):
             return ["not", True, [], 0]
 
         case "spread":
-            courseUsed = []
             creditUsed = 0
+            courseUsed = []
             for i in code["attr"]["array"]:
+                courseNum = 0
                 areaCourseList = []
                 for j in code["attr"]["array"][i]["array"]:
-                    recursion = switch(code["attr"]["array"][i]["array"][j]["action"], code["attr"]["array"][i])
+                    recursion = switch(code["attr"]["array"][i]["array"][j]["action"], code["attr"]["array"][i]["array"][j])
                     if recursion[1]:
-                        areaCourseList.append(recursion[2])
-                        creditUsed += recursion[3]
-                    courseUsed.append(len(areaCourseList), i, areaCourseList)
+                        courseNum += 1
+                    areaCourseList.append([j, recursion[2]])
+                    creditUsed += int(recursion[3])
+                courseUsed.append([courseNum, i, areaCourseList])
+
+            courseUsedWithoutNum = []
+            for i in range(len(courseUsed)):
+                courseUsedWithoutNum.append([courseUsed[i][1], courseUsed[i][2]])
 
             courseUsed.sort()
             for i in range(len(code["attr"]["min_course_spread"])):
                 if courseUsed[len(courseUsed) - 1] < code["attr"]["min_course_spread"]:
-                    return ["spread", False, courseUsed, creditUsed]
-            return ["spread", True, courseUsed, creditUsed]
+                    return ["spread", False, courseUsedWithoutNum, creditUsed]
+            return ["spread", True, courseUsedWithoutNum, creditUsed]
 
         case "pass_course":
             if code["course"] not in user["courses"]:
@@ -275,19 +281,8 @@ def switch(action, code):
         case _:
             return ["Error", False, [], 0]
 
-# Checking function for major
-def majorFunction(majorIn):
-    if "action" in majorIn:
-        if "array" in majorIn:
-            for key, value in majorIn["array"].items():
-                majorFunction(majorIn["array"][key])
-            switch(majorIn["action"], majorIn)
-        else:
-            switch(majorIn["action"], majorIn)
-
-
 # Varibles
-cin = "BEng in Civil and Environmental Engineering"
+cin = "BEng in Computer Engineering"
 year = "20"
 year += user["profile"]["currentStudies"]["yearOfIntake"][0]
 year += user["profile"]["currentStudies"]["yearOfIntake"][1]
