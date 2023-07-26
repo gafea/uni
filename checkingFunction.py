@@ -32,8 +32,6 @@ def major_checking(request_data):
             user = copy.deepcopy(userdb)
         recursion = switch(globalVarible.major[year][i]["action"], globalVarible.major[year][i])
         output[i] = recursion
-        if globalVarible.major[year][i]["attr"]["type"] != "option":
-            del user
     return output
 
 def semesterSort(course):
