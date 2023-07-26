@@ -16,6 +16,10 @@ def course_checking(request_data):
     return False
 
 ##############################
+notPassGrade = ["F", "AU", "CR", "I", "PP", "W"]
+seng = ["BIEN", "CENG", "CEEV", "CIVL", "CIEV", "CPEG",
+        "COMP", "COSC", "ELEC", "IEEM", "ISDN", "MECH"]
+
 def major_checking(request_data):
     userdb = request_data["userdb"]
     year = "20"
@@ -38,7 +42,7 @@ def semesterSort(course):
     return sem
 
 def gradeMapping(grade):
-    if grade in globalVarible.notPassGrade:
+    if grade in notPassGrade:
         return 0
     match grade[0]:
         case "A":
@@ -490,7 +494,7 @@ def switch(action, code):
             if "school" in code:
                 match code["school"]:
                     case "SENG":
-                        deptList = globalVarible.seng
+                        deptList = seng
 
                     case _:
                         return output
