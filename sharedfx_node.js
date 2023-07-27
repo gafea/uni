@@ -19,6 +19,8 @@ const envar = {
     death_dump_path: "C:\\webserver\\death\\"
 }; Object.freeze(envar)
 
+const post = (url, data) => fetch(url, { method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: data })
+
 const deathDump = (domain, msg, e) => {
     let t = (new Date)
     let tx = t.toJSON()
@@ -83,6 +85,48 @@ const parseCookies = (req) => {
     })
 
     return cookies
+}
+
+const find7003 = (res, body) => {
+    if (typeof body.userdb === "undefined" || typeof body.fx === "undefined" || !body.fx) {
+        res.writeHead(400, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+        res.end(JSON.stringify({ status: 400 }))
+        return
+    }
+
+    let dir = ""
+    if (body.fx === "checking") {
+        dir = "!checking/"
+    } else if (body.fx === "recommend/courses") {
+        dir = "!recommend/courses/"
+    } else if (body.fx === "recommend/mm") {
+        dir = "!recommend/mm/"
+    } else if (body.fx === "recommend/arrange") {
+        dir = "!recommend/arrange/"
+    } else {
+        res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+        res.end(JSON.stringify({ status: 404 }))
+        return
+    }
+
+    post("http://127.0.0.1:7003/" + dir, JSON.stringify(body)).then(r => r.json()).then(r => {
+        if (r.status === 200) {
+            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+            res.end(JSON.stringify({ status: 200, resp: r.resp }))
+            return
+        } else {
+            res.writeHead(r.status, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+            res.end(JSON.stringify(r))
+            return
+        }
+    }).catch(err => {
+        console.log(err)
+        res.writeHead(503, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+        res.end(JSON.stringify({ status: 503 }))
+        return
+    })
+
+    return
 }
 
 const emailRegex = /^[-!#$%&'*+\/0-9=?A-Z^_a-z{|}~](\.?[-!#$%&'*+\/0-9=?A-Z^_a-z`{|}~])*@[a-zA-Z0-9](-*\.?[a-zA-Z0-9])*\.[a-zA-Z](-?[a-zA-Z0-9])+$/
@@ -209,4 +253,4 @@ class CSRF {
     }
 }
 
-module.exports = { about, envar, deathDump, returnErr, getAllFromDir, pushObjArray, sha512, rndStr, isEmailValid, throwMail, parseCookies, zeroPad, CSRF }
+module.exports = { about, envar, post, deathDump, returnErr, getAllFromDir, pushObjArray, sha512, rndStr, find7003, isEmailValid, throwMail, parseCookies, zeroPad, CSRF }

@@ -4,43 +4,50 @@
 version = 1
 
 ##############################
-# globalVarible with webserver
+# globalVariable with webserver
 ##############################
-import globalVarible
+import globalVariable
 import json
 import re
 
 ##############################
 # import masking
 ##############################
-with open('masking.json', encoding = "utf-8") as f:
-    replacement = json.load(f)
+replacement = globalVariable.replacement
     
 ##############################
 # Golbal Variable
 ##############################
 targetAttr = ["PRE-REQUISITE", "EXCLUSION", "CO-REQUISITE"]
-# v need to code v
-dept_list = ["ACCT", "AESF", "AIAA", "AMAT", "BIBU", "BIEN", "BSBE", "BTEC", "CBME", "CENG", "CHEM", "CHMS", "CIEM", "CIVL", "CMAA", "COMP", "CORE", "CPEG", "CSIC", "CSIT", "DASC", "DBAP", "DSAA", "DSCT", "ECON", "EEMT", "EESM", "ELEC", "EMBA", "EMIA", "ENEG", "ENGG", "ENTR", "ENVR", "ENVS", "EOAS", "EVNG", "EVSM", "FINA", "FTEC", "FUNH", "GBUS", "GFIN", "GNED", "HART", "HHMS", "HLTH", "HMMA", "HUMA", "IBTM", "IDPO", "IEDA", "IIMP", "IMBA", "INFH", "INTR", "IOTA", "IPEN", "ISDN", "ISOM", "JEVE", "LABU", "LANG", "LIFS", "MAED", "MAFS", "MARK", "MASS", "MATH", "MECH", "MESF", "MFIT", "MGCS", "MGMT", "MICS", "MILE", "MIMT", "MSBD", "MSDM", "MTLE", "NANO", "OCES", "PDEV", "PHYS", "PPOL", "RMBI", "ROAS", "SBMT", "SCIE", "SEEN", "SHSS", "SMMG", "SOSC", "SUST", "SYSH", "TEMG", "UGOD", "UROP", "WBBA"]
+
+dept_list = []
 
 dept_modify_OR = []
 dept_modify_AND = []
-# Find department that contain keywords
-for dept in dept_list:
-    if(dept.find("OR") != -1):
-        dept_modify_OR.append(dept)
-    if(dept.find("AND") != -1):
-        dept_modify_AND.append(dept)
+
 # For phrasing
 HKDSE_list = {"Chinese": "Chinese Language", "English": "English Language", "Biology": "Biology", "Chemistry": "Chemistry", "Physics": "Physics", "M1": "Mathematics Extended Part (M1: Calculus and Statistics)", "M2": "Mathematics Extended Part (M2: Algebra and Calculus)", "Economics": "Economics"}
 HKDSE_level_list = {"U":0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "5*": 6, "5**": 7}
 grade_list = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D"]
-attr_list = ["corequisites", "prerequisites"]
+attr_list = {"corequisites" : "CO-REQUISITE", "prerequisites": "PRE-REQUISITE"}
 school_list = ["Science", "Engineering"]
 
 ##############################
 # Copying
 ##############################
+def copydept():
+    for courses in globalVariable.courseids:
+        if courses[:4] in dept_list:
+            continue
+        dept_list.append(courses[:4])
+    
+    # Find department that contain keywords
+    for dept in dept_list:
+        if(dept.find("OR") != -1):
+            dept_modify_OR.append(dept)
+        if(dept.find("AND") != -1):
+            dept_modify_AND.append(dept)
+            
 def copy(courseids,courses):
     copyed_data = {}
     
@@ -266,6 +273,7 @@ def AND_OR_basePhrase (content):
     return current_location
 
 def AND_OR_Phrase_helper(local_output, content, content_phrased):
+    
     for i in range(len(local_output["array"])):
         if "action" in local_output["array"][i]:
             AND_OR_Phrase_helper(local_output["array"][i], content, content_phrased)
@@ -467,7 +475,7 @@ def phrase_isMajor(content):
     return {"action": "is_major" , "major": array_dept[0]}
     
 def phrase_nonMajor(content):
-    return {"action": "non", "note" : phrase_isMajor(content)}    
+    return {"action": "not", "array" : [phrase_isMajor(content)]}    
 
 def phrase_isSchool(content):
     for school in school_list:
@@ -477,7 +485,7 @@ def phrase_isSchool(content):
 def phrase_failAttr(content):
     for attr in attr_list:
         if content.find(attr) != -1:
-            return {"action": "fail_attr", "school": attr}
+            return {"action": "fail_attr", "target_attr": attr_list[attr]}
 
 def phrase_CGA(content):
     dot_pos = content.find(".")
@@ -485,7 +493,7 @@ def phrase_CGA(content):
     return {"action": "CGA", "CGA": CGA} 
 
 def phrase_HKDSE(content):
-    current_list = {"action": "pass_qualifcation", "qualifcation": {}}
+    current_list = {"action": "pass_qualifcation", "array": {}}
     array = []
     # Find level
     level_pos = content.find("level")
@@ -505,34 +513,37 @@ def phrase_HKDSE(content):
             array.append(subject)
     
     if len(array) > 1:
-        current_list["qualifcation"] = {"action": "or"}
+        current_list["array"] = {"action": "or"}
 
     for subject in array:
         if subject == "Biology" or subject == "Chemistry" or subject == "Physics":
             # Both exisit
             if content.find("1/2x") != -1 and content.find("1x") != -1:
-                if "action" not in current_list["qualifcation"]:
-                    current_list["qualifcation"] = {"action": "or"}
-                array.append("Combine Science - " + subject)
-            # Only Combine Science
+                if "action" not in current_list["array"]:
+                    current_list["array"] = {"action": "or"}
+                array.append("Combined Science - " + subject)
+            # Only Combined Science
             elif content.find("1/2x") != -1: 
                 subject = "current_list - " + subject
             
-            # NO Combine Science
+            # NO Combined Science
             elif content.find("1x") != -1:
                 if level == 1:
                     level = 3
     
-    if "action" in current_list["qualifcation"]:
+    if "action" in current_list["array"]:
         new_array = []
         for subject in array:
-            if subject.find("Combine Science") != -1:
+            if subject.find("Combined Science") != -1:
                 new_array.append({"action": "level_DSE", "subject": subject, "level": level})
             else:
                 new_array.append({"action": "level_DSE", "subject": HKDSE_list[subject], "level": level}) 
-        current_list["qualifcation"]["array"] = new_array
+        current_list["array"]["array"] = new_array
+        current_list["array"] = [current_list["array"]]
         return current_list
-    current_list["qualifcation"] = {"action": "level_DSE", "subject": HKDSE_list[array[0]], "level": level}
+
+    current_list["array"] = {"action": "level_DSE", "subject": HKDSE_list[array[0]], "level": level}
+    current_list["array"] = [current_list["array"]]
     return current_list
 
 def phrasetype (content):
@@ -644,17 +655,39 @@ def phrase(formated_data):
 ############################## 
 def masking(phrased_data):
     for course in replacement:
-        phrased_data[globalVarible.insems[course][len(globalVarible.insems[course])-1]][course] = {}
-        phrased_data[globalVarible.insems[course][len(globalVarible.insems[course])-1]][course] = replacement[course]
+        phrased_data[globalVariable.insems[course][len(globalVariable.insems[course])-1]][course] = {}
+        phrased_data[globalVariable.insems[course][len(globalVariable.insems[course])-1]][course] = replacement[course]
     return phrased_data
 
-
+def remove_garbage_values(data):
+    if "array" in data:
+        for items in data["array"]:
+            items = remove_garbage_values(items)
+            if not bool(items):
+                data["array"].remove(items)
+        return data
+    
+    if "note" in data:
+        if data["note"] == "" or data["note"] == " Nil":
+            del data["note"]
+            del data["action"]
+    return data
 ##############################
 # main
 ##############################    
 def main():
-    copyed_data = copy(globalVarible.courseids,globalVarible.courses)
+    copydept()
+    copyed_data = copy(globalVariable.courseids,globalVariable.courses)
     cleaned_data = clean(copyed_data)
     formated_data = formating(cleaned_data)
     phrased_data = phrase(formated_data)
-    return masking(phrased_data)
+    masked_data = masking(phrased_data)
+    
+    for semester in masked_data:
+        for courses in masked_data[semester]:
+            for attr in targetAttr:
+                if attr in masked_data[semester][courses]:
+                    masked_data[semester][courses][attr] = remove_garbage_values(masked_data[semester][courses][attr])
+    
+    return masked_data
+

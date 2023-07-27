@@ -1,4 +1,5 @@
 const fs = require('fs')
+const text2png = require('text2png')
 const sharp = require('sharp')
 const post = (url, data) => fetch(url, { method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: data })
 
@@ -6,6 +7,11 @@ const sharedfx = require((!fs.existsSync('./' + __filename.slice(__dirname.lengt
 if (sharedfx.about() != "sharedfx") { throw new Error('bad sharedfx import') }
 
 const cdnPath = "" + sharedfx.envar.cdn_path + `uni_ai\\`
+
+if (true) {
+    fs.writeFileSync('T:\\out.png', text2png('ISOM 3310', {color: '#ccc', backgroundColor: 'white', font: '80px calibri', lineSpacing: 10, padding: 150}))
+    return
+}
 
 if (true) {
     fs.readdirSync(cdnPath + "rawpng\\").forEach(file => {

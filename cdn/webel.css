@@ -89,6 +89,11 @@ dialog{border:none; border-radius: 1em; padding:1.5em; box-shadow: 0 1em 1em rgb
 .selbox:hover{box-shadow: 0 1em 2em rgba(0,0,0,.15)}
 .picbox{background-repeat: no-repeat; background-position: center center; background-size: cover; object-fit: cover;}
 .textbox{background-color:rgba(128,128,128,.3);border-radius:0.5em;padding:0.25em 0.5em;opacity:1;backdrop-filter:blur(0.25em)}
+.boxcolor-normal{border:2px solid #8884}
+.boxcolor-red{border: 2px solid #f8cc; background-color: #f8c2}
+.boxcolor-yellow{border: 2px solid #ff8c; background-color: #ff82}
+.boxcolor-green{border: 2px solid #8fcc; background-color: #8fc2}
+.boxcolor-green > .boxcolor-green {background-color: transparent}
 
 .ckimg{object-fit:cover;width:7.5em;height:3em;filter:brightness(50%);-webkit-filter:brightness(50%)}
 .centerwrp{justify-content:center;min-height:100vh}
@@ -293,6 +298,10 @@ body, head, html{background-color:#0f0c09;color:#eeeeee}
 dialog{color:#eeeeee} dialog::backdrop {background-color: rgba(0, 0, 0, 0.5)}
 a, .acss{color:#3993ff} a:hover, .acss:hover{color:#5bb5ff}
 .box, .selbox{background-color: #1f1c19}
+.boxcolor-red{background-color: #f8c2}
+.boxcolor-yellow{background-color: #ff82}
+.boxcolor-green{border-color: #8fc9; background-color: #8fc2}
+.boxcolor-green .boxcolor-green {background-color: transparent}
 .selbox:hover{background-color: #2f2c29}
 textarea{background:#3f3c39;color:#f0f0f0;border-color:#606060}
 .aobh:hover{background-color:rgba(255,255,255,.05);color:#5bb5ff}

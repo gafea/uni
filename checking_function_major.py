@@ -1,19 +1,10 @@
 version = 1
 
-import globalVarible
+import globalVariable
 import copy
 
 def main(request_data):
-    return splitter(request_data)
-
-def splitter(request_data):
-    if "course" in request_data:
-        return course_checking(request_data)
-    else:
-        return major_checking(request_data)
-    
-def course_checking(request_data):
-    return False
+    return major_checking(request_data)
 
 ##############################
 notPassGrade = ["F", "AU", "CR", "I", "PP", "W"]
@@ -27,10 +18,10 @@ def major_checking(request_data):
     year += userdb["profile"]["currentStudies"]["yearOfIntake"][1]
     output = {}
     for i in request_data["prog"]:
-        if globalVarible.major[year][i]["attr"]["type"] != "option":
+        if globalVariable.major[year][i]["attr"]["type"] != "option":
             global user
             user = copy.deepcopy(userdb)
-        recursion = switch(globalVarible.major[year][i]["action"], globalVarible.major[year][i])
+        recursion = switch(globalVariable.major[year][i]["action"], globalVariable.major[year][i])
         output[i] = recursion
     return output
 

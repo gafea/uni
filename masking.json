@@ -11,10 +11,10 @@
                     "array": [
                         {
                             "action": "not",
-                            "note": {
+                            "array": [{
                                 "action": "fail_attr",
-                                "attr": "corequisites"
-                            }
+                                "target_attr": "CO-REQUISITE"
+                            }]
                         },
                         {
                             "action": "pass_course",
@@ -27,7 +27,7 @@
                     "array": [
                         {
                             "action": "fail_attr",
-                            "attr": "corequisites"
+                            "target_attr": "CO-REQUISITE"
                         },
                         {
                             "action": "or",
@@ -78,19 +78,19 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chemistry",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
-                        "subject": "Combine Science - Chemistry",
+                        "subject": "Combined Science - Chemistry",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -113,10 +113,10 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "and",
                         "array": [
-                            {
+                            {   "attr" :{"exact": true},
                                 "action": "level_DSE",
                                 "subject": "English Language",
                                 "Overall": 3
@@ -142,29 +142,31 @@
                                 "Speaking": 3
                             }
                         ]
-                    }
+                    }]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
+                        "attr" :{"exact": true},
                         "action": "level_DSE",
                         "subject": "English Language",
                         "level": 4
-                    }
+                    }]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "and",
                         "array": [
                             {
+                                "attr" :{"exact": true},
                                 "action": "level_DSE",
                                 "subject": "English Language",
                                 "Overall": 5
                             },
                             {
                                 "action": "not",
-                                "note": {
+                                "array": [{
                                     "action": "and",
                                     "array": [
                                         {
@@ -188,10 +190,10 @@
                                             "Speaking": 4
                                         }
                                     ]
-                                }
+                                }]
                             }
                         ]
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -297,10 +299,10 @@
             "array": [
                 {
                     "action": "not",
-                    "note": {
+                    "array": [{
                         "action": "is_major",
                         "major": "QFIN"
-                    }
+                    }]
                 },
                 {
                     "action": "pass_course",
@@ -373,7 +375,7 @@
                     "array": [
                         {
                             "action": "not",
-                            "note": {
+                            "array": [{
                                 "action": "or",
                                 "array": [
                                     {
@@ -385,7 +387,7 @@
                                         "major": "DDP"
                                     }
                                 ]
-                            }
+                            }]
                         },
                         {
                             "action": "pass_course",
@@ -513,10 +515,10 @@
                     "array": [
                         {
                             "action": "not",
-                            "note": {
+                            "array": [{
                                 "action": "is_major",
                                 "major": "DDP"
-                            }
+                            }]
                         },
                         {
                             "action": "pass_course",
@@ -594,10 +596,10 @@
                     "array": [
                         {
                             "action": "not",
-                            "note": {
+                            "array": [{
                                 "action": "is_major",
                                 "major": "DDP"
-                            }
+                            }]
                         },
                         {
                             "action": "pass_course",
@@ -646,10 +648,10 @@
                     "array": [
                         {
                             "action": "not",
-                            "note": {
+                            "array": [{
                                 "action": "is_major",
                                 "major": "DDP"
-                            }
+                            }]
                         },
                         {
                             "action": "pass_course",
@@ -707,10 +709,10 @@
                     "array": [
                         {
                             "action": "not",
-                            "note": {
+                            "array": [{
                                 "action": "is_major",
                                 "major": "DSCT"
-                            }
+                            }]
                         },
                         {
                             "action": "pass_course",
@@ -759,10 +761,10 @@
                     "array": [
                         {
                             "action": "not",
-                            "note": {
+                            "array": [{
                                 "action": "is_major",
                                 "major": "DDP"
-                            }
+                            }]
                         },
                         {
                             "action": "pass_course",
@@ -811,10 +813,10 @@
                     "array": [
                         {
                             "action": "not",
-                            "note": {
+                            "array": [{
                                 "action": "is_major",
                                 "major": "DDP"
-                            }
+                            }]
                         },
                         {
                             "action": "pass_course",
@@ -856,18 +858,18 @@
                     "action": "and",
                     "array": [
                         {
-                            "action": "non",
-                            "note": {
+                            "action": "not",
+                            "array": [{
                                 "action": "is_major",
                                 "major": "BIBU"
-                            }
+                            }]
                         },
                         {
-                            "action": "non",
-                            "note": {
-                                "action": "is_major",
-                                "major": "SGFN"
-                            }
+                            "action": "not",
+                            "array": [
+                                {"action": "is_major",
+                                "major": "SGFN"}
+                            ]
                         }
                     ]
                 },
@@ -914,7 +916,7 @@
         },
         "PRE-REQUISITE": {
             "action": "pass_qualifcation",
-            "qualifcation": {
+            "array": [{
                 "action": "or",
                 "array": [
                     {
@@ -938,7 +940,7 @@
                         "level": 4
                     }
                 ]
-            }
+            }]
         }
     },
     "ECON4374": {
@@ -1164,10 +1166,10 @@
                     "array": [
                         {
                             "action": "not",
-                            "note": {
+                            "array": [{
                                 "action": "is_major",
                                 "major": "DDP"
-                            }
+                            }]
                         },
                         {
                             "action": "pass_course",
@@ -1195,19 +1197,19 @@
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
-                        "subject": "Combine Science - Biology",
+                        "subject": "Combined Science - Biology",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Biology",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -1301,25 +1303,25 @@
                     "array": [
                         {
                             "action": "pass_qualifcation",
-                            "qualifcation": {
+                            "array": [{
                                 "action": "level_DSE",
                                 "subject": "Physics",
                                 "level": 6
-                            }
+                            }]
                         },
                         {
                             "action": "pass_qualifcation",
-                            "qualifcation": {
+                            "array": [{
                                 "action": "level_DSE",
-                                "subject": "Combine Science - Physics",
+                                "subject": "Combined Science - Physics",
                                 "level": 6
-                            }
+                            }]
                         }
                     ]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "or",
                         "array": [
                             {
@@ -1333,7 +1335,7 @@
                                 "level": 5
                             }
                         ]
-                    }
+                    }]
                 }
             ]
         },
@@ -1368,10 +1370,11 @@
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "and",
                         "array": [
                             {
+                                "attr" :{"exact": true},
                                 "action": "level_DSE",
                                 "subject": "English Language",
                                 "Overall": 5
@@ -1397,7 +1400,7 @@
                                 "Speaking": 4
                             }
                         ]
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -1427,10 +1430,11 @@
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "and",
                         "array": [
                             {
+                                "attr" :{"exact": true},
                                 "action": "level_DSE",
                                 "subject": "English Language",
                                 "Overall": 5
@@ -1456,7 +1460,7 @@
                                 "Speaking": 4
                             }
                         ]
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -1486,10 +1490,11 @@
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "and",
                         "array": [
                             {
+                                "attr" :{"exact": true},
                                 "action": "level_DSE",
                                 "subject": "English Language",
                                 "Overall": 5
@@ -1515,7 +1520,7 @@
                                 "Speaking": 4
                             }
                         ]
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -1537,19 +1542,19 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
-                        "subject": "Combine Science - Physics",
+                        "subject": "Combined Science - Physics",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Physics",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -1606,11 +1611,11 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chinese Language",
                         "level": 1
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -1781,19 +1786,19 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chemistry",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
-                        "subject": "Combine Science - Chemistry",
+                        "subject": "Combined Science - Chemistry",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -1828,11 +1833,11 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
-                        "subject": "Combine Science - Chemistry",
+                        "subject": "Combined Science - Chemistry",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "pass_course",
@@ -1845,11 +1850,11 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chemistry",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "pass_course",
@@ -1871,11 +1876,11 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chinese Language",
                         "level": 1
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -1921,11 +1926,11 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chinese Language",
                         "level": 1
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -1971,11 +1976,11 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chinese Language",
                         "level": 1
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -2021,11 +2026,11 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chinese Language",
                         "level": 1
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -2071,11 +2076,11 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chinese Language",
                         "level": 1
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -2121,11 +2126,11 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chinese Language",
                         "level": 1
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -2171,11 +2176,11 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Chinese Language",
                         "level": 1
-                    }
+                    }]
                 },
                 {
                     "action": "approval",
@@ -2310,19 +2315,19 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
                         "subject": "Physics",
                         "level": 3
-                    }
+                    }]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "qualifcation": {
+                    "array": [{
                         "action": "level_DSE",
-                        "subject": "Combine Science - Physics",
+                        "subject": "Combined Science - Physics",
                         "level": 3
-                    }
+                    }]
                 }
             ]
         },

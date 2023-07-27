@@ -234,6 +234,8 @@ async function sha512(message) {
     return bufferToHex(hash).toUpperCase();
 }
 
+const rndStr = () => (Math.random() + 1).toString(36).substring(2)
+
 const emptyimg = `data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==`
 
 var popArray = []
@@ -273,26 +275,31 @@ function setLoadingStatus(type, presistant = false, title = '', subtitle = '', j
     switch (type) {
         case 'success':
             setLoadingStatus('show', false, '', '', setLoadingStatusCSS.success)
+            setTimeout(setLoadingStatus, 500, 'show', false, '', '', setLoadingStatusCSS.success)
+            setTimeout(setLoadingStatus, 1000, 'show', false, '', '', setLoadingStatusCSS.success)
+            setTimeout(setLoadingStatus, 1500, 'show', false, '', '', setLoadingStatusCSS.success)
+            setTimeout(setLoadingStatus, 2000, 'show', false, '', '', setLoadingStatusCSS.success)
+            setTimeout(setLoadingStatus, 2500, 'show', false, '', '', setLoadingStatusCSS.success)
             presistTime = 2850; LoadingStatusQueue += 1; setTimeout(() => { LoadingStatusQueue -= 1 }, presistTime + 750)
             break
         case 'warning':
             setLoadingStatus('show', false, '', '', setLoadingStatusCSS.warn.grow)
             presistTime = 6350; LoadingStatusQueue += 1; setTimeout(() => { LoadingStatusQueue -= 1 }, presistTime + 750)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.dim }, 600)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.grow }, 1300)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.dim }, 2000)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.grow }, 2700)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.warn.dim }, presistTime - 350)
+            setTimeout(setLoadingStatus, 600, 'show', false, '', '', setLoadingStatusCSS.warn.dim)
+            setTimeout(setLoadingStatus, 1300, 'show', false, '', '', setLoadingStatusCSS.warn.grow)
+            setTimeout(setLoadingStatus, 2000, 'show', false, '', '', setLoadingStatusCSS.warn.dim)
+            setTimeout(setLoadingStatus, 2700, 'show', false, '', '', setLoadingStatusCSS.warn.grow)
+            setTimeout(setLoadingStatus, presistTime - 350, 'show', false, '', '', setLoadingStatusCSS.warn.dim)
             break
         case 'error':
             setLoadingStatus('show', false, '', '', setLoadingStatusCSS.error.show)
             presistTime = 6850; LoadingStatusQueue += 1; setTimeout(() => { LoadingStatusQueue -= 1 }, presistTime + 750)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.hide }, 850)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.show }, 1350)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.hide }, 1850)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.show }, 2350)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.hide }, 2850)
-            setTimeout(() => { l.innerHTML = setLoadingStatusCSS.error.show }, 3350)
+            setTimeout(setLoadingStatus, 850, 'show', false, '', '', setLoadingStatusCSS.error.hide)
+            setTimeout(setLoadingStatus, 1350, 'show', false, '', '', setLoadingStatusCSS.error.show)
+            setTimeout(setLoadingStatus, 1850, 'show', false, '', '', setLoadingStatusCSS.error.hide)
+            setTimeout(setLoadingStatus, 2350, 'show', false, '', '', setLoadingStatusCSS.error.show)
+            setTimeout(setLoadingStatus, 2850, 'show', false, '', '', setLoadingStatusCSS.error.hide)
+            setTimeout(setLoadingStatus, 3350, 'show', false, '', '', setLoadingStatusCSS.error.show)
             break
         case 'show':
             presistant = true
@@ -443,6 +450,7 @@ function boot(path, noHistory, bootID = -1) {
 }
 
 function reboot() {
+    prev_bootID_call = -2
     prev_boot_call = 'none'
     prev_call = 'none'
     bottomBarUserInfo = ""
