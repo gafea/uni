@@ -450,7 +450,15 @@ function boot(path, noHistory, bootID = -1) {
     return true;
 }
 
-function reboot() {
+function reboot(soft = false) {
+    if (soft) {
+        if (prev_bootID_call == -2) {
+            boot(window.location.pathname, true)
+        } else {
+            boot(window.location.pathname, true, prev_bootID_call)
+        }
+        return
+    }
     prev_bootID_call = -2
     prev_boot_call = 'none'
     prev_call = 'none'

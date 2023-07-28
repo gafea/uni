@@ -43,8 +43,15 @@ try {
     var majorschoolmapping = {}
 
     function startPythonServer() {
-        pythonseed = sharedfx.rndStr(32)
-        setTimeout(exec, 1, "python C:\\webserver\\nodejs\\uni\\webServer.py " + pythonseed, err => {console.log("python error", err)})
+        try {
+            pythonseed = sharedfx.rndStr(32)
+            setTimeout(exec, 10, "python C:\\webserver\\nodejs\\uni\\webServer.py " + pythonseed, err => {
+                console.log("python error", err)
+                sharedfx.deathDump("uni.gafea.net", "failed to start python server", err)
+            })
+        } catch (error) {
+            sharedfx.deathDump("uni.gafea.net", "failed to start python server", error)
+        }
     }
     startPythonServer()
 

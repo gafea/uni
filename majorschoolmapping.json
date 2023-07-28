@@ -1,33 +1,126 @@
-		
 {
-"BEng in Bioengineering": {"prog": "BIEN", "school": "engineering"},
-"BEng in Chemical Engineering": {"prog": "CENG", "school": "engineering"},
-"BEng in Chemical Engineering with Research Option": {"prog": "CENG", "school": "engineering"},
-"BEng in Chemical and Environmental Engineering": {"prog": "CEEV", "school": "engineering"},
-"BEng in Chemical and Environmental Engineering with Research Option": {"prog": "CEEV", "school": "engineering"},
-"BEng in Sustainable Energy Engineering": {"prog": "SUSEE", "school": "engineering"},
-"BEng in Civil Engineering": {"prog": "CIVL", "school": "engineering"},
-"BEng in Civil Engineering with Research Option": {"prog": "CIVL", "school": "engineering"},
-"BEng in Civil and Environmental Engineering": {"prog": "CIEV", "school": "engineering"},
-"BEng in Civil and Environmental Engineering with Research Option": {"prog": "CIEV", "school": "engineering"},
-"BEng in Computer Engineering": {"prog": "CPEG", "school": "engineering"},
-"BEng in Computer Engineering with Research Option": {"prog": "CPEG", "school": "engineering"},
-"BEng in Computer Science": {"prog": "COMP", "school": "engineering"},
-"BSc in Computer Science": {"prog": "COSC", "school": "engineering"},
-"BEng in Electronic Engineering": {"prog": "ELEC", "school": "engineering"},
-"BEng in Electronic Engineering with Research Option": {"prog": "ELEC", "school": "engineering"},
-"BEng in Decision Analytics": {"prog": "DA", "school": "engineering"},
-"BEng in Industrial Engineering and Engineering Management": {"prog": "IEEM", "school": "engineering"},
-"BEng in Industrial Engineering and Engineering Management with Financial Engineering Option": {"prog": "IEEM", "school": "engineering"},
-"BEng in Industrial Engineering and Engineering Management with Research Option": {"prog": "IEEM", "school": "engineering"},
-"BSc in Integrative Systems and Design": {"prog": "ISDN", "school": "engineering"},
-"BEng in Aerospace Engineering": {"prog": "AE", "school": "engineering"},
-"BEng in Aerospace Engineering with Research Option": {"prog": "AE", "school": "engineering"},
-"BEng in Mechanical Engineering": {"prog": "MECH", "school": "engineering"},
-"BEng in Mechanical Engineering with Energy Option": {"prog": "MECH", "school": "engineering"},
-"BEng in Mechanical Engineering with Engineering Design Option": {"prog": "MECH", "school": "engineering"},
-"BEng in Mechanical Engineering with Materials Option": {"prog": "MECH", "school": "engineering"},
-"BEng in Mechanical Engineering with Research Option": {"prog": "MECH", "school": "engineering"},
-"BSc in Data Science and Technology": {"prog": "DSCT", "school": "science"},
-"Extended Major Program in Artificial Intelligence": {"prog": "EXTM-AI", "school": "Academy of Interdisciplinary Studies"},
-"Extended Major Program in Digital Media and Creative Arts": {"prog": "EXTM-DMCA", "school": "Academy of Interdisciplinary Studies"}}
+    "BEng in Bioengineering": {
+        "prog": "BIEN",
+        "school": "School of Engineering"
+    },
+    "BEng in Chemical Engineering": {
+        "prog": "CENG",
+        "school": "School of Engineering"
+    },
+    "BEng in Chemical Engineering with Research Option": {
+        "prog": "CENG",
+        "school": "School of Engineering"
+    },
+    "BEng in Chemical and Environmental Engineering": {
+        "prog": "CEEV",
+        "school": "School of Engineering"
+    },
+    "BEng in Chemical and Environmental Engineering with Research Option": {
+        "prog": "CEEV",
+        "school": "School of Engineering"
+    },
+    "BEng in Sustainable Energy Engineering": {
+        "prog": "SUSEE",
+        "school": "School of Engineering"
+    },
+    "BEng in Civil Engineering": {
+        "prog": "CIVL",
+        "school": "School of Engineering"
+    },
+    "BEng in Civil Engineering with Research Option": {
+        "prog": "CIVL",
+        "school": "School of Engineering"
+    },
+    "BEng in Civil and Environmental Engineering": {
+        "prog": "CIEV",
+        "school": "School of Engineering"
+    },
+    "BEng in Civil and Environmental Engineering with Research Option": {
+        "prog": "CIEV",
+        "school": "School of Engineering"
+    },
+    "BEng in Computer Engineering": {
+        "prog": "CPEG",
+        "school": "School of Engineering"
+    },
+    "BEng in Computer Engineering with Research Option": {
+        "prog": "CPEG",
+        "school": "School of Engineering"
+    },
+    "BEng in Computer Science": {
+        "prog": "COMP",
+        "school": "School of Engineering"
+    },
+    "BSc in Computer Science": {
+        "prog": "COSC",
+        "school": "School of Engineering"
+    },
+    "BEng in Electronic Engineering": {
+        "prog": "ELEC",
+        "school": "School of Engineering"
+    },
+    "BEng in Electronic Engineering with Research Option": {
+        "prog": "ELEC",
+        "school": "School of Engineering"
+    },
+    "BEng in Decision Analytics": {
+        "prog": "DA",
+        "school": "School of Engineering"
+    },
+    "BEng in Industrial Engineering and Engineering Management": {
+        "prog": "IEEM",
+        "school": "School of Engineering"
+    },
+    "BEng in Industrial Engineering and Engineering Management with Financial Engineering Option": {
+        "prog": "IEEM",
+        "school": "School of Engineering"
+    },
+    "BEng in Industrial Engineering and Engineering Management with Research Option": {
+        "prog": "IEEM",
+        "school": "School of Engineering"
+    },
+    "BSc in Integrative Systems and Design": {
+        "prog": "ISDN",
+        "school": "School of Engineering"
+    },
+    "BEng in Aerospace Engineering": {
+        "prog": "AE",
+        "school": "School of Engineering"
+    },
+    "BEng in Aerospace Engineering with Research Option": {
+        "prog": "AE",
+        "school": "School of Engineering"
+    },
+    "BEng in Mechanical Engineering": {
+        "prog": "MECH",
+        "school": "School of Engineering"
+    },
+    "BEng in Mechanical Engineering with Energy Option": {
+        "prog": "MECH",
+        "school": "School of Engineering"
+    },
+    "BEng in Mechanical Engineering with Engineering Design Option": {
+        "prog": "MECH",
+        "school": "School of Engineering"
+    },
+    "BEng in Mechanical Engineering with Materials Option": {
+        "prog": "MECH",
+        "school": "School of Engineering"
+    },
+    "BEng in Mechanical Engineering with Research Option": {
+        "prog": "MECH",
+        "school": "School of Engineering"
+    },
+    "BSc in Data Science and Technology": {
+        "prog": "DSCT",
+        "school": "School of Science"
+    },
+    "Extended Major Program in Artificial Intelligence": {
+        "prog": "EXTM-AI",
+        "school": "Academy of Interdisciplinary Studies"
+    },
+    "Extended Major Program in Digital Media and Creative Arts": {
+        "prog": "EXTM-DMCA",
+        "school": "Academy of Interdisciplinary Studies"
+    }
+}

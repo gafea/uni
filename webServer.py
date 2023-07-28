@@ -24,7 +24,9 @@ try:
 # Check if nodejs server is alive
 ############################
 
-    nodejs_alive_key = sys.argv[1]
+    nodejs_alive_key = ""
+    if sys.argv != [] and len(sys.argv) > 1:
+        nodejs_alive_key = sys.argv[1]
 
     def set_interval(func, sec):
         def func_wrapper():
@@ -45,7 +47,7 @@ try:
             print("nodejs server not alive, killing python server too")
             exit(1)
 
-    set_interval(check_if_nodejs_server_alive, 60)
+    #set_interval(check_if_nodejs_server_alive, 60)
 
 ############################
 
@@ -141,11 +143,14 @@ try:
             mxi = request.get_json()
             mx = {}
             if "course" in mxi:
+                #print(1, mxi)
                 mx = checking_function_course.main(mxi)
             else:
+                #print(2, mxi)
                 mx = checking_function_major.main(mxi)
             return {"status": 200, "resp": mx}
-        except:
+        except Exception as error:
+            #print(3, error)
             return {"status": 500}
 
     @app.route('/!recommend/courses/', methods = ['POST'])
@@ -174,7 +179,7 @@ try:
         return {"status": 404}
 
     if __name__ == '__main__':
-        app.run(debug=False, port=7003)
+        app.run(debug=True, port=7003)
 except ImportError:
     print("File missing or outdated")
 except Exception as Argument:

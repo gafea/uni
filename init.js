@@ -608,7 +608,7 @@ function render_plan(path) {
                         mmlength = config.profile.currentStudies.mm.length + 1
 
                         for (let index = 0; index < mmlength; index++) {
-                            mmdraft += `[` + (index + 1) + `]: <select id="mmsel-` + index + `" onchange="let n = []; if (typeof config.profile.currentStudies.mm != 'undefined') n = config.profile.currentStudies.mm; let v = document.getElementById('mmsel-` + index + `').value;if (v === '----') {n.splice(` + index + `, 1)} else {n[` + index + `] = v};updateProfile('currentStudies', 'mm', n);reboot()">`
+                            mmdraft += `[` + (index + 1) + `]: <select id="mmsel-` + index + `" onchange="let n = []; if (typeof config.profile.currentStudies.mm != 'undefined') n = config.profile.currentStudies.mm; let v = document.getElementById('mmsel-` + index + `').value;if (v === '----') {n.splice(` + index + `, 1)} else {n[` + index + `] = v};updateProfile('currentStudies', 'mm', n, reboot)">`
                             if (index || (typeof config.profile.currentStudies.mm[index] == "undefined" || config.profile.currentStudies.mm.length > 1)) {
                                 mmdraft += `<option value="----" selected>----</option>`
                             }
@@ -644,10 +644,26 @@ function render_plan(path) {
             })
             document.getElementById("major_select_topbox").innerHTML = mmdraft
             mmdraft = ""
-            find_in_local_cache(yearx, majorminorx, (reqs) => {
-                //document.getElementById("courses_select_right").innerHTML = JSON.stringify(reqs)
-                document.getElementById("major_select_cont").innerHTML = `<h3>` + majorminorx + ((yearx != "0") ? " (" + yearx + ")" : "") + `</h3><br>` + generate_html_from_action(JSON.parse(JSON.stringify(reqs)))
-            })
+            if (signinlevel > 0) {
+                let reqx = { "fx": "checking", "prog": [majorminorx] }
+                if (signinlevel < 1) reqx.userdb = config
+                post((signinlevel >= 1) ? "/!acc/userfx/" : "/!guestfx/", reqx).then(r => r.json()).then(r => {
+                    if (r.status === 200) {
+                        //document.getElementById("exp-api-checking-result").innerHTML = ""
+                        document.getElementById("major_select_cont").innerHTML = `<h3>` + majorminorx + ((yearx != "0") ? " (" + yearx + ")" : "") + `</h3><br>` + generate_html_from_action(JSON.parse(JSON.stringify(r.resp[majorminorx])))
+                    } else {
+                        document.getElementById("major_select_cont").innerHTML = "failed to contact server"
+                    }
+                }).catch(error => {
+                    console.log(error)
+                    document.getElementById("major_select_cont").innerHTML = "failed to contact server"
+                })
+            } else {
+                find_in_local_cache(yearx, majorminorx, (reqs) => {
+                    //document.getElementById("courses_select_right").innerHTML = JSON.stringify(reqs)
+                    document.getElementById("major_select_cont").innerHTML = `<h3>` + majorminorx + ((yearx != "0") ? " (" + yearx + ")" : "") + `</h3><br>` + generate_html_from_action(JSON.parse(JSON.stringify(reqs)))
+                })
+            }
         })
     })
 }
@@ -979,7 +995,7 @@ function render_me(path) {
                     let snote = rndStr()
                     selfDeclearTemplate += `<div class='flx' style="gap:0.5em;padding:1em;border-radius:1em;width:calc(100% - 2em);` + ((i % 2) ? "" : "background-color:#ccc1") + `">
                     <p2> ` + item + `</p2>
-                    <button onclick="updateProfile('specialApprovals', 'selfDeclear', config.profile.specialApprovals.selfDeclear.filter(a => a != document.getElementById('aprvtext-` + snote + `').innerText));setTimeout(reboot, 100)">delete</button>
+                    <button onclick="updateProfile('specialApprovals', 'selfDeclear', config.profile.specialApprovals.selfDeclear.filter(a => a != document.getElementById('aprvtext-` + snote + `').innerText), reboot)">delete</button>
                     <textarea id="aprvtext-` + snote + `" style="display:none"></textarea>
                     </div>`
                     setTimeout(() => document.getElementById("aprvtext-" + snote).innerText = item, 100)
@@ -1137,7 +1153,8 @@ function generate_year_of_intake_select(selection = "") {
     return draft
 }
 
-function updateProfile(category, target, value) {
+function updateProfile(category, target, value, cb) {
+    try {setLoadingStatus("show")} catch (error) {}
     let configTemp = JSON.parse(JSON.stringify(config))
     if (typeof configTemp.profile === "undefined") configTemp.profile = {}
     if (typeof configTemp.profile[category] === "undefined") configTemp.profile[category] = {}
@@ -1145,7 +1162,10 @@ function updateProfile(category, target, value) {
     update_config("profile", configTemp.profile, (err) => {
         if (err) { alert(err); console.log(err); return }
         //alert("Profile updated!")
-        setTimeout(() => setLoadingStatus("success", false, "Profile updated"), 250)
+        setTimeout(() => {
+            if (cb) cb()
+            setLoadingStatus("success", false, "Profile updated")
+        }, 10)
     })
 }
 
@@ -1361,8 +1381,14 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
             ignoreMissingAction = true
             break;
 
+        case "pass_qualification":            
+            htmldft = `<h5>Pass this qualification:</h5>`
+            htmlcft = `<p2>Level ` + json.level + ` or above in ` + json.quali.join(" ") + `</p2>`
+            if (!json.quali || !json.level) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
+            break;
+
         case "pass_qualifcation":
-            htmldft = `<h4><small>Pass this qualification:</small></h4>`
+            htmldft = `<h5>Pass this qualification:</h5>`
             if (!json.array) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
             break;
 
@@ -1390,7 +1416,7 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
             if (typeof json.attr != "undefined" && typeof json.attr.requireUserFillCourses != "undefined" && json.attr.requireUserFillCourses) {
                 onclickScript = `alert("hvnt made the add course yet, coming soon")`
             } else {
-                onclickScript = "updateProfile('specialApprovals', 'selfDeclear', " + (json.pass ? ("config.profile.specialApprovals.selfDeclear.filter(a => a != document.getElementById('aprvtext-" + snote + "').innerText)") : ((typeof config.profile == "undefined" || typeof config.profile.specialApprovals == "undefined" || typeof config.profile.specialApprovals.selfDeclear == "undefined") ? ("[document.getElementById('aprvtext-" + snote + "').innerText]") : ("[...config.profile.specialApprovals.selfDeclear, document.getElementById('aprvtext-" + snote + "').innerText]"))) + "); setTimeout(reboot, 100)"
+                onclickScript = "updateProfile('specialApprovals', 'selfDeclear', " + (json.pass ? ("config.profile.specialApprovals.selfDeclear.filter(a => a != document.getElementById('aprvtext-" + snote + "').innerText)") : ((typeof config.profile == "undefined" || typeof config.profile.specialApprovals == "undefined" || typeof config.profile.specialApprovals.selfDeclear == "undefined") ? ("[document.getElementById('aprvtext-" + snote + "').innerText]") : ("[...config.profile.specialApprovals.selfDeclear, document.getElementById('aprvtext-" + snote + "').innerText]"))) + ", () => reboot(true))"
             }
             htmldft = `<h4><small>Fulfill this requirement:</small></h4>`
             htmlcft = `<p2>` + json.note + `</p2>

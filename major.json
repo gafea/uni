@@ -78,7 +78,8 @@
                 "Business Advanced Courses": {
                     "action": "or",
                     "attr": {
-                        "min_course": 0
+                        "min_course": 0,
+                        "min_credit": 0
                     },
                     "array": {
                         "ACCT 2200 ": {
