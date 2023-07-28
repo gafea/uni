@@ -1,0 +1,2379 @@
+{
+    "ISOM2600": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "not",
+                            "array": [{
+                                "action": "fail_attr",
+                                "target_attr": "CO-REQUISITE"
+                            }]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "ISOM 2500"
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "fail_attr",
+                            "target_attr": "CO-REQUISITE"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "and",
+                                    "array": [
+                                        {
+                                            "action": "pass_course",
+                                            "course": "ISOM 2500"
+                                        },
+                                        {
+                                            "action": "pass_course",
+                                            "course": "COMP 1021"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "action": "and",
+                                    "array": [
+                                        {
+                                            "action": "pass_course",
+                                            "course": "MATH 2411"
+                                        },
+                                        {
+                                            "action": "pass_course",
+                                            "course": "COMP 1021"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "CO-REQUISITE": {
+            "action": "pass_course",
+            "course": "ISOM 2020"
+        }
+    },
+    "CHEM1008": {
+        "attr": {
+            "type": "course"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chemistry",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Combined Science - Chemistry",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "a passing grade in AL/AS Chemistry"
+                },
+                {
+                    "action": "pass_certain_level",
+                    "dept": "CHEM",
+                    "level": "1004"
+                }
+            ]
+        }
+    },
+    "CORE1402": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "and",
+                        "array": [
+                            {   "attr" :{"exact": true},
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Overall": 3
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Reading": 3
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Writing": 3
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Listening": 3
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Speaking": 3
+                            }
+                        ]
+                    }]
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "attr" :{"exact": true},
+                        "action": "level_DSE",
+                        "subject": "English Language",
+                        "level": 4
+                    }]
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "and",
+                        "array": [
+                            {
+                                "attr" :{"exact": true},
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Overall": 5
+                            },
+                            {
+                                "action": "not",
+                                "array": [{
+                                    "action": "and",
+                                    "array": [
+                                        {
+                                            "action": "level_DSE",
+                                            "subject": "English Language",
+                                            "Reading": 4
+                                        },
+                                        {
+                                            "action": "level_DSE",
+                                            "subject": "English Language",
+                                            "Writing": 4
+                                        },
+                                        {
+                                            "action": "level_DSE",
+                                            "subject": "English Language",
+                                            "Listening": 4
+                                        },
+                                        {
+                                            "action": "level_DSE",
+                                            "subject": "English Language",
+                                            "Speaking": 4
+                                        }
+                                    ]
+                                }]
+                            }
+                        ]
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "Overall bandscore of 6.0 in IELTS"
+                },
+                {
+                    "action": "approval",
+                    "note": "Overall bandscore of 6.5 in IELTS with some but not all subscores at or above 6.0"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1002"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1003"
+                }
+            ]
+        }
+    },
+    "IEDA4100": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "and",
+            "array": [
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "and",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "IEDA 2520"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "IEDA 2540"
+                                }
+                            ]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "IEDA 2510"
+                        }
+                    ]
+                },
+                {
+                    "action": "pass_course",
+                    "course": "IEDA 3010"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "pass_course",
+            "course": "ISOM 2700"
+        }
+    },
+    "IEDA4130": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "IEDA 2520"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "IEDA 2540"
+                        }
+                    ]
+                },
+                {
+                    "action": "pass_course",
+                    "course": "IEDA 2510"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "pass_course",
+            "course": "ISOM 4720"
+        }
+    },
+    "ISOM3230": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "and",
+            "array": [
+                {
+                    "action": "not",
+                    "array": [{
+                        "action": "is_major",
+                        "major": "QFIN"
+                    }]
+                },
+                {
+                    "action": "pass_course",
+                    "course": "ISOM 2010"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "pass_course",
+            "course": "COMP 1022Q"
+        }
+    },
+    "LANG4030": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "DDP"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1403"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1404"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 1003"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "DSCT"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 2010"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 2030"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "not",
+                            "array": [{
+                                "action": "or",
+                                "array": [
+                                    {
+                                        "action": "is_major",
+                                        "major": "DSCT"
+                                    },
+                                    {
+                                        "action": "is_major",
+                                        "major": "DDP"
+                                    }
+                                ]
+                            }]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "LANG 2030"
+                        }
+                    ]
+                }
+            ]
+        },
+        "CO-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "is_major",
+                                    "major": "COMP"
+                                },
+                                {
+                                    "action": "is_major",
+                                    "major": "DSCT"
+                                }
+                            ]
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "COMP 4910"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "COMP 4981"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "COMP 4981H"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "CPEG"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "CPEG 4901"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "CPEG 4902"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "CPEG 4910"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "COSC"
+                        },
+                        {
+                            "action": "approval",
+                            "note": " Nil"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "LANG4031": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "DDP"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1403"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1404"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 1003"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "not",
+                            "array": [{
+                                "action": "is_major",
+                                "major": "DDP"
+                            }]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "LANG 2030"
+                        }
+                    ]
+                }
+            ]
+        },
+        "CO-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "ELEC 4900"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "ELEC 4901"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "ELEC 4910"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CPEG 4910"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CPEG 4911"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CPEG 4912"
+                }
+            ]
+        }
+    },
+    "LANG4032": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "DDP"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1403"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1404"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 1003"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "not",
+                            "array": [{
+                                "action": "is_major",
+                                "major": "DDP"
+                            }]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "LANG 2030"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "LANG4034": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "DDP"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1403"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1404"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 1003"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "not",
+                            "array": [{
+                                "action": "is_major",
+                                "major": "DDP"
+                            }]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "LANG 2030"
+                        }
+                    ]
+                }
+            ]
+        },
+        "CO-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "MECH 3690"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "MECH 3830"
+                }
+            ]
+        }
+    },
+    "LANG3021": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "DSCT"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 2010"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 2030"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "not",
+                            "array": [{
+                                "action": "is_major",
+                                "major": "DSCT"
+                            }]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "LANG 2010"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "LANG4035": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "DDP"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1403"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1404"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 1003"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "not",
+                            "array": [{
+                                "action": "is_major",
+                                "major": "DDP"
+                            }]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "LANG 2030"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "LANG3024": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "DDP"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1403"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1404"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 1003"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "not",
+                            "array": [{
+                                "action": "is_major",
+                                "major": "DDP"
+                            }]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "LANG 2010"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "MATH4033": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "and",
+            "array": [
+                {
+                    "action": "grade_course",
+                    "course": "MATH 2023",
+                    "grade": "A-"
+                },
+                {
+                    "action": "grade_course",
+                    "course": "MATH 2131",
+                    "grade": "B-"
+                }
+            ]
+        }
+    },
+    "MGMT2130": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "and",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "not",
+                            "array": [{
+                                "action": "is_major",
+                                "major": "BIBU"
+                            }]
+                        },
+                        {
+                            "action": "not",
+                            "array": [
+                                {"action": "is_major",
+                                "major": "SGFN"}
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "pass_course",
+                    "course": "MGMT 2010"
+                }
+            ]
+        }
+    },
+    "SCIE1120": {
+        "attr": {
+            "type": "course"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_certain_level",
+                    "dept": "CHEM",
+                    "level": "2000"
+                },
+                {
+                    "action": "pass_certain_level",
+                    "dept": "LIFS",
+                    "level": "2000"
+                },
+                {
+                    "action": "pass_certain_level",
+                    "dept": "CENG",
+                    "level": "2000"
+                },
+                {
+                    "action": "pass_certain_level",
+                    "dept": "BIEN",
+                    "level": "2000"
+                }
+            ]
+        }
+    },
+    "SCIE3110": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "pass_qualifcation",
+            "array": [{
+                "action": "or",
+                "array": [
+                    {
+                        "action": "level_DSE",
+                        "subject": "Physics",
+                        "level": 4
+                    },
+                    {
+                        "action": "level_DSE",
+                        "subject": "Chemistry",
+                        "level": 4
+                    },
+                    {
+                        "action": "level_DSE",
+                        "subject": "Mathematics Extended Part (M1: Calculus and Statistics)",
+                        "level": 4
+                    },
+                    {
+                        "action": "level_DSE",
+                        "subject": "Mathematics Extended Part (M2: Algebra and Calculus)",
+                        "level": 4
+                    }
+                ]
+            }]
+        }
+    },
+    "ECON4374": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "ECON 3014"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "ECON 3024"
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "ECON 3113"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "ECON 3123"
+                        }
+                    ]
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "pass_course",
+            "course": "ECON 4384"
+        }
+    },
+    "ECON4114": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "ECON 3014"
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "ECON 3113"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "ECON 3133"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "IEDA3130": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "IEDA 2510"
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "IEDA 2520"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "IEDA 2540"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "IEDA3330": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "CIVL 2160"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "ELEC 2600"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "IEDA 2510"
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "IEDA 2520"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "IEDA 2540"
+                        }
+                    ]
+                },
+                {
+                    "action": "pass_course",
+                    "course": "ISOM 2500"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "MATH 2411"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "MATH 2421"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "MATH 2431"
+                }
+            ]
+        }
+    },
+    "IEDA3250": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "IEDA 2510"
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "IEDA 2520"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "IEDA 2540"
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2411"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2421"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "LANG4033": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "DDP"
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1403"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "CORE 1404"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "LANG 1003"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "not",
+                            "array": [{
+                                "action": "is_major",
+                                "major": "DDP"
+                            }]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "LANG 2030"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "LIFS1010": {
+        "attr": {
+            "type": "course"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "LIFS 1901"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LIFS 1902"
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Combined Science - Biology",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Biology",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "a passing grade in HKCEE Biology"
+                },
+                {
+                    "action": "approval",
+                    "note": "HKAL Biology"
+                }
+            ]
+        }
+    },
+    "MATH4432": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "and",
+            "array": [
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "COMP 1021"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "COMP 1022P"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "COMP 1022Q"
+                        }
+                    ]
+                },
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "IEDA 2510"
+                        },
+                        {
+                            "action": "and",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "IEDA 2520"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "IEDA 2540"
+                                }
+                            ]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "ISOM 2500"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "LIFS 3150"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2411"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2421"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2431"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "PHYS1312": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "and",
+            "array": [
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "pass_qualifcation",
+                            "array": [{
+                                "action": "level_DSE",
+                                "subject": "Physics",
+                                "level": 6
+                            }]
+                        },
+                        {
+                            "action": "pass_qualifcation",
+                            "array": [{
+                                "action": "level_DSE",
+                                "subject": "Combined Science - Physics",
+                                "level": 6
+                            }]
+                        }
+                    ]
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "or",
+                        "array": [
+                            {
+                                "action": "level_DSE",
+                                "subject": "Mathematics Extended Part (M1: Calculus and Statistics)",
+                                "level": 5
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "Mathematics Extended Part (M2: Algebra and Calculus)",
+                                "level": 5
+                            }
+                        ]
+                    }]
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "PHYS 1111"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "PHYS 1112"
+                }
+            ]
+        }
+    },
+    "CORE1403A": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "CORE 1401"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CORE 1402"
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "and",
+                        "array": [
+                            {
+                                "attr" :{"exact": true},
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Overall": 5
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Reading": 4
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Writing": 4
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Listening": 4
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Speaking": 4
+                            }
+                        ]
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "Overall bandscore of 6.5 in IELTS with all subscores at or above 6.0"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "pass_course",
+            "course": "LANG 1003"
+        }
+    },
+    "CORE1403I": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "CORE 1401"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CORE 1402"
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "and",
+                        "array": [
+                            {
+                                "attr" :{"exact": true},
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Overall": 5
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Reading": 4
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Writing": 4
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Listening": 4
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Speaking": 4
+                            }
+                        ]
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "Overall bandscore of 6.5 in IELTS with all subscores at or above 6.0"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "pass_course",
+            "course": "LANG 1003"
+        }
+    },
+    "CORE1403S": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "CORE 1401"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CORE 1402"
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "and",
+                        "array": [
+                            {
+                                "attr" :{"exact": true},
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Overall": 5
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Reading": 4
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Writing": 4
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Listening": 4
+                            },
+                            {
+                                "action": "level_DSE",
+                                "subject": "English Language",
+                                "Speaking": 4
+                            }
+                        ]
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "Overall bandscore of 6.5 in IELTS with all subscores at or above 6.0"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "pass_course",
+            "course": "LANG 1003"
+        }
+    },
+    "PHYS1006": {
+        "attr": {
+            "type": "course"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Combined Science - Physics",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Physics",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "a passing grade in AL/AS Physics"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CORE 1110"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "PHYS 1002"
+                }
+            ]
+        }
+    },
+    "UROP3200": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "approval",
+                    "note": "TWO passing grades in UROP 1100"
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "UROP 1100"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "UROP 2100"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "LANG1126": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "pass_course",
+            "course": "LANG 1125"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chinese Language",
+                        "level": 1
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "HKALE/HKCEE/JEE Chinese"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1113"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1114"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1115"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1116"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1117"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1118"
+                }
+            ]
+        }
+    },
+    "MATH4333": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "MATH 2350"
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "MATH 2121"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "MATH 2111"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "MATH 2131"
+                                }
+                            ]
+                        },
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "MATH 2351"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "MATH 2352"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "MATH4336": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "and",
+            "array": [
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2011"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2023"
+                        }
+                    ]
+                },
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2350"
+                        },
+                        {
+                            "action": "and",
+                            "array": [
+                                {
+                                    "action": "or",
+                                    "array": [
+                                        {
+                                            "action": "pass_course",
+                                            "course": "MATH 2111"
+                                        },
+                                        {
+                                            "action": "pass_course",
+                                            "course": "MATH 2121"
+                                        },
+                                        {
+                                            "action": "pass_course",
+                                            "course": "MATH 2131"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "action": "or",
+                                    "array": [
+                                        {
+                                            "action": "pass_course",
+                                            "course": "MATH 2351"
+                                        },
+                                        {
+                                            "action": "pass_course",
+                                            "course": "MATH 2352"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "COMP 4421"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "ELEC 4130"
+                }
+            ]
+        }
+    },
+    "CHEM1004": {
+        "attr": {
+            "type": "course"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chemistry",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Combined Science - Chemistry",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "a passing grade in AL/AS Chemistry"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CHEM 1010"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CHEM 1020"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CHEM 1030"
+                },
+                {
+                    "action": "pass_certain_level",
+                    "dept": "CHEM",
+                    "level": "2000"
+                }
+            ]
+        }
+    },
+    "CHEM1010": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Combined Science - Chemistry",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CHEM 1004"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chemistry",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CHEM 1008"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CHEM 1020"
+                }
+            ]
+        }
+    },
+    "LANG1120": {
+        "attr": {
+            "type": "course"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chinese Language",
+                        "level": 1
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "HKALE/HKCEE/JEE Chinese"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1113"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1114"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1115"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1116"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1117"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1118"
+                }
+            ]
+        }
+    },
+    "LANG1121": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "pass_course",
+            "course": "LANG 1120"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chinese Language",
+                        "level": 1
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "HKALE/HKCEE/JEE Chinese"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1113"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1114"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1115"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1116"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1117"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1118"
+                }
+            ]
+        }
+    },
+    "LANG1122": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "pass_course",
+            "course": "LANG 1121"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chinese Language",
+                        "level": 1
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "HKALE/HKCEE/JEE Chinese"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1113"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1114"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1115"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1116"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1117"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1118"
+                }
+            ]
+        }
+    },
+    "LANG1123": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "pass_course",
+            "course": "LANG 1122"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chinese Language",
+                        "level": 1
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "HKALE/HKCEE/JEE Chinese"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1113"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1114"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1115"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1116"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1117"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1118"
+                }
+            ]
+        }
+    },
+    "LANG1124": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "pass_course",
+            "course": "LANG 1123"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chinese Language",
+                        "level": 1
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "HKALE/HKCEE/JEE Chinese"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1113"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1114"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1115"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1116"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1117"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1118"
+                }
+            ]
+        }
+    },
+    "LANG1127": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "pass_course",
+            "course": "LANG 1126"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chinese Language",
+                        "level": 1
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "HKALE/HKCEE/JEE Chinese"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1113"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1114"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1115"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1116"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1117"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1118"
+                }
+            ]
+        }
+    },
+    "LANG1125": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "pass_course",
+            "course": "LANG 1124"
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Chinese Language",
+                        "level": 1
+                    }]
+                },
+                {
+                    "action": "approval",
+                    "note": "HKALE/HKCEE/JEE Chinese"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1113"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1114"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1115"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1116"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1117"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1118"
+                }
+            ]
+        }
+    },
+    "LIFS4060": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "and",
+            "array": [
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "LIFS 2040"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "LIFS 2210"
+                        }
+                    ]
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LIFS 3140"
+                }
+            ]
+        }
+    },
+    "MATH4824B": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "and",
+            "array": [
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "COMP 2011"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "COMP 2012"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "COMP 2012H"
+                        }
+                    ]
+                },
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "pass_course",
+                                    "course": "COMP 2711"
+                                },
+                                {
+                                    "action": "pass_course",
+                                    "course": "COMP 2711H"
+                                }
+                            ]
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2343"
+                        }
+                    ]
+                },
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2111"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2121"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "MATH 2131"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "PHYS1005": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Physics",
+                        "level": 3
+                    }]
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [{
+                        "action": "level_DSE",
+                        "subject": "Combined Science - Physics",
+                        "level": 3
+                    }]
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "approval",
+            "note": "SISP 1111"
+        }
+    },
+    "ECON4999R": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "ECON 3014"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "ECON 3024"
+                        }
+                    ]
+                },
+                {
+                    "action": "and",
+                    "array": [
+                        {
+                            "action": "pass_course",
+                            "course": "ECON 3113"
+                        },
+                        {
+                            "action": "pass_course",
+                            "course": "ECON 3123"
+                        }
+                    ]
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "pass_course",
+            "course": "ECON 4364"
+        }
+    }
+}

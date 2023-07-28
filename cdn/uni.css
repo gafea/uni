@@ -49,11 +49,21 @@ select:hover, select:focus, input:not([type=search]):hover, input:not([type=sear
 .course_sel:hover, .course_sel:focus{transform:scale(1.01)}
 .course_sel:hover:active{transform:scale(0.9875)}
 .course_sel, .picbox_inner{min-height:8.5em;min-width:15em}
-.course_sel > img {object-fit:cover;position:absolute;top:0;bottom:0;left:0;right:0;width:100%;height:100%;border-radius:1em}
+.course_sel > img, .course_sel > .picbox_inner_blocked, .course_sel > .picbox_inner_locked, .course_sel > .picbox_inner_success {object-fit:cover;position:absolute;top:0;bottom:0;left:0;right:0;width:100%;height:100%;border-radius:1em}
 .picbox_inner{color:white;align-items:flex-end;position:relative;background-color: rgba(0,0,0,.7); background: linear-gradient(180deg, rgba(0,0,0,.3) 0%, rgba(0,0,0,.6) 50%, rgba(0,0,0,.75) 100%); padding: 1em; border-radius: 1em}
 .picbox_inner_up{position: absolute; top: 0.675em; right: 0.675em; left: 0.675em}
 .picbox_inner_up > h5:not(.textbox) {margin-right: 0.325em}
+.picbox_inner_blocked, .picbox_inner_locked, .picbox_inner_success {padding: 0;justify-content: center; align-items: center}
+.picbox_inner_blocked {background: #f885}
+.picbox_inner_locked {background: #ff87}
+.picbox_inner_success {background: #8f85}
 .titlecard_titleblock{display:block}
+.box-dash{border-top:0.15em dotted #8884;margin:0.5em 0}
+.boxcolor-green > .box-dash{border-color:#084c}
+.boxcolor-green > h4, .boxcolor-green > h5 {color:#042}
+.requirement-showbtn-green{padding:0.5em 1.25em;border-radius:2em;margin-top:0.75em;border:2px solid #8fcc; background-color: #8fc8; color:#021; transition-duration: 0.1s;}
+.requirement-showbtn-green:hover{background-color: #8fcc}
+.requirement-showbtn-green:hover:active{transform:scale(0.95)}
 
 .courses_specific_close {position:sticky;top:1.5em;top:calc(1.5em + env(safe-area-inset-top));text-align:right;padding-right:calc(5% + 2em);padding-right:calc(5% + 2em + env(safe-area-inset-right));z-index:10000}
 .courses_specific_close > button {padding:0;margin:0;border:none;border-radius:50%;transition-duration:0.05s;background:rgba(128,128,128,.25);opacity:0.8}
@@ -85,6 +95,8 @@ select:hover, select:focus, input:not([type=search]):hover, input:not([type=sear
     button{color:#eee;background-color:#3f3c39}
     select, #myInput, input{color:#eee;background:#3f3c39}
     .courses_specific_close > button > img, .closebtn > img{filter:invert(1)}
+    .boxcolor-green > h4, .boxcolor-green > h5 {color:#ddfff6}
+    .requirement-showbtn-green{border: 2px solid #8fc9; background-color: #8fc4; color: #ddfff6;}
 
     #fdigbtn, #digbtn:hover, #digbtn:active, #digbtn:focus, #digbtn:focus-within{background:#2c2c34}
 }

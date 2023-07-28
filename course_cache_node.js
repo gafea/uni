@@ -21,6 +21,20 @@ process.argv.forEach(function (val, index, array) {
 let cctm = (new Date())
 console.log("[courses_cache] cacheing courses...")
 
+let localdirpath = servar.course_path + `../`
+if (firstBoot && fs.existsSync(localdirpath + "majorschoolmapping.json") && fs.existsSync(localdirpath + "major.json") && fs.existsSync(localdirpath + "masking.json")) {
+    let mmm = JSON.parse(fs.readFileSync(localdirpath + "majorschoolmapping.json", "utf8")), major = JSON.parse(fs.readFileSync(localdirpath + "major.json", "utf8")), masking = JSON.parse(fs.readFileSync(localdirpath + "masking.json", "utf8"))
+    post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ majorschoolmapping: mmm, majorminorreqs: major })).then(r => r.json()).then(r => {
+        post("http://127.0.0.1:7003/!setvar/majorschoolmapping", JSON.stringify(mmm)).then(r => r.json()).then(r => {
+            post("http://127.0.0.1:7003/!setvar/major", JSON.stringify(major)).then(r => r.json()).then(r => {
+                post("http://127.0.0.1:7003/!setvar/replacement", JSON.stringify(masking)).then(r => r.json()).then(r => {
+                    console.log('[courses_cache] cacheing majorschoolmapping, majorminorreqs, masking done')
+                })
+            })
+        })
+    })
+}
+
 let xcourses = {}
 let xdiffs = {}
 let xpeoples = {}
@@ -211,155 +225,174 @@ Object.keys(xpeoples).forEach(people => {
     if (Object.keys(xpeoples[people]).length === 0) delete xpeoples[people]
 })
 
-post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ courses: xcourses, peoples: xpeoples, rooms: xrooms, sems: xsems, courseids: xcourseids, insems: xinsems, coursegroups: xcoursegroups })).then(r => r.json()).then(r => {
+let pkg = {}
+pkg["courses"] = xcourses
+pkg["peoples"] = xpeoples
+pkg["rooms"] = xrooms
+pkg["sems"] = xsems
+pkg["courseids"] = xcourseids
+pkg["insems"] = xinsems
+pkg["coursegroups"] = xcoursegroups
+post("http://127.0.0.1:7002/!setvar/", JSON.stringify(pkg)).then(r => r.json()).then(r => {
+    console.log('[courses_cache] early cacheing to nodejs server done')
+})
 
-    console.log('[courses_cache] early cacheing done, used ' + ((new Date()).getTime() - cctm.getTime()) + 'ms')
-
-    if (true) {
-        let atm2 = (new Date())
-        let cacheData = {}
-
-        let timeArray = [], startT = 0, endT = 0
-        Object.keys(xdiffs).forEach(courseCode => {
-            let diffFilePath = servar.course_path + "_diff\\" + xsems[0] + "\\" + courseCode + ".json"
-            if (fs.existsSync(diffFilePath)) {
-                cacheData[courseCode] = JSON.parse(fs.readFileSync(diffFilePath, "utf-8"))
-                Object.keys(cacheData[courseCode]).forEach(lesson => {
-                    Object.keys(cacheData[courseCode][lesson]).forEach(dataPointTime => {
-                        let newDataPointTime = dataPointTime - dataPointTime % (20 * 60 * 1000)
-                        if (!timeArray.includes(newDataPointTime)) timeArray.push(newDataPointTime)
-                    })
-                })
-            }
-        })
-        timeArray.sort(); startT = timeArray[0]; endT = timeArray[timeArray.length - 1] + 19 * 60 * 1000; timeArray = [];
-        let timeU = startT; do { timeArray.push(timeU); timeU += 20 * 60 * 1000 } while (endT >= timeU);
-
-        Object.keys(xdiffs).forEach(courseCode => {
-            if (typeof cacheData[courseCode] != "undefined") {
-                let data = cacheData[courseCode]
-
-                Object.keys(data).forEach(lesson => {
-                    Object.keys(data[lesson]).forEach(dataPointTime => {
-                        let newDataPointTime = dataPointTime - dataPointTime % (20 * 60 * 1000)
-                        data[lesson][newDataPointTime] = data[lesson][dataPointTime]
-                        delete data[lesson][dataPointTime]
-                    })
-                })
-
-                xdiffs[courseCode] = []
-                //xdiffs[courseCode] = { lec: [], lab: [], tut: [], rsh: [], otr: [] }
-
-                let datasets = {}
-                Object.keys(data).forEach(key => {
-                    let keys = Object.keys(data[key])
-                    keys.sort()
-
-                    let time = startT, value = data[key][keys[0]], keys_pos = -1, newDB = []
-                    do {
-                        if (keys[keys_pos + 1] < time + 20 * 60 * 1000) {
-                            keys_pos++
-                            value = data[key][keys[keys_pos]]
-                        } else {
-                            value = null
-                        }
-                        newDB.push(value)
-                        time += 20 * 60 * 1000
-                    } while (keys_pos < keys.length && endT >= time)
-
-                    if (typeof datasets[lessonToType(key)] == "undefined") datasets[lessonToType(key)] = {}
-                    datasets[lessonToType(key)][key] = newDB
-                });
-
-                let maxLessonNum = 1;
-                ["lec", "lab", "tut", "rsh", "otr"].forEach((lessonType, index) => {
-                    if (typeof datasets[lessonType] != "undefined" && Object.keys(datasets[lessonType]).length) {
-                        let maxThisLessonNum = 0
-                        Object.keys(datasets[lessonType]).forEach(lesson => {
-
-                            let thisLessonNum = lesson.split(" ")[0].replace(/^\D+|\D+$/g, "")
-                            if (!thisLessonNum) thisLessonNum = "1"
-                            thisLessonNum = parseInt(thisLessonNum)
-                            //console.log(lesson, thisLessonNum)
-                            if (maxThisLessonNum < thisLessonNum) maxThisLessonNum = thisLessonNum
-
-                        })
-                        //console.log(lessonType, maxThisLessonNum)
-                        if (maxLessonNum < maxThisLessonNum) maxLessonNum = maxThisLessonNum
-                    }
-                });
-                //console.log(courseCode, maxLessonNum);
-                ["lec", "lab", "tut", "rsh", "otr"].forEach((lessonType, index) => {
-                    let pS = ["rect", "triangle", "circle", "rectRot", "crossRot"][index]
-                    let pR = [5, 5, 4, 5, 5][index]
-                    let pHR = [8, 8, 7, 8, 8][index]
-                    let pCB = ["90", "60", "60", "90", "30"][index]
-                    let pBD = [[], [3, 3], [8, 8], [], []][index]
-                    if (typeof datasets[lessonType] != "undefined" && Object.keys(datasets[lessonType]).length) {
-                        Object.keys(datasets[lessonType]).forEach(lesson => {
-
-                            let thisLessonNum = lesson.split(" ")[0].replace(/^\D+|\D+$/g, "")
-                            if (!thisLessonNum) thisLessonNum = "1"
-                            thisLessonNum = parseInt(thisLessonNum)
-
-                            //console.log("#" + sharedfx.zeroPad((Math.round(thisLessonNum / maxLessonNum * 256) - 1).toString(16), 2) + "0000")
-
-                            //xdiffs[courseCode][lessonType].push({label: lesson, data: datasets[lessonType][lesson], pointStyle: px})
-                            xdiffs[courseCode].push({ label: lesson, data: datasets[lessonType][lesson], pointStyle: pS, pointRadius: 0, pointHoverRadius: pHR, borderDash: pBD, borderColor: "hsl(" + ((60 - Math.round((thisLessonNum - 1) * 100 / maxLessonNum)) / 100) + "turn, " + pCB + "%, 60%)", backgroundColor: "hsl(" + ((60 - Math.round((thisLessonNum - 1) * 100 / maxLessonNum)) / 100) + "turn, " + pCB + "%, 85%)" })
-
-                        })
-                    } else { delete xdiffs[courseCode][lessonType] }
-                })
-            } else { delete xdiffs[courseCode] }
-
-        })
-        xdiffs["_times"] = timeArray
-
-        post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ diffs: xdiffs })).then(r => r.json()).then(r => {
-            console.log('[courses_cache] cacheing diff done, used ' + ((new Date()).getTime() - atm2.getTime()) + 'ms')
-
-            if (fs.existsSync("T:\\major.json")) {
-                post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ majorminorreqs: {2022: JSON.parse(fs.readFileSync("T:\\major.json", "utf8"))} })).then(r => r.json()).then(r => {
-                    console.log('[courses_cache] cacheing tempmajor done')
-                })
-            }
-        })
-    }
-
-    if (firstBoot) {
-        let atm1 = (new Date())
-        let kcourseids = Object.keys(xcourseids).sort().reverse()
-        kcourseids.reverse().forEach(courseid => {
-            let xcourseName = ""
-            for (const fullCourseName of Object.keys(xcourses[courseid.substring(0, 4)][xcourseids[courseid].SEM])) {
-                if (fullCourseName.startsWith(courseid.substring(0, 4) + " " + courseid.substring(4) + " - ")) {
-                    xcourseName = fullCourseName
-                    break
-                }
-            }
-            let rx = JSON.parse(JSON.stringify(xcourses[courseid.substring(0, 4)][xcourseids[courseid].SEM][xcourseName])), condiA = false, condiB = false
-            kcourseids.forEach(xcourseid => {
-                ["PRE-REQUISITE", "EXCLUSION"].forEach(a => {
-                    if (typeof rx.attr[a] != "undefined") {
-                        condiA = rx.attr[a].includes(xcourseid.substring(0, 4) + " " + xcourseid.substring(4))
-                        //TODO: think about how to handle cases like ( exclude CORE1403 -> exclude CORE1403A & CORE1403S & CORE1403I ) with current looping approach
-                        //current bug: ( exclude CORE1403I will be treated as exclude CORE1403A & CORE1403S & CORE1403I when CORE1403 does not exist )
-                        //condiB = (condiA) ? true : (!kcourseids.includes(xcourseid.substring(0, 8)) && rx.attr[a].includes(xcourseid.substring(0, 4) + " " + xcourseid.substring(4, 8)))
-                        if (courseid != xcourseid && (condiA || condiB)) {
-                            if (typeof xextraattr[xcourseid] === "undefined") xextraattr[xcourseid] = {}
-                            if (typeof xextraattr[xcourseid]["" + a + "-BY"] === "undefined") xextraattr[xcourseid]["" + a + "-BY"] = []
-                            xextraattr[xcourseid]["" + a + "-BY"].push(courseid.substring(0, 4) + " " + courseid.substring(4))
-                            if (condiA) rx.attr[a] = rx.attr[a].replaceAll(xcourseid.substring(0, 4) + " " + xcourseid.substring(4), " . ")
-                        }
-                    }
+post("http://127.0.0.1:7003/!setvar/courses", JSON.stringify(xcourses)).then(r => r.json()).then(r => {
+    post("http://127.0.0.1:7003/!setvar/courseids", JSON.stringify(xcourseids)).then(r => r.json()).then(r => {
+        post("http://127.0.0.1:7003/!setvar/coursegroups", JSON.stringify(xcoursegroups)).then(r => r.json()).then(r => {
+            post("http://127.0.0.1:7003/!setvar/sems", JSON.stringify(xsems)).then(r => r.json()).then(r => {
+                post("http://127.0.0.1:7003/!setvar/insems", JSON.stringify(xinsems)).then(r => r.json()).then(r => {
+                    console.log('[courses_cache] cacheing to python server done')
                 })
             })
         })
+    })
+}).catch(e => {
+    console.log(e)
+    sharedfx.deathDump("course_cache_node", "Failed to send data to :7003", e)
+})
 
-        post("http://127.0.0.1:7002/!setvar/", JSON.stringify({ extraattr: xextraattr })).then(r => r.json()).then(r => {
-            console.log('[courses_cache] cacheing extraattr done, used ' + ((new Date()).getTime() - atm1.getTime()) + 'ms')
+let willmodifydiff = false
+if (true) {
+    willmodifydiff = true
+    let atm2 = (new Date())
+    let cacheData = {}
+
+    let timeArray = [], startT = 0, endT = 0
+    Object.keys(xdiffs).forEach(courseCode => {
+        let diffFilePath = servar.course_path + "_diff\\" + xsems[0] + "\\" + courseCode + ".json"
+        if (fs.existsSync(diffFilePath)) {
+            cacheData[courseCode] = JSON.parse(fs.readFileSync(diffFilePath, "utf-8"))
+            Object.keys(cacheData[courseCode]).forEach(lesson => {
+                Object.keys(cacheData[courseCode][lesson]).forEach(dataPointTime => {
+                    let newDataPointTime = dataPointTime - dataPointTime % (20 * 60 * 1000)
+                    if (!timeArray.includes(newDataPointTime)) timeArray.push(newDataPointTime)
+                })
+            })
+        }
+    })
+    timeArray.sort(); startT = timeArray[0]; endT = timeArray[timeArray.length - 1] + 19 * 60 * 1000; timeArray = [];
+    let timeU = startT; do { timeArray.push(timeU); timeU += 20 * 60 * 1000 } while (endT >= timeU);
+
+    Object.keys(xdiffs).forEach(courseCode => {
+        if (typeof cacheData[courseCode] != "undefined") {
+            let data = cacheData[courseCode]
+
+            Object.keys(data).forEach(lesson => {
+                Object.keys(data[lesson]).forEach(dataPointTime => {
+                    let newDataPointTime = dataPointTime - dataPointTime % (20 * 60 * 1000)
+                    data[lesson][newDataPointTime] = data[lesson][dataPointTime]
+                    delete data[lesson][dataPointTime]
+                })
+            })
+
+            xdiffs[courseCode] = []
+            //xdiffs[courseCode] = { lec: [], lab: [], tut: [], rsh: [], otr: [] }
+
+            let datasets = {}
+            Object.keys(data).forEach(key => {
+                let keys = Object.keys(data[key])
+                keys.sort()
+
+                let time = startT, value = data[key][keys[0]], keys_pos = -1, newDB = []
+                do {
+                    if (keys[keys_pos + 1] < time + 20 * 60 * 1000) {
+                        keys_pos++
+                        value = data[key][keys[keys_pos]]
+                    } else {
+                        value = null
+                    }
+                    newDB.push(value)
+                    time += 20 * 60 * 1000
+                } while (keys_pos < keys.length && endT >= time)
+
+                if (typeof datasets[lessonToType(key)] == "undefined") datasets[lessonToType(key)] = {}
+                datasets[lessonToType(key)][key] = newDB
+            });
+
+            let maxLessonNum = 1;
+            ["lec", "lab", "tut", "rsh", "otr"].forEach((lessonType, index) => {
+                if (typeof datasets[lessonType] != "undefined" && Object.keys(datasets[lessonType]).length) {
+                    let maxThisLessonNum = 0
+                    Object.keys(datasets[lessonType]).forEach(lesson => {
+
+                        let thisLessonNum = lesson.split(" ")[0].replace(/^\D+|\D+$/g, "")
+                        if (!thisLessonNum) thisLessonNum = "1"
+                        thisLessonNum = parseInt(thisLessonNum)
+                        //console.log(lesson, thisLessonNum)
+                        if (maxThisLessonNum < thisLessonNum) maxThisLessonNum = thisLessonNum
+
+                    })
+                    //console.log(lessonType, maxThisLessonNum)
+                    if (maxLessonNum < maxThisLessonNum) maxLessonNum = maxThisLessonNum
+                }
+            });
+            //console.log(courseCode, maxLessonNum);
+            ["lec", "lab", "tut", "rsh", "otr"].forEach((lessonType, index) => {
+                let pS = ["rect", "triangle", "circle", "rectRot", "crossRot"][index]
+                let pR = [5, 5, 4, 5, 5][index]
+                let pHR = [8, 8, 7, 8, 8][index]
+                let pCB = ["90", "60", "60", "90", "30"][index]
+                let pBD = [[], [3, 3], [8, 8], [], []][index]
+                if (typeof datasets[lessonType] != "undefined" && Object.keys(datasets[lessonType]).length) {
+                    Object.keys(datasets[lessonType]).forEach(lesson => {
+
+                        let thisLessonNum = lesson.split(" ")[0].replace(/^\D+|\D+$/g, "")
+                        if (!thisLessonNum) thisLessonNum = "1"
+                        thisLessonNum = parseInt(thisLessonNum)
+
+                        //console.log("#" + sharedfx.zeroPad((Math.round(thisLessonNum / maxLessonNum * 256) - 1).toString(16), 2) + "0000")
+
+                        //xdiffs[courseCode][lessonType].push({label: lesson, data: datasets[lessonType][lesson], pointStyle: px})
+                        xdiffs[courseCode].push({ label: lesson, data: datasets[lessonType][lesson], pointStyle: pS, pointRadius: 0, pointHoverRadius: pHR, borderDash: pBD, borderColor: "hsl(" + ((60 - Math.round((thisLessonNum - 1) * 100 / maxLessonNum)) / 100) + "turn, " + pCB + "%, 60%)", backgroundColor: "hsl(" + ((60 - Math.round((thisLessonNum - 1) * 100 / maxLessonNum)) / 100) + "turn, " + pCB + "%, 85%)" })
+
+                    })
+                } else { delete xdiffs[courseCode][lessonType] }
+            })
+        } else { delete xdiffs[courseCode] }
+
+    })
+    xdiffs["_times"] = timeArray
+}
+
+let willmodifyextraattr = false
+if (firstBoot) {
+    willmodifyextraattr = true
+    let kcourseids = Object.keys(xcourseids).sort().reverse()
+    kcourseids.reverse().forEach(courseid => {
+        let xcourseName = ""
+        for (const fullCourseName of Object.keys(xcourses[courseid.substring(0, 4)][xcourseids[courseid].SEM])) {
+            if (fullCourseName.startsWith(courseid.substring(0, 4) + " " + courseid.substring(4) + " - ")) {
+                xcourseName = fullCourseName
+                break
+            }
+        }
+        let rx = JSON.parse(JSON.stringify(xcourses[courseid.substring(0, 4)][xcourseids[courseid].SEM][xcourseName])), condiA = false, condiB = false
+        kcourseids.forEach(xcourseid => {
+            ["PRE-REQUISITE", "EXCLUSION"].forEach(a => {
+                if (typeof rx.attr[a] != "undefined") {
+                    condiA = rx.attr[a].includes(xcourseid.substring(0, 4) + " " + xcourseid.substring(4))
+                    //TODO: think about how to handle cases like ( exclude CORE1403 -> exclude CORE1403A & CORE1403S & CORE1403I ) with current looping approach
+                    //current bug: ( exclude CORE1403I will be treated as exclude CORE1403A & CORE1403S & CORE1403I when CORE1403 does not exist )
+                    //condiB = (condiA) ? true : (!kcourseids.includes(xcourseid.substring(0, 8)) && rx.attr[a].includes(xcourseid.substring(0, 4) + " " + xcourseid.substring(4, 8)))
+                    if (courseid != xcourseid && (condiA || condiB)) {
+                        if (typeof xextraattr[xcourseid] === "undefined") xextraattr[xcourseid] = {}
+                        if (typeof xextraattr[xcourseid]["" + a + "-BY"] === "undefined") xextraattr[xcourseid]["" + a + "-BY"] = []
+                        xextraattr[xcourseid]["" + a + "-BY"].push(courseid.substring(0, 4) + " " + courseid.substring(4))
+                        if (condiA) rx.attr[a] = rx.attr[a].replaceAll(xcourseid.substring(0, 4) + " " + xcourseid.substring(4), " . ")
+                    }
+                }
+            })
         })
-    }
+    })
+}
+
+pkg = {}
+if (willmodifydiff) pkg["diffs"] = xdiffs
+if (willmodifyextraattr) pkg["extraattr"] = xextraattr
+
+post("http://127.0.0.1:7002/!setvar/", JSON.stringify(pkg)).then(r => r.json()).then(r => {
+    console.log('[courses_cache] cacheing to nodejs server done, used ' + ((new Date()).getTime() - cctm.getTime()) + 'ms')
 
     if (servar.course_backup_path) {
         setTimeout(exec, 100, `"C:\\Program Files\\7-Zip\\7z.exe" a ` + servar.course_backup_path + ` "` + servar.course_path + `*"`, err => { })

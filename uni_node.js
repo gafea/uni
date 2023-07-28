@@ -3,6 +3,7 @@ const path = require('path')
 const http = require('http')
 const https = require('https')
 const { exec } = require("child_process")
+const post = (url, data) => fetch(url, { method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: data })
 
 const sharedfx = require((!fs.existsSync('./' + __filename.slice(__dirname.length + 1))) ? ('./../sharedfx_node.js') : ('./sharedfx_node.js'))
 if (sharedfx.about() != "sharedfx") { throw new Error('bad sharedfx import') }
@@ -26,6 +27,7 @@ try {
 
     if (!fs.existsSync(servar.course_temp_path)) fs.mkdirSync(servar.course_temp_path)
 
+    let pythonseed = ""
     var courses = {}
     var diffs = {}
     var peoples = {}
@@ -37,6 +39,21 @@ try {
     var coursegroups = {}
     var majorminorreqs = {}
     var coursereqs = {}
+    var phrasedcourse = {}
+    var majorschoolmapping = {}
+
+    function startPythonServer() {
+        try {
+            pythonseed = sharedfx.rndStr(32)
+            setTimeout(exec, 10, "python C:\\webserver\\nodejs\\uni\\webServer.py " + pythonseed, err => {
+                console.log("python error", err)
+                sharedfx.deathDump("uni.gafea.net", "failed to start python server", err)
+            })
+        } catch (error) {
+            sharedfx.deathDump("uni.gafea.net", "failed to start python server", error)
+        }
+    }
+    startPythonServer()
 
     //courses_fetch, including course_cache
     function courses_fetch(recur = false) {
@@ -188,12 +205,36 @@ try {
                         return
                     }
 
+                } else if (req.url === '/!guestfx/' && req.method.toUpperCase() === "POST" && bodytxt) {
+                    if (typeof body.userdb === "undefined" || typeof body.fx === "undefined") {
+                        res.writeHead(400, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 400 }))
+                        return
+                    }
+
+                    post("http://localhost:7002/!pyser/", JSON.stringify(body)).then(r => r.json()).then(r => {
+                        if (r.status === 200) {
+                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify({ status: 200, resp: r.resp }))
+                            return
+                        } else {
+                            res.writeHead(r.status, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify(r))
+                            return
+                        }
+                    }).catch(err => {
+                        console.log(err)
+                        res.writeHead(503, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                        res.end(JSON.stringify({ status: 503 }))
+                        return
+                    })
+
                 } else if (req.url.startsWith('/!plan/') && !req.url.includes("..")) {
                     let path = decodeURIComponent(req.url).substring(7)
                     let paths = path.split('/')
                     let year = -1, majorminor = ""
                     if (paths[0] && !isNaN(paths[0]) && !isNaN(parseFloat(paths[0]))) year = parseInt(paths[0])
-                    if (typeof paths[1] != "undefined" && paths[1]) majorminor = paths[1]
+                    if (typeof paths[1] != "undefined" && paths[1] && !paths[1].startsWith("?")) majorminor = paths[1]
 
                     if (!Object.keys(majorminorreqs).length) {
                         res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
@@ -214,8 +255,18 @@ try {
                     }
 
                     if (!majorminor) {
-                        res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                        res.end(JSON.stringify({ status: 200, resp: Object.keys(majorminorreqs[year]).sort() }))
+                        let params = new URLSearchParams(paths[1])
+                        if (params.get("majoronly") == "true") {
+                            let resp = []
+                            Object.keys(majorminorreqs[year]).forEach(majorminor => {
+                                if (majorminorreqs[year][majorminor].attr.type == "major") resp.push(majorminor)
+                            })
+                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify({ status: 200, resp: resp.sort() }))
+                        } else {
+                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify({ status: 200, resp: Object.keys(majorminorreqs[year]).sort() }))
+                        }
                         return
                     }
 
@@ -536,6 +587,13 @@ try {
                         rx.insem = insems[courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]]
                     }
 
+                    if (typeof phrasedcourse[semx] != "undefined" && typeof phrasedcourse[semx][courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]] != "undefined") {
+                        let phtemp = JSON.parse(JSON.stringify(phrasedcourse[semx][courseNameFound.split(" ")[0] + courseNameFound.split(" ")[1]]))
+                        delete phtemp["attr"]["type"]
+                        if (!Object.keys(phtemp["attr"]).length) delete phtemp["attr"]
+                        rx.phrasedattr = phtemp
+                    }
+
                     Object.keys(rx.attr).forEach(key => {
                         if (!key.startsWith("_")) {
                             Object.keys(courseids).sort().reverse().forEach(courseid => {
@@ -599,15 +657,15 @@ try {
                     })
 
                 } else if (req.url.startsWith('/!acc/')) {
-                    (servar.deployed) ? acc.handle(req, res, body, servar) : sharedfx.returnErr(res, 503, "not-supported", true)
+                    (servar.deployed) ? acc.handle(req, res, body, servar, {courseids: courseids, sems: sems}) : sharedfx.returnErr(res, 503, "not-supported", true)
 
                 } else if (req.url.toLowerCase() === '/init.js') {
                     res.writeHead(200, { 'Content-Type': 'application/javascript', 'Server': 'joutou', 'Cache-Control': 'max-age=7200' })
-                    fs.readFile('' + __dirname + path.sep + req.url.toLowerCase(), 'utf8', (err, data) => { (err) ? res.end("") : res.end(data) })
+                    fs.readFile('' + __dirname + "/init.js", 'utf8', (err, data) => { (err) ? res.end("") : res.end(data) })
 
                 } else if (req.url.toLowerCase() === '/robots.txt') {
                     res.writeHead(200, { 'Content-Type': 'text/plain', 'Server': 'joutou' })
-                    res.end(`User-agent: *\nAllow: /\nAllow: /*\n\nDisallow: /!acc/*`)
+                    res.end(`User-agent: *\nAllow: /\nAllow: /*\nDisallow: /!acc/*\nDisallow: /!search/*`)
 
                 } else if (req.url.toLowerCase() === '/favicon.ico') {
                     res.writeHead(200, { 'Content-Type': 'image/x-icon', 'Server': 'joutou', 'Cache-Control': 'max-age=604800' })
@@ -663,18 +721,35 @@ try {
                     }, 100)
 
                 } else if (req.url === '/!course_cache_full/') {
-                    res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
-                    res.end(JSON.stringify({ status: 200 }))
+                    sharedfx.returnErr(res, 200, "", true)
                     setTimeout(() => {
                         course_cache(true)
                     }, 100)
+                    return
 
                 } else if (req.url === '/!course_fetch/') {
-                    res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
-                    res.end(JSON.stringify({ status: 200 }))
+                    sharedfx.returnErr(res, 200, "", true)
                     setTimeout(() => {
                         courses_fetch()
                     }, 100)
+                    return
+
+                } else if (req.url === '/!pyser/' && req.method.toUpperCase() === "POST" && bodytxt) {
+                    sharedfx.find7003(res, body)
+                    return
+
+                } else if (req.url.toLowerCase().startsWith('/!python7003/')) {
+                    let tkey = req.url.substring(13)
+                    if (tkey != pythonseed) {
+                        sharedfx.returnErr(res, 404, "", true)
+                    } else {
+                        sharedfx.returnErr(res, 200, "", true)
+                    }
+                    return
+
+                } else if (req.url == '/!start7003/') {
+                    setTimeout(startPythonServer, 1000)
+                    return
 
                 } else if (req.url === '/!setvar/') {
                     if (bodytxt) {
@@ -690,10 +765,12 @@ try {
                         if (typeof r.coursegroups != "undefined") coursegroups = r.coursegroups
                         if (typeof r.majorminorreqs != "undefined") majorminorreqs = r.majorminorreqs
                         if (typeof r.coursereqs != "undefined") coursereqs = r.coursereqs
+                        if (typeof r.phrasedcourse != "undefined") phrasedcourse = r.phrasedcourse
+                        if (typeof r.majorschoolmapping != "undefined") majorschoolmapping = r.majorschoolmapping
                         console.log("[" + servar.domain + "] cacheing variables updated")
+                        console.log(Object.keys(r))
                     }
-                    res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
-                    res.end(JSON.stringify({ status: 200 }))
+                    sharedfx.returnErr(res, 200, "", true)
 
                 } else if (req.url.toLowerCase().startsWith('/!getvar/')) {
                     switch (req.url.substring(9).toLowerCase()) {
@@ -750,6 +827,16 @@ try {
                         case "coursereqs":
                             res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
                             res.end(JSON.stringify({ status: 200, resp: coursereqs }))
+                            break
+
+                        case "phrasedcourse":
+                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify({ status: 200, resp: phrasedcourse }))
+                            break
+
+                        case "majorschoolmapping":
+                            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
+                            res.end(JSON.stringify({ status: 200, resp: majorschoolmapping }))
                             break
 
                         default:

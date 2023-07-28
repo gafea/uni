@@ -16,7 +16,7 @@ const servar = {
 
 let noDiff = false
 process.argv.forEach(function (val, index, array) {
-    if (val == "noDiff") {noDiff = true; console.log("noDiff mode on")}
+    if (val == "noDiff") { noDiff = true; console.log("noDiff mode on") }
 })
 
 let c = []
@@ -149,7 +149,7 @@ function getLatestCourseSet(course_path, course_temp_path, tm, cb) {
                             } catch (error) {
                                 console.log(error)
                                 console.log("[courses_fetch] fatal error: unable to parse HTML, re-downloading...")
-                                setTimeout(getLatestCourseSet, 2000, course_path, course_temp_path, tm, cb)
+                                setTimeout(getLatestCourseSet, 5000, course_path, course_temp_path, tm, cb)
                             }
                         }
                     }, 100)
@@ -161,7 +161,7 @@ function getLatestCourseSet(course_path, course_temp_path, tm, cb) {
             fs.unlink(dest)
             console.log(err.message)
             console.log("[courses_fetch] fatal error: unable to download index HTML, re-downloading...")
-            setTimeout(getLatestCourseSet, 2000, course_path, course_temp_path, tm, cb)
+            setTimeout(getLatestCourseSet, 5000, course_path, course_temp_path, tm, cb)
         })
 
         response.destroy()
@@ -169,7 +169,7 @@ function getLatestCourseSet(course_path, course_temp_path, tm, cb) {
     }).on('error', err => {
         console.log(err.message)
         console.log("[courses_fetch] fatal error: unable to download index HTML, re-downloading...")
-        setTimeout(getLatestCourseSet, 2000, course_path, course_temp_path, tm, cb)
+        setTimeout(getLatestCourseSet, 5000, course_path, course_temp_path, tm, cb)
     })
 }
 
@@ -192,9 +192,9 @@ const JSONing = (starting_index, course_temp_path, course_path, latestSem, cb) =
 
     let currentDiffIndex = {}
     if (!noDiff && fs.existsSync(course_path + "_mdiff\\")) {
-        fs.readdirSync(course_path + "_mdiff\\" ).forEach(sem => {
+        fs.readdirSync(course_path + "_mdiff\\").forEach(sem => {
             currentDiffIndex[sem] = {}
-            fs.readdirSync(course_path + "_mdiff\\" + sem + "\\" ).forEach(course => {
+            fs.readdirSync(course_path + "_mdiff\\" + sem + "\\").forEach(course => {
                 currentDiffIndex[sem][course.split(".json")[0]] = true
             })
         })
@@ -234,35 +234,40 @@ const JSONing = (starting_index, course_temp_path, course_path, latestSem, cb) =
                     var first_section_name = ""
                     var tempx = {}
                     var sectlist = {}
-                    Array.from(course.getElementsByClassName("sections")[0].children[0].children).forEach((section, index) => {
 
-                        if (index === 0) {
-                            Array.from(section.children).forEach(name => {
-                                txindex.push(name.textContent)
-                            })
+                    if (typeof course.getElementsByClassName("sections")[0].children[0].children != "undefined") {
 
-                        } else {
+                        Array.from(course.getElementsByClassName("sections")[0].children[0].children).forEach((section, index) => {
 
-                            if (section.classList[0] == "newsect" && Object.keys(sectlist).length) {
-                                tempx[first_section_name] = sectlist
-                                sectlist = {}
+                            if (index === 0) {
+                                Array.from(section.children).forEach(name => {
+                                    txindex.push(name.textContent)
+                                })
+
+                            } else {
+
+                                if (section.classList[0] == "newsect" && Object.keys(sectlist).length) {
+                                    tempx[first_section_name] = sectlist
+                                    sectlist = {}
+                                }
+
+                                Array.from(section.children).forEach((name, i) => {
+                                    if (name.textContent.trim()) {
+                                        if (section.classList[0] == "newsect") {
+                                            first_section_name = section.children[0].textContent.trim()
+                                            if (typeof sectlist[section.children[1].textContent.trim()] === "undefined") sectlist[section.children[1].textContent.trim()] = {}
+                                            sectlist[section.children[1].textContent.trim()][txindex[i]] = name.textContent.trim()
+                                        } else {
+                                            if (typeof sectlist[section.children[0].textContent.trim()] === "undefined") sectlist[section.children[0].textContent.trim()] = {}
+                                            sectlist[section.children[0].textContent.trim()][txindex[i + 1]] = name.textContent.trim()
+                                        }
+                                    }
+                                })
                             }
 
-                            Array.from(section.children).forEach((name, i) => {
-                                if (name.textContent.trim()) {
-                                    if (section.classList[0] == "newsect") {
-                                        first_section_name = section.children[0].textContent.trim()
-                                        if (typeof sectlist[section.children[1].textContent.trim()] === "undefined") sectlist[section.children[1].textContent.trim()] = {}
-                                        sectlist[section.children[1].textContent.trim()][txindex[i]] = name.textContent.trim()
-                                    } else {
-                                        if (typeof sectlist[section.children[0].textContent.trim()] === "undefined") sectlist[section.children[0].textContent.trim()] = {}
-                                        sectlist[section.children[0].textContent.trim()][txindex[i + 1]] = name.textContent.trim()
-                                    }
-                                }
-                            })
-                        }
+                        })
 
-                    })
+                    }
 
                     tempx[first_section_name] = JSON.parse(JSON.stringify(sectlist))
                     sectlist = {}
@@ -272,11 +277,11 @@ const JSONing = (starting_index, course_temp_path, course_path, latestSem, cb) =
                     if (!noDiff) {
                         let timeNow = (new Date)
                         let courseCode = course.getElementsByTagName("h2")[0].textContent.split(" - ")[0].replace(" ", "")
-    
+
                         let diffFilePath = "" + item.split("\\").pop().slice(0, 4) + "\\" + courseCode + ".json"
                         if (!fs.existsSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")
                         if (!fs.existsSync(course_temp_path + "_mdiff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_mdiff\\" + item.split("\\").pop().slice(0, 4) + "\\")
-    
+
                         let diff = {}, mdiff = {}, lessonDetails = {}
                         if (fs.existsSync(course_path + "_diff\\" + diffFilePath)) diff = JSON.parse(fs.readFileSync(course_path + "_diff\\" + diffFilePath, "utf-8"))
                         if (fs.existsSync(course_path + "_mdiff\\" + diffFilePath)) mdiff = JSON.parse(fs.readFileSync(course_path + "_mdiff\\" + diffFilePath, "utf-8"))
@@ -288,13 +293,13 @@ const JSONing = (starting_index, course_temp_path, course_path, latestSem, cb) =
                                 delete currentDiffIndex[item.split("\\").pop().slice(0, 4)]
                             }
                         }
-    
+
                         Object.keys(tempx).forEach(lesson => {
                             lessonDetails = tempx[lesson][Object.keys(tempx[lesson])[0]]
-    
+
                             if (typeof diff[lesson] === "undefined") diff[lesson] = {}
                             diff[lesson][timeNow.getTime()] = Number((((parseInt(lessonDetails.Enrol) + parseInt(lessonDetails.Wait)) / parseInt(lessonDetails.Quota.split("Quota/Enrol/Avail")[0])) * 100).toFixed(2))
-    
+
                             if (typeof mdiff[lesson] === "undefined") mdiff[lesson] = {}
                             Object.keys(mdiff[lesson]).forEach(attr => {
                                 if (!Object.values(mdiff[lesson][attr].slice(-1)[0]).slice(-1)[0] && typeof lessonDetails[attr] === "undefined") mdiff[lesson][attr].push({ [timeNow.getTime()]: "" })
@@ -309,7 +314,7 @@ const JSONing = (starting_index, course_temp_path, course_path, latestSem, cb) =
                         fs.writeFileSync(course_temp_path + "_diff\\" + diffFilePath, JSON.stringify(diff))
                         if (JSON.stringify(mdiff) != omdiff) fs.writeFileSync(course_temp_path + "_mdiff\\" + diffFilePath, JSON.stringify(mdiff))
                     }
-                    
+
                     tempx = {}
 
                     domJSON[course.getElementsByTagName("h2")[0].textContent] = JSON.parse(JSON.stringify(courseMeta))
