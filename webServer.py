@@ -1,3 +1,4 @@
+import flask
 from flask import Flask, request
 import requests
 import json
@@ -52,6 +53,8 @@ try:
 ############################
 
     app = Flask(__name__)
+    app.config['JSON_SORT_KEYS'] = False
+    flask.json.provider.DefaultJSONProvider.sort_keys = False
 
     @app.route('/')
     def home():

@@ -53,17 +53,17 @@ try {
             sharedfx.deathDump("uni.gafea.net", "failed to start python server", error)
         }
     }
-    startPythonServer()
+    //startPythonServer()
 
     //courses_fetch, including course_cache
     function courses_fetch(recur = false) {
 
         if (recur) {
             let tu = (new Date())
-            if ((new Date).getTime() < 1683043205000) {
+            if ((new Date).getTime() < new Date('2023-08-25T00:00:00.000+08:00').getTime()) { //the time before recur fetching starts
                 setTimeout(courses_fetch, (19 - (tu.getMinutes() % 20)) * 60 * 1000 + (59 - tu.getSeconds()) * 1000 + (999 - tu.getMilliseconds()) + 500, true)
                 return
-            } else if ((new Date).getTime() > 1690818600000) {
+            } else if ((new Date).getTime() > new Date('2023-09-15T23:50:00.000+08:00').getTime()) { //the time when recur stops
                 console.log("[" + servar.domain + "] fetching killtime reached, stopping loop...")
                 return
             }
@@ -72,11 +72,6 @@ try {
         console.log("[" + servar.domain + "] starting fetching...")
 
         setTimeout(exec, 100, (servar.deployed) ? 'node uni\\course_fetch_node.js' : 'node course_fetch_node.js', err => { })
-
-        if (recur) {
-            let t = (new Date())
-            setTimeout(courses_fetch, (19 - (t.getMinutes() % 20)) * 60 * 1000 + (59 - t.getSeconds()) * 1000 + (999 - t.getMilliseconds()) + 500, true)
-        }
 
     }
     let t = (new Date())
@@ -677,7 +672,17 @@ try {
                     <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chartjs\\chart.umd.js"></script>
                     <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chartjs-plugin-annotation.min.js"></script>
                     <script src="` + sharedfx.envar.cdnNETpath + `pkg\\chartjs-chart-graph\\index.umd.js"></script>
-                    `).replace("%gscript%", sharedfx.envar.gscript))
+                    `).replace("%gscript%", sharedfx.envar.gscript).replace(`<div id="cover_screen"></div>`, `
+                    <div id="cover_screen">
+                        <img src="` + sharedfx.envar.cdnNETpath + `image/uni.svg" style="height:8em;width:100%;object-fit:contain;margin:3em 0 1.5em 0">
+                            <div id="cover_spin"></div>
+                        <style>
+                        :root{color-scheme: light dark;--bw:white} @media (prefers-color-scheme: dark) {:root{--bw:black}}
+                        #cover_screen{background-color:var(--bw);z-index:10000;opacity:1;transition-duration:0.15s;display:flex;flex-flow:column;justify-content:center;align-items:center;width:100%;height:100%;position:fixed;top:0;bottom:0;left:0;right:0}
+                        #cover_spin{padding:0.005em;text-align:center;line-height:1;opacity:1;transition-duration:0.15s;border-radius:50%;animation:1.25s linear infinite spinner;border:solid 0.25em rgba(96,96,96,.3);border-top-color:#99f;height:1em;width:1em;will-change:transform}
+                        @keyframes spinner { 0% {transform:rotate(0deg)} 100% {transform:rotate(360deg)} }
+                        </style>
+                    </div>`))
 
                 }
 
