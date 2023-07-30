@@ -7,14 +7,9 @@ version = 1
 # globalVariable with webserver
 ##############################
 import globalVariable
-import json
+import copy
 import re
 
-##############################
-# import masking
-##############################
-replacement = globalVariable.replacement
-    
 ##############################
 # Golbal Variable
 ##############################
@@ -48,7 +43,7 @@ def copydept():
         if(dept.find("AND") != -1):
             dept_modify_AND.append(dept)
             
-def copy(courseids,courses):
+def copy_course(courseids,courses):
     copyed_data = {}
     
     for courseCode in courseids:
@@ -370,7 +365,7 @@ def formating(cleaned_data):
     return cleaned_data
 
 ##############################
-# phrasing
+# parsing
 ##############################   
 def phrase_approval (content):
     if content.find("DDP") != -1:
@@ -677,7 +672,9 @@ def remove_garbage_values(data):
 ##############################    
 def main():
     copydept()
-    copyed_data = copy(globalVariable.courseids,globalVariable.courses)
+    global replacement 
+    replacement = copy.deepcopy(globalVariable.replacement)
+    copyed_data = copy_course(globalVariable.courseids,globalVariable.courses)
     cleaned_data = clean(copyed_data)
     formated_data = formating(cleaned_data)
     phrased_data = phrase(formated_data)
