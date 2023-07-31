@@ -35,9 +35,9 @@ def main(request_data):
                     check_data[course][attr] = course_action_checking(check_data[course][attr], request_data["userdb"], attr, check_data[course],is_failattr, request_data)
         
             if "pass" in check_data[course]:
-                if request_data["userdb"]["studyProgram"] == "UG" and int(course[5:]) >= 5000:
+                if request_data["userdb"]["profile"]["currentStudies"]["studyProgram"] == "UG" and int(course[4:8]) >= 5000:
                     check_data[course]["pass"] = False
-                if request_data["userdb"]["studyProgram"] == "PG" and int(course[5:]) < 5000:
+                if request_data["userdb"]["profile"]["currentStudies"]["studyProgram"] == "PG" and int(course[4:8]) < 5000:
                     check_data[course]["pass"] = False
                 continue
             
