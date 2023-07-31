@@ -5,7 +5,7 @@ const bottombarIcon = "" + resourceNETpath + "image/uni.svg"
 const bottombarbuttons = [
     'Me,/me/,me,' + resourceNETpath + 'image/me.png,1',
     'Browse,/course/,course,' + resourceNETpath + 'image/browse.png,2',
-    'Planning,/plan/,plan,' + resourceNETpath + 'image/nullicon.png,4',
+    'Planning,/plan/,plan,' + resourceNETpath + 'image/plan.png,4',
     'Search,/search/,search,' + resourceNETpath + 'image/search.png,3',
     'About,/about/,about,' + resourceNETpath + 'image/info.png,0'
 ]
@@ -330,12 +330,13 @@ const courseCode_to_fullName = (code) => {
         return courseCodeNamedb[code]
 }
 
-function generate_course_selbox(courseCode = "COMP 3511", courseName = "Operating Systems", sem = "2230", picbox_inner_up_html = "", noSpecialOverlay = false) { //this only support courses
+function generate_course_selbox(courseCode = "COMP 3511", courseName = "Operating Systems", sem = "2230", units = "3", picbox_inner_up_html = "", noSpecialOverlay = false, onclickfx = "") { //this only support courses
     let code = courseCode.replaceAll(" ", ""), url = "" + resourceNETpath + `uni_ai/` + code + `.webp`, deptName = courseCode_to_fullName(courseCode.split(" ")[0])
 
     if (courseCode == "COMP 3511") url = `https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`
 
-    return `<button id="` + code + `" aria-label="Course selection button. ` + courseCode.replace(new RegExp(`.{${1}}`, 'g'), '$&' + " ") + ", " + courseName + `. A` + ((deptName[0] == "A" || deptName[0] == "E" || deptName[0] == "I" || deptName[0] == "O" || deptName[0] == "U") ? "n " : " ") + deptName + ` course, offered in ` + ustTimeToString(sem).replace("-", " to ") + `. Double click for details." class="course_sel selbox picbox" onclick="boot('/course/` + sem + "/" + courseCode.split(' ')[0] + "/" + code + `/', false, 2)">
+    return `<button id="` + code + `" aria-label="Course selection button. ` + courseCode.replace(new RegExp(`.{${1}}`, 'g'), '$&' + " ") + ", " + courseName + `. A` + ((deptName[0] == "A" || deptName[0] == "E" || deptName[0] == "I" || deptName[0] == "O" || deptName[0] == "U") ? "n " : " ") + deptName + ` course, offered in ` + ustTimeToString(sem).replace("-", " to ") + `. Double click for details." class="course_sel selbox picbox" 
+    onclick="` + ((onclickfx) ? onclickfx(courseCode, courseName, sem, units) : (`boot('/course/` + sem + "/" + courseCode.split(' ')[0] + "/" + code + `/', false, 2)`)) + `">
         <img src="` + url + `" loading="lazy" fetchpriority="low" onerror="this.onerror=null;this.src=emptyimg">    
         <div class="picbox_inner flx">
             <div class="picbox_inner_up flx">
@@ -362,28 +363,37 @@ function courseStringToParts(course) {
     return { dept: dept, code: code, units: units, name: name }
 }
 
-function render_search(path) {
-    path = window.location.search
+const startSearchingHTML = `<br><br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Type in keywords to start searching!</b></p1></center>`
 
-    let params = new URLSearchParams(path)
-    let query = params.get('q')
-
-    document.getElementById("courses_select_left_top").innerHTML = `<div class="flx"><h2>Search</h2></div>`
-    document.getElementById("courses_select_left_optionBox").innerHTML = `<style>#courses_select_left_optionBox{display:none}</style>`
-    document.getElementById("courses_select_right").innerHTML = `<br><div id="fdigbtn" class="flx"><label for="search_dw_box"><img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false"></label><p3 id="digsrtxt">Search</p3>
-    <form onsubmit="boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_dw_box').value)), true, 3);this.blur();return false"><input ` + ((!query) ? "autofocus " : "") + `id="search_dw_box" name="dw" type="search" placeholder="Search for anything" value="" title="Search"></form></div>
-    <div id="search_result"></div>`
-    document.getElementById("search_dw_box").focus()
-
-    if (!query) {
-        document.title = "Search - uni"
-        document.getElementById("search_result").innerHTML = `<br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Type in keywords to start searching!</b></p1></center>`
-        return
+function render_search(path, queryX = "", selectCourse = false) {
+    let query = ""
+    if (!path && queryX) {
+        path = "?q=" + queryX
+        query = queryX
+    } else {
+        path = window.location.search
+        let params = new URLSearchParams(path)
+        query = params.get('q')
     }
 
-    document.title = "🔍 " + query + " - uni"
-    document.getElementById("search_dw_box").value = query
-    document.getElementById("search_dw_box").blur()
+    if (!selectCourse) {
+        document.getElementById("courses_select_left_top").innerHTML = `<div class="flx"><h2>Search</h2></div>`
+        document.getElementById("courses_select_left_optionBox").innerHTML = `<style>#courses_select_left_optionBox{display:none}</style>`
+        document.getElementById("courses_select_right").innerHTML = `<br><div id="fdigbtn" class="flx"><label for="search_dw_box"><img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false"></label><p3 id="digsrtxt">Search</p3>
+    <form onsubmit="boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_dw_box').value)), true, 3);this.blur();return false"><input ` + ((!query) ? "autofocus " : "") + `id="search_dw_box" name="dw" type="search" placeholder="Search for anything" value="" title="Search"></form></div>
+    <div id="search_result"></div>`
+        document.getElementById("search_dw_box").focus()
+
+        if (!query) {
+            document.title = "Search - uni"
+            document.getElementById("search_result").innerHTML = startSearchingHTML
+            return
+        }
+
+        document.title = "🔍 " + query + " - uni"
+        document.getElementById("search_dw_box").value = query
+        document.getElementById("search_dw_box").blur()
+    }
     document.getElementById("search_result").innerHTML = `<br><div class="flx" style="justify-content:center;gap:0.5em;text-align:center"><div id="d_loading"></div><p2><b>Loading...</b></p2></div>`
 
     let tmark = (new Date()).getTime()
@@ -392,13 +402,19 @@ function render_search(path) {
             case 404:
                 r.resp = []
             case 200:
+                if (selectCourse && r.resp.length > 100) {
+                    if (queryX == add_course_search_history) {
+                        document.getElementById("search_result").innerHTML = `<br><p3 style="margin-left:0.5em">Total ` + r.resp.length + ` result` + ((r.resp.length === 1) ? "" : "s") + ` (` + ((new Date()).getTime() - tmark) + ` ms).</p3><br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch_empty.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Too many results, try using course codes (e.g. COMP1021) ?</b></p1></center>`
+                    }
+                    return
+                }
                 document.getElementById("search_result").innerHTML = `<br><p3 style="margin-left:0.5em">Total ` + r.resp.length + ` result` + ((r.resp.length === 1) ? "" : "s") + ` (` + ((new Date()).getTime() - tmark) + ` ms).</p3><br><div class="flx" id="search_out"><div id="d_loading"></div></div>`
                 setTimeout(() => {
                     let draft = [], scores = [], score = 0, queryAmt = query.split(" "), lastQueryAmt = queryAmt.pop(), qLength = queryAmt.length; if (lastQueryAmt) qLength++
                     r.resp.sort((a, b) => { return parseInt(b.result.SEM) - parseInt(a.result.SEM) }).forEach(ans => {
                         switch (ans.type) {
                             case "course":
-                                if (r.resp.length === 1) {
+                                if (r.resp.length === 1 && !selectCourse) {
                                     boot(`/course/` + ans.result.SEM + "/" + ans.result.CODE.substring(0, 4) + "/" + ans.result.CODE + `/`, true, 2)
                                     return
                                 }
@@ -407,15 +423,24 @@ function render_search(path) {
                                     if (f === "CODE") score += 1 / qLength
                                     if (f === "NAME") score += 0.6 / qLength / qLength + 0.3 / qLength / qLength + 0.1 / qLength / qLength
                                 })
-                                draft.push({ score: score, html: generate_course_selbox(ans.result.CODE.substring(0, 4) + " " + ans.result.CODE.substring(4), ans.result.NAME, ans.result.SEM, "", true) /*+ score /* + ", " + JSON.stringify(ans.found) */ })
+                                if (selectCourse) {
+                                    draft.push({
+                                        score: score, html: generate_course_selbox(ans.result.CODE.substring(0, 4) + " " + ans.result.CODE.substring(4), ans.result.NAME, ans.result.SEM, ans.result.UNITS, `<h5></h5><h5 style="opacity:0.85">` + ans.result.UNITS + ` unit` + ((ans.result.UNITS === "1") ? '' : 's') + `</h5>`, true, (courseCode = "COMP 3511", courseName = "Operating Systems", sem = "2230", units = "3") => {
+                                            return `add_course(false, {'code': '` + courseCode + `', 'name': '` + courseName.replaceAll('"', '\\"').replaceAll("'", "\\'") + `', 'sem': '` + sem + `', 'units': '` + units + `'})`
+                                        }) /*+ score /* + ", " + JSON.stringify(ans.found) */
+                                    })
+                                } else {
+                                    draft.push({ score: score, html: generate_course_selbox(ans.result.CODE.substring(0, 4) + " " + ans.result.CODE.substring(4), ans.result.NAME, ans.result.SEM, ans.result.UNITS, `<h5></h5><h5 style="opacity:0.85">` + ans.result.UNITS + ` unit` + ((ans.result.UNITS === "1") ? '' : 's') + `</h5>`, true) /*+ score /* + ", " + JSON.stringify(ans.found) */ })
+                                }
                                 break;
 
                             case "people":
-                                if (r.resp.length === 1) {
+                                if (r.resp.length === 1 && !selectCourse) {
                                     peoplex = ans.result
                                     boot(`/people/` + ans.result + `/`, true, 2)
                                     return
                                 }
+                                if (selectCourse) return
                                 score = 1
                                 draft.push({
                                     score: score, html: `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="peoplex='` + ans.result + `';boot('/people/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
@@ -425,11 +450,12 @@ function render_search(path) {
                                 break;
 
                             case "room":
-                                if (r.resp.length === 1) {
+                                if (r.resp.length === 1 && !selectCourse) {
                                     roomx = ans.result
                                     boot(`/room/` + ans.result + `/`, true, 2)
                                     return
                                 }
+                                if (selectCourse) return
                                 score = 1
                                 draft.push({
                                     score: score, html: `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="roomx='` + ans.result + `';boot('/room/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
@@ -439,6 +465,7 @@ function render_search(path) {
                                 break;
 
                             default:
+                                if (selectCourse) return
                                 score = 0
                                 draft.push({ score: score, html: `<div class="box">` + JSON.stringify(ans) + "</div>" })
                                 break;
@@ -782,6 +809,73 @@ function create_new_profile(studyProgram = "----", yearOfIntake = "----", mm = [
 
 }
 
+function check_course_exists(code, sem, cb) {
+    if (typeof config.courses[code] != "undefined" && typeof config.courses[code][sem] != "undefined") { cb(true); return }
+    fetch("/!course/" + sem + "/" + code.substring(0, 4) + "/" + code + "/").then(r => r.json()).then(r => {
+        if (r.status != 200) { cb(false); return }
+        cb(true)
+    })
+}
+
+var add_course_search_history = ""
+
+function add_course(back = false, course = {}) {
+    document.getElementById("add_course_model").innerHTML = `<dialog id="add_course_dialog">
+    <form id="add_course_dialog_form" action="javascript:void(0)" onsubmit="return false">
+        <div class="flx" style="gap:1em;flex-wrap: wrap-reverse;">
+            <h4>Add Course</h4>
+            <button value="cancel" formmethod="dialog" class="closebtn" onclick="document.getElementById('add_course_dialog').close()"><img src="` + resourceNETpath + `image/circle-cross.png" title="Close"></button>
+        </div><br>
+
+        <div id="add_course_dialog_content">
+        </div>
+
+        <div id="add_course_dialog_buttons" class="flx">
+        </div>
+    </form>
+    </dialog>`
+
+    let contentDiv = document.getElementById("add_course_dialog_content")
+    let buttonDiv = document.getElementById("add_course_dialog_buttons")
+
+    if (!Object.keys(course).length || back) {
+        contentDiv.innerHTML = `<div class="flx" style="gap:0.5em; margin:0.5em 0"><label for="search_dw_box">
+        <img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false" style="vertical-align: middle;object-fit: contain;width: 2rem;height: 2rem;cursor: pointer;user-select: none;-webkit-touch-callout: none;"></label><p3 id="digsrtxt">Search</p3>
+        <input autofocus autocomplete="off" id="search_dw_boxX" name="dw" type="search" placeholder="Search for courses" value="" title="Search" onkeypress="if ((event.charCode || event.keyCode || 0) == 13) event.preventDefault();" onkeyup="
+            let nc = document.getElementById('search_dw_boxX').value;
+            if (!nc) {document.getElementById('search_result').innerHTML = startSearchingHTML; add_course_search_history = nc; return false}; 
+            if (nc != add_course_search_history) {render_search('', nc, true); add_course_search_history = nc; return false}
+        "></form></div>
+        <style>@media (min-width:800px) {dialog #search_result {max-height:35em}}</style>
+        <div id="search_result" style="width:45em;max-width:100%;min-height:17.5em;overflow:scroll">`+ startSearchingHTML + `</div>`
+        buttonDiv.innerHTML = ``
+    } else if (Object.keys(course).length) {
+        console.log(course)
+        contentDiv.innerHTML = `
+                    Course: <input readonly name="code" type="text" value="` + course.code + `"><br>
+                    Name: <input readonly name="name" type="text" value="` + course.name + `"><br>
+                    Semester: <select id="course_update_sem" name="sem">` + generate_year_of_intake_select(course.sem, true) + `</select><br>
+                    Grade: <select name="grade">` + generate_grade_selection("----", []) + `</select><br>
+                    <br><h4>Extra</h4><br>
+                    <input type="checkbox" id="is_SPO" name="is_SPO" value="yes"> <label for="is_SPO"> [SPO] Self-Paced Online Learning</label><br>
+                    Actual credit: <input name="actual_cred" type="number" min="0" value="` + course.units + `"><br>
+                    Total credit: <input name="units" type="number" min="0" value="` + course.units + `"><br>
+                    <div class="box" style="display:none">
+                        <p2>Lec: </p2><br>
+                        <p2>Lab: </p2><br>
+                        <p2>Tut: </p2><br>
+                        <p2>Rsh: </p2><br>
+                    </div>
+                    <br>`
+        buttonDiv.innerHTML = `
+                    <br>
+                    <button id="security_dialog_confirmBtn" onclick="submitCourseUpdate(false, () => {reboot(true)})">Add</button>
+                    `
+    }
+
+    document.getElementById("add_course_dialog").showModal()
+}
+
 function generate_new_profile_selHTML(configTemp, onChangeScript = true) {
     if (typeof configTemp.profile === "undefined") configTemp.profile = {}
     if (typeof configTemp.profile.currentStudies === "undefined") configTemp.profile.currentStudies = {}
@@ -1072,79 +1166,95 @@ function render_me(path) {
             </div>
             
             <div id="my_courses">
-                ` + renderTopBar(`...`, " ", `<button>add course</button>`, false, "", false, "", true) + `
+                ` + renderTopBar(`...`, " ", `<div><button onclick="add_course()">add course</button><div id="add_course_model"></div></div>`, false, "", false, "", true) + `
                 <div id="my_courses_content"></div>
+                <div id="course_enroll_model"></div>
             </div>`
 
-            update_config("", "", () => {
-                let htmld = "", total_cred = 0, total_passed_cred = 0, total_gpacred = 0, total_grade_points = 0
-                if (typeof config.courses === "undefined" || Object.keys(config.courses).length === 0) {
-                    htmld = `<div class="edge2edge_page"><p2>No courses found!</p2></div>`
-                } else {
-                    let semsdb = {}
+            let htmld = "", total_cred = 0, total_passed_cred = 0, total_gpacred = 0, total_grade_points = 0
+            if (typeof config.courses === "undefined" || Object.keys(config.courses).length === 0) {
+                htmld = `<div class="edge2edge_page"><p2>No courses found!</p2></div>`
+            } else {
+                let semsdb = {}
 
-                    Object.keys(config.courses).forEach(course => {
-                        Object.keys(config.courses[course]).forEach(sem => {
-                            if (typeof semsdb[sem] === "undefined") semsdb[sem] = {}
-                            semsdb[sem][course] = config.courses[course][sem]
-                        })
+                Object.keys(config.courses).forEach(course => {
+                    Object.keys(config.courses[course]).forEach(sem => {
+                        if (typeof semsdb[sem] === "undefined") semsdb[sem] = {}
+                        semsdb[sem][course] = config.courses[course][sem]
                     })
+                })
 
-                    Object.keys(semsdb).sort().reverse().forEach(sem => {
-                        let mhtmld = "", gpacred = 0, total_term_cred = 0, termcredload = 0, gpasum = 0, haveunfilled = false
-                        Object.keys(semsdb[sem]).forEach(course => {
-                            let cred = parseInt(semsdb[sem][course].units)
-                            let actualcred = cred
-                            if (typeof semsdb[sem][course].actual_cred != "undefined") actualcred = parseInt(semsdb[sem][course].actual_cred)
-                            mhtmld += generate_course_selbox(course, semsdb[sem][course].name, sem, `` + ((semsdb[sem][course].grade === "----") ? (`<style>#` + course.replace(" ", "") + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">`) : (`<h5 class="textbox">`)) + semsdb[sem][course].grade + `</h5><h5 style="opacity:0.85">` + ((actualcred != cred) ? ("" + actualcred + " of ") : "") + semsdb[sem][course].units + ` unit` + ((semsdb[sem][course].units === "1") ? '' : 's') + `</h5>`, true)
-                            total_term_cred += actualcred
-                            total_cred += actualcred
-                            termcredload += actualcred
-                            if (semsdb[sem][course].grade === "----") {
-                                haveunfilled = true
-                                return
-                            };
-                            ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"].forEach((grade, index) => {
-                                if (semsdb[sem][course].grade === grade) {
-                                    gpacred += cred
-                                    total_gpacred += cred
-                                    if (grade != "F") total_passed_cred += cred
-                                    gpasum += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
-                                    total_grade_points += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
+                Object.keys(semsdb).sort().reverse().forEach(sem => {
+                    let mhtmld = "", gpacred = 0, total_term_cred = 0, termcredload = 0, gpasum = 0, haveunfilled = false
+                    Object.keys(semsdb[sem]).forEach(course => {
+                        let cred = parseInt(semsdb[sem][course].units)
+                        let actualcred = cred
+                        if (typeof semsdb[sem][course].actual_cred != "undefined") actualcred = parseInt(semsdb[sem][course].actual_cred)
+                        mhtmld += generate_course_selbox(
+                            course,
+                            semsdb[sem][course].name,
+                            sem,
+                            cred,
+                            `` + ((semsdb[sem][course].grade === "----") ? (`<style>#` + course.replace(" ", "") + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">`) : (`<h5 class="textbox">`)) + semsdb[sem][course].grade + `</h5><h5 style="opacity:0.85">` + ((actualcred != cred) ? ("" + actualcred + " of ") : "") + semsdb[sem][course].units + ` unit` + ((semsdb[sem][course].units === "1") ? '' : 's') + `</h5>`,
+                            true, 
+                            (course, name, sem, units) => {let coursen = course.replaceAll(" ", ""); return `setLoadingStatus('show'); check_course_exists('` + coursen + `', '` + sem + `', (exist) => {
+                                if (exist) {
+                                    boot('/course/` + sem + `/` + coursen.substring(0, 4) + '/' + coursen + `/', false, 2)
+                                } else {
+                                    setLoadingStatus('hide');
+                                    add_course(false, {'code': '` + course + `', 'name': '` + name + `', 'sem': '` + sem + `', 'units': '` + units + `'})
                                 }
-                            })
-                            if (["P", "T", "CR", "DI", "DN", "PA", "PS"].includes(semsdb[sem][course].grade)) {
-                                total_passed_cred += cred
-                                if (semsdb[sem][course].grade === "T") termcredload -= actualcred
-                            }
-                            if (["AU", "W"].includes(semsdb[sem][course].grade)) {
-                                total_term_cred -= actualcred
-                                total_cred -= actualcred
-                                if (semsdb[sem][course].grade === "W") termcredload -= actualcred
+                            })`},
+                        )
+                        total_term_cred += actualcred
+                        total_cred += actualcred
+                        termcredload += actualcred
+                        if (semsdb[sem][course].grade === "----") {
+                            haveunfilled = true
+                            return
+                        };
+                        ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"].forEach((grade, index) => {
+                            if (semsdb[sem][course].grade === grade) {
+                                gpacred += cred
+                                total_gpacred += cred
+                                if (grade != "F") total_passed_cred += cred
+                                gpasum += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
+                                total_grade_points += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
                             }
                         })
-                        htmld += `<div class="edge2edge_page"><div class="flx"><h3>` + ustTimeToString(sem) + `</h3><div class="flx" style="gap:0.5em">` + ((gpacred) ? (`<h5>TGA <span class="textbox"` + (haveunfilled ? ` title="There are courses missing grade information">⌛ ` : ">") + (gpasum / gpacred).toFixed(3) + `</span></h5>`) : "") + ((termcredload != total_term_cred) ? (`<h5>Actual Credit Load <span class="textbox" title="The actual credit load after deducting transferred credits">` + termcredload + `</span></h5>`) : "") + `<h5>Credits <span class="textbox">` + total_term_cred + `</span></h5></div></div><div class="flx">` + mhtmld + `</div></div>`
+                        if (["P", "T", "CR", "DI", "DN", "PA", "PS"].includes(semsdb[sem][course].grade)) {
+                            total_passed_cred += cred
+                            if (semsdb[sem][course].grade === "T") termcredload -= actualcred
+                        }
+                        if (["AU", "W"].includes(semsdb[sem][course].grade)) {
+                            total_term_cred -= actualcred
+                            total_cred -= actualcred
+                            if (semsdb[sem][course].grade === "W") termcredload -= actualcred
+                        }
                     })
-                }
-                let courseSum = `<div class="flx" style="gap:0.5em;width:fit-content">` + ((total_gpacred) ? (`<h5>CGA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span></h5>`) : "") + `<h5>Passed Credits <span class="textbox">` + total_passed_cred + `</span></h5><h5>Total Credits <span class="textbox">` + total_cred + `</span></h5></div>`
+                    htmld += `<div class="edge2edge_page"><div class="flx"><h3>` + ustTimeToString(sem) + `</h3><div class="flx" style="gap:0.5em">` + ((gpacred) ? (`<h5>TGA <span class="textbox"` + (haveunfilled ? ` title="There are courses missing grade information">⌛ ` : ">") + (gpasum / gpacred).toFixed(3) + `</span></h5>`) : "") + ((termcredload != total_term_cred) ? (`<h5>Actual Credit Load <span class="textbox" title="The actual credit load after deducting transferred credits">` + termcredload + `</span></h5>`) : "") + `<h5>Credits <span class="textbox">` + total_term_cred + `</span></h5></div></div><div class="flx">` + mhtmld + `</div></div>`
+                })
+            }
+            let courseSum = `<div class="flx" style="gap:0.5em;width:fit-content">` + ((total_gpacred) ? (`<h5>CGA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span></h5>`) : "") + `<h5>Passed Credits <span class="textbox">` + total_passed_cred + `</span></h5><h5>Total Credits <span class="textbox">` + total_cred + `</span></h5></div>`
 
-                document.getElementById("titlecard_subtitle").innerHTML = `<div class="only_mobile" style="padding:0.25em 0"><br>` + courseSum + `</div>`
-                document.getElementById("topbar_title").innerHTML = `<div class="no_mobile" style="padding:0.25em 0">` + courseSum + `</div>`
-                document.getElementById("my_courses_content").innerHTML = htmld
+            document.getElementById("titlecard_subtitle").innerHTML = `<div class="only_mobile" style="padding:0.25em 0"><br>` + courseSum + `</div>`
+            document.getElementById("topbar_title").innerHTML = `<div class="no_mobile" style="padding:0.25em 0">` + courseSum + `</div>`
+            document.getElementById("my_courses_content").innerHTML = htmld
 
-                setLoadingStatus("hide")
-            })
+            setLoadingStatus("hide")
             break
     }
 }
 
-function generate_year_of_intake_select(selection = "") {
+function generate_year_of_intake_select(selection = "", full = false) {
     let years = [], pyears = []
     if (!selection) {
         years.push("----")
     }
     for (let y = (new Date().getFullYear()); y > (new Date().getFullYear()) - 7; y--) {
+        if (full) pyears.push("" + ((y - 2000) * 100 + 40))
         pyears.push("" + ((y - 2000) * 100 + 30))
+        if (full) pyears.push("" + ((y - 2000) * 100 + 20))
         pyears.push("" + ((y - 2000) * 100 + 10))
     }
     if (selection && !pyears.includes(selection)) {
@@ -1325,7 +1435,7 @@ function approval_course_selbox(snote) {
                 semsdb[sem][course] = config.courses[course][sem]
             })
         })
-        console.log(semsdb)
+        //console.log(semsdb)
         Object.keys(semsdb).sort().reverse().forEach(sem => {
             let mhtmld = ``, unote = rndStr()
             Object.keys(semsdb[sem]).sort().forEach(course => {
@@ -1717,13 +1827,15 @@ function generate_grade_selection(selection = "----", possibleGrades = []) {
     return ((possibleGrades.length) ? ("" + loop(["----"], selection) + `<optgroup label="Grades">` + loop(possibleGrades, selection) + `</optgroup><optgroup>` + loop(["AU", "I", "T", "W"], selection)) + `</optgroup>` : ("" + loop(["----"], selection) + `<optgroup label="Toward GPA">` + loop(["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"], selection) + `</optgroup><optgroup label="Not for GPA">` + loop(["P", "PP", "T", "AU", "W", "CR", "DI", "DN", "I", "PA", "PS"].sort(), selection) + `</optgroup>`))
 }
 
-function submitCourseUpdate(remove = false) {
+function submitCourseUpdate(remove = false, cb = "") {
 
-    document.getElementById('course_update_dialog').close()
+    if (document.getElementById('course_update_dialog')) document.getElementById('course_update_dialog').close()
+    if (document.getElementById('add_course_dialog')) document.getElementById('add_course_dialog').close()
     setLoadingStatus('show')
-    const formData = formToJson(new FormData(document.getElementById("course_update_dialog_form")))
+    let formData = {}
+    if (document.getElementById("course_update_dialog_form")) formData = formToJson(new FormData(document.getElementById("course_update_dialog_form")))
+    if (document.getElementById("add_course_dialog_form")) formData = formToJson(new FormData(document.getElementById("add_course_dialog_form")))
     let newConfig = JSON.parse(JSON.stringify(config))
-    let btn = document.getElementById("course_enroll_btn")
 
     if (remove) {
         delete newConfig.courses[formData.code][formData.sem]
@@ -1750,29 +1862,34 @@ function submitCourseUpdate(remove = false) {
     }
 
     update_config("courses", newConfig.courses, (err) => {
-        if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); return }
+        if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); if (cb) cb(); return }
         setLoadingStatus('success', false)
         update_enroll_course_gui(formData.currentsem, formData.code)
+        if (cb) cb()
     })
 
 }
 
 function update_enroll_course_gui(sem, code) {
-    let btn = document.getElementById("course_enroll_btn")
-    let newConfig = JSON.parse(JSON.stringify(config))
-    if (typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).includes(sem)) {
-        btn.innerText = "✅ Enrolled (grade: " + newConfig.courses[code][sem].grade + ")"
-        document.getElementById("course_enroll_notice").innerHTML = ""
-    } else {
-        btn.innerText = "Enroll"
-        document.getElementById("course_enroll_notice").innerHTML = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).length) ? (`<p4>Last enrolled at ` + ustTimeToString(Object.keys(newConfig.courses[code]).sort().reverse()[0]) + `</p4>`) : "")
+    try {
+        let btn = document.getElementById("course_enroll_btn")
+        let newConfig = JSON.parse(JSON.stringify(config))
+        if (typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).includes(sem)) {
+            btn.innerText = "✅ Enrolled (grade: " + newConfig.courses[code][sem].grade + ")"
+            document.getElementById("course_enroll_notice").innerHTML = ""
+        } else {
+            btn.innerText = "Enroll"
+            document.getElementById("course_enroll_notice").innerHTML = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).length) ? (`<p4>Last enrolled at ` + ustTimeToString(Object.keys(newConfig.courses[code]).sort().reverse()[0]) + `</p4>`) : "")
+        }
+    } catch (error) {
+
     }
 }
 
 function enroll_course(sem, course, make_switch = false, is_SPO = false, possibleGrades = [], actual_cred = []) {
     let btn = document.getElementById("course_enroll_btn")
     let model = document.getElementById("course_enroll_model")
-    if (btn) {
+
         if (make_switch && !(signinlevel > 0)) {
             if (confirm("You are not signed in. Do you want to create a Guest Profile now?\n\nThis temporary profile will be wiped when you close or refresh your browser, and is not migratable when you sign in later.")) {
                 document.getElementById("course_enroll_notice").innerHTML = `<div id="profile_new_model"></div>`
@@ -1828,7 +1945,7 @@ function enroll_course(sem, course, make_switch = false, is_SPO = false, possibl
         } else {
             update_enroll_course_gui(sem, courseParts.code)
         }
-    }
+    
 }
 
 function checkCourseEnrollOK(course) {
@@ -2136,7 +2253,7 @@ function render_courses_details(path, scrollIntoView = false, isGroup = false) {
             if ((studprog === "ug" && parseInt(course[5]) > 0 && parseInt(course[5]) < 5) || (studprog === "pg" && parseInt(course[5]) >= 5)) {
                 if (listMode === "card") {
                     let courseParts = courseStringToParts(course)
-                    html_draft += generate_course_selbox(courseParts.code, courseParts.name, path.split('/')[0], "" + ((typeof config.courses != "undefined" && typeof config.courses[course.split(" - ")[0]] != "undefined" && typeof config.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (`<style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + config.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : "<h5></h5>") + ((typeof r.resp[course].attr._cancelled != "undefined" && r.resp[course].attr._cancelled) ? `<div class="textbox"><h5>❌ Cancelled</h5></div>` : (`<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"])) + "</h5>"))
+                    html_draft += generate_course_selbox(courseParts.code, courseParts.name, path.split('/')[0], courseParts.units.split(" ")[0], "" + ((typeof config.courses != "undefined" && typeof config.courses[course.split(" - ")[0]] != "undefined" && typeof config.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (`<style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + config.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : "<h5></h5>") + ((typeof r.resp[course].attr._cancelled != "undefined" && r.resp[course].attr._cancelled) ? `<div class="textbox"><h5>❌ Cancelled</h5></div>` : (`<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"])) + "</h5>"))
                 } else {
                     html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + course.split(" ")[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)">
                     <div>

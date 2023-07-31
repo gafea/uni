@@ -82,7 +82,7 @@ sharedfx.getAllFromDir(servar.course_path, true).forEach(sx => {
                         xinsems[code].push(st.split(".")[0])
                         if (typeof xcourseids[code] === "undefined") xcourseids[code] = {}
                         let course = courseName
-                        xcourseids[code] = { SEM: st.split(".")[0], COURSEID: course, NAME: course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" (")) }
+                        xcourseids[code] = { UNITS: course.split(" (").pop().split(" ")[0], SEM: st.split(".")[0], COURSEID: course, NAME: course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" (")) }
                         let c = xcourses[sx][st.split(".")[0]][courseName];
                         ["DESCRIPTION", "INTENDED LEARNING OUTCOMES", "ALTERNATE CODE(S)", "PREVIOUS CODE"].forEach(a => {
                             if (typeof c.attr[a] != "undefined") {

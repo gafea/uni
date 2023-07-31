@@ -107,7 +107,7 @@ try {
                 let keepit = false
 
                 Object.keys(courseid).forEach(key => {
-                    if (key != "SEM" && key != "COURSEID") { 
+                    if (key != "SEM" && key != "COURSEID" && key != "UNITS") { 
                         if (courseid[key].normalize().toLowerCase().includes(q)) {
                             keepit = true
                             if (typeof courseFoundIn[CODE] === "undefined") courseFoundIn[CODE] = []
@@ -124,7 +124,7 @@ try {
         let results = []
         if (Object.keys(resultsPending.courseids).length) {
             Object.keys(resultsPending.courseids).forEach(CODE => {
-                results.push({ type: "course", found: courseFoundIn[CODE], result: { CODE: CODE, NAME: resultsPending.courseids[CODE].NAME, SEM: resultsPending.courseids[CODE].SEM, DESCRIPTION: resultsPending.courseids[CODE].DESCRIPTION } })
+                results.push({ type: "course", found: courseFoundIn[CODE], result: { CODE: CODE, NAME: resultsPending.courseids[CODE].NAME, SEM: resultsPending.courseids[CODE].SEM, UNITS: resultsPending.courseids[CODE].UNITS, DESCRIPTION: resultsPending.courseids[CODE].DESCRIPTION } })
             })
         }
         if (resultsPending.peoples.length) {

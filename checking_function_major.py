@@ -191,18 +191,19 @@ def exact(attr, courseCopy, output):
         elif courseNum - len(courseW) == 1:
             count += 1
             continue
-        for i in range(count, len(courseCopy)):
-            if courseCopy[i][2] + courseCopy[count][2] >= suggest * 2:
-                gpaW += courseCopy[count][0] * courseCopy[count][3] + courseCopy[i][0] * courseCopy[i][3]
-                for j in range(len(courseCopy[count][1])):
-                    courseW.append(courseCopy[count][1][j])
-                for j in range(len(courseCopy[i][1])):
-                    courseW.append(courseCopy[i][1][j])
-                creditW += courseCopy[count][2] + courseCopy[i][2]
-                actual_credW += courseCopy[count][3] + courseCopy[i][3]
-                break
-            if i == len(courseCopy) - 1:
-                alterW.append(courseCopy[count])
+        else:
+            for i in range(count + 1, len(courseCopy)):
+                if courseCopy[i][2] + courseCopy[count][2] >= suggest * 2:
+                    gpaW += courseCopy[count][0] * courseCopy[count][3] + courseCopy[i][0] * courseCopy[i][3]
+                    for j in range(len(courseCopy[count][1])):
+                        courseW.append(courseCopy[count][1][j])
+                    for j in range(len(courseCopy[i][1])):
+                        courseW.append(courseCopy[i][1][j])
+                    creditW += courseCopy[count][2] + courseCopy[i][2]
+                    actual_credW += courseCopy[count][3] + courseCopy[i][3]
+                    break
+                if i == len(courseCopy) - 1:
+                    alterW.append(courseCopy[count])
         count += 1
 
     for i in range(count, len(courseCopy)):
@@ -366,7 +367,7 @@ def switch(action, code):
                     return output
                 
                 output["pass"] = True
-                output["respattr"]["gpa"] = gpa
+                output["respattr"]["gpa"] = gpa / 10
                 output["respattr"]["courseUsed"] = [code["course"]]
                 output["respattr"]["credit"] = credit
                 output["respattr"]["actual_cred"] = actual_cred
@@ -377,15 +378,19 @@ def switch(action, code):
             if "school" in code:
                 match code["school"]:
                     case "SENG":
-                        deptList = seng
+                        for i in seng:
+                            deptList.append(i)
 
                     case _:
                         output["respattr"]["error"] = "Invalid_school"
                         return output
             
-            blackList = []
+
             if "dept" in code:
-                deptList = code["dept"]
+                for i in code["dept"]:
+                    deptList.append(i)
+
+            exclusion = []  
             if "attr" in code:
                 if "excl" in code["attr"]:
                     if "dept" in code["attr"]["excl"]:
@@ -394,13 +399,13 @@ def switch(action, code):
                                 deptList.remove(i)
                     elif "course" in code["attr"]["excl"]:
                         for i in code["attr"]["excl"]["course"]:
-                            blackList.append(i)
+                            exclusion.append(i)
 
             course = []
             alter = []
             if "courses" in user:
                 for i in user["courses"]:
-                    if i in blackList:
+                    if i in exclusion:
                         continue
                     courseCodeSep = i.split()
                     dept = courseCodeSep[0]
@@ -436,7 +441,7 @@ def switch(action, code):
             return output
         
         case "pass_qualification":
-            if code["quali"][0] not in user["profile"]["pastQuali"] or code["quali"][1] not in user["profile"]["pastQuali"][code["quali"][0]]:
+            if "pastQuali" not in user["profile"] or code["quali"][0] not in user["profile"]["pastQuali"] or code["quali"][1] not in user["profile"]["pastQuali"][code["quali"][0]]:
                 return output
             output = qualiMapping(code["quali"][0], code["level"], user["profile"]["pastQuali"][code["quali"][0]][code["quali"][1]], output)
             return output
@@ -479,10 +484,10 @@ def creditFind(course, output):
         locater = courseid.find(courseName) + len(courseName) + 2
     else:
         output["respattr"]["error"] = "Course_not_found_in_coursids"
-        return "credit", output
+        return -1, output
 
     if locater >= len(courseid):
-        return "credit", output
+        return -1, output
     elif courseid[locater].isnumeric():
         return int(courseid[locater]), output
     else:
@@ -521,25 +526,25 @@ def gradeMapping(grade, output):
     if grade in notPassGrade:
         return 0, output
     if grade in passNonLetterGrade:
-        return 0.1, output
+        return 1, output
     match grade[0]:
         case "A":
-            gpa = 4
+            gpa = 40
         case "B":
-            gpa = 3
+            gpa = 30
         case "C":
-            gpa = 2
+            gpa = 20
         case "D":
-            return 1, output
+            return 10, output
         case _:
             output["respattr"]["error"] = "Invalid_grade_received"
             return 0, output
     if len(grade) > 1:
         match grade[1]:
             case "+":
-                gpa += 0.3
+                gpa += 3
             case "-":
-                gpa -= 0.3
+                gpa -= 3
     return gpa, output
 
 def courseInfo(course, output):
@@ -551,7 +556,7 @@ def courseInfo(course, output):
         credit = int(user["courses"][course][sem[len(sem) - 1]]["actual_cred"])
     else:
         credit = int(user["courses"][course][sem[0]]["units"])
-    if gpa == 0.1:
+    if gpa == 1:
         actual_cred = 0
     else:
         actual_cred = credit
@@ -628,7 +633,7 @@ def bestCourse(course, alter, output):
 def info(gpaSum, courseUsed, credit, actual_cred, output):
     if courseUsed != []:
         if actual_cred:
-            output["respattr"]["gpa"] = gpaSum / actual_cred
+            output["respattr"]["gpa"] = gpaSum / (actual_cred * 10)
         else:
             output["respattr"]["gpa"] = 0.1
         output["respattr"]["courseUsed"] = courseUsed
