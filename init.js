@@ -1,5 +1,7 @@
 var script1 = document.createElement('script'); script1.src = '/!acc/uniplus.js'; document.head.appendChild(script1);
 
+const bottombarIcon = "" + resourceNETpath + "image/uni.svg"
+
 const bottombarbuttons = [
     'Me,/me/,me,' + resourceNETpath + 'image/me.png,1',
     'Browse,/course/,course,' + resourceNETpath + 'image/browse.png,2',
@@ -87,6 +89,15 @@ function init(path) {
             }
         })
 
+        // document.getElementById("cover_screen").innerHTML = `
+        // <img src="` + resourceNETpath + `image/uni.svg" style="height:8em;width:100%;object-fit:contain;margin:3em 0 1.5em 0">
+        //     <div id="cover_spin"></div>
+        //     <style>
+        //   #cover_screen{background-color:var(--bw);z-index:10000;opacity:1;transition-duration:0.15s;display:flex;flex-flow:column;justify-content:center;align-items:center;width:100%;height:100%;position:fixed;top:0;bottom:0;left:0;right:0}
+        //   #cover_spin{padding:0.005em;text-align:center;line-height:1;opacity:1;transition-duration:0.15s;border-radius:50%;animation:1.25s linear infinite spinner;border:solid 0.25em rgba(96,96,96,.3);border-top-color:#99f;height:1em;width:1em;will-change:transform}
+        //   @keyframes spinner { 0% {transform:rotate(0deg)} 100% {transform:rotate(360deg)} }
+        // </style>`
+
         if (path == '/' || path == '') { //home page, not decided what to do yet so redir to /course/ ;)
             setTimeout(() => {
                 boot("/course/", true, 2)
@@ -94,7 +105,7 @@ function init(path) {
             return `<meta http-equiv="refresh" content="0;URL=/course/">`
 
         } else if (path.toLowerCase().startsWith("/me/")) { //me page
-            return `<div id="me_wrp"></div>` + renderBottomBar('me')
+            return `<div id="me_wrp"></div>` + renderBottomBar('me', false, bottombarIcon)
 
         } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/group/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/")) { //course + people + room
             return `<div id="courses_select_wrp">
@@ -118,7 +129,7 @@ function init(path) {
                     </div>
                     <div class="LR_Right" id="courses_select_right"></div>
                 </div>
-            </div>` + renderBottomBar('course')
+            </div>` + renderBottomBar('course', false, bottombarIcon)
 
         } else if (path.toLowerCase().startsWith("/search/")) { //search
 
@@ -133,7 +144,7 @@ function init(path) {
                     </div>
                     <div class="LR_Right" id="courses_select_right"></div>
                 </div>
-            </div>` + renderBottomBar('search')
+            </div>` + renderBottomBar('search', false, bottombarIcon)
 
         } else if (path.toLowerCase().startsWith("/plan/")) { //plan
 
@@ -157,7 +168,7 @@ function init(path) {
                         <div id="major_select_cont"></div>
                     </div>
                 </div>
-            </div>` + renderBottomBar('plan')
+            </div>` + renderBottomBar('plan', false, bottombarIcon)
 
         } else if (path.toLowerCase().startsWith("/about/")) { //about page
             return `<div id="about"><div class="edge2edge_page">
@@ -228,7 +239,7 @@ function init(path) {
                 Feature Request/Bug Reports? Find me at <a href="mailto:gafea@icloud.com">gafea@icloud.com</a>.
             </p3>
 
-            </div></div>` + renderBottomBar('about')
+            </div></div>` + renderBottomBar('about', false, bottombarIcon)
 
         } else if (false && path.startsWith('/!') && !(path === '/!404' || path.startsWith('/!404/'))) { //reserved for api call, invalid for HTML
             let spath = document.createTextNode(path).textContent
@@ -298,17 +309,18 @@ function exe(path) {
 
 }
 
-function exe_about() {
-    document.title = "About - uni"
-    return
-}
-
 const exe_courses = (path) => wait_allSems(render_courses, path, "Courses - uni")
 const exe_people = (path) => wait_allSems(render_people, path, "Instructors - uni")
 const exe_room = (path) => wait_allSems(render_room, path, "Rooms - uni")
 const exe_me = (path) => wait_allSems(render_me, path, "Me - uni")
 const exe_search = (path) => wait_allSems(render_search, path, "Search - uni")
 const exe_plan = (path) => wait_allSems(render_plan, path, "Planning - uni")
+const exe_about = (path) => wait_allSems(render_about, path, "About - uni")
+
+function render_about() {
+    document.title = "About - uni"
+    return
+}
 
 const courseCodeNamedb = JSON.parse('{"ACCT":"Accounting","BIBU":"Biotechnology and Business","BIEN":"Bioengineering","BIPH":"Biological Physics","CENG":"Chemical and Biological Engineering","CHEM":"Chemistry","CIVL":"Civil and Environmental Engineering","COMP":"Computer Science and Engineering","CORE":"Common Core","CPEG":"Computer Engineering","DASC":"Data Analytics in Science","DSCT":"Data Science and Technology","ECON":"Economics","ELEC":"Electronic and Computer Engineering","EMIA":"Emerging Interdisciplinary Areas","ENEG":"Energy","ENGG":"School of Engineering","ENTR":"Entrepreneurship","ENVR":"Environment","ENVS":"Environmental Science","FINA":"Finance","FYTG":"HKUST Fok Ying Tung Graduate School","GBUS":"Global Business","GNED":"General Education","HART":"Studio Arts courses offered by HUMA","HLTH":"Health and Physical Education","HUMA":"Humanities","IDPO":"Interdisciplinary Programs Office","IEDA":"Industrial Engineering and Decision Analytics","IIMP":"Individualized Interdisciplinary Major","IROP":"International Research Opportunities Program","ISDN":"Integrative Systems and Design","ISOM":"Information Systems, Business Statistics and Operations Management","LABU":"Language for Business","LANG":"Language","LEGL":"Legal Education","LIFS":"Life Science","MARK":"Marketing","MATH":"Mathematics","MECH":"Mechanical and Aerospace Engineering","MGMT":"Management","OCES":"Ocean Science","PHYS":"Physics","PPOL":"Public Policy","RMBI":"Risk Management and Business Intelligence","SBMT":"School of Business and Management","SCIE":"School of Science","SHSS":"School of Humanities and Social Science","SISP":"Summer Institute for Secondary School Students","SOSC":"Social Science","SUST":"Sustainability","TEMG":"Technology and Management","UROP":"Undergraduate Research Opportunities Program","WBBA":"SF program in World Business"}')
 const courseCode_to_fullName = (code) => {
@@ -684,9 +696,9 @@ function create_new_profile(studyProgram = "----", yearOfIntake = "----", mm = [
 
     document.getElementById("profile_new_model").innerHTML = `<dialog id="profile_new_dialog">
     <form id="profile_new_dialog_form" action="javascript:void(0);">
-        <div class="flx" style="gap:1em">
+        <div class="flx" style="gap:1em;flex-wrap: wrap-reverse;">
             <h4>Create ` + (signinlevel >= 1 ? `New` : `Guest`) + ` Profile</h4>
-            <button value="cancel" formmethod="dialog" class="closebtn"` + ((false && signinlevel >= 1) ? ` style="display:none"` : ``) + `><img src="` + resourceNETpath + `image/circle-cross.png" title="Close"></button>
+            <button value="cancel" formmethod="dialog" class="closebtn"` + ((signinlevel >= 1) ? ` style="display:none"` : ``) + `><img src="` + resourceNETpath + `image/circle-cross.png" title="Close"></button>
         </div><br>
 
         <div id="profile_new_dialog_content">
@@ -753,10 +765,16 @@ function create_new_profile(studyProgram = "----", yearOfIntake = "----", mm = [
                     yearOfIntake: yearOfIntake,
                     mm: mm
                 }
+            },
+            courses: {
             }
         }
         if (signinlevel >= 1) {
-            update_config("profile", config.profile, () => create_new_profile_cb())
+            update_config("profile", config.profile, () => {
+                update_config("courses", config.courses, () => {
+                    create_new_profile_cb()
+                })
+            })
         } else {
             create_new_profile_cb()
         }
@@ -1064,14 +1082,14 @@ function render_me(path) {
                     htmld = `<div class="edge2edge_page"><p2>No courses found!</p2></div>`
                 } else {
                     let semsdb = {}
-    
+
                     Object.keys(config.courses).forEach(course => {
                         Object.keys(config.courses[course]).forEach(sem => {
                             if (typeof semsdb[sem] === "undefined") semsdb[sem] = {}
                             semsdb[sem][course] = config.courses[course][sem]
                         })
                     })
-    
+
                     Object.keys(semsdb).sort().reverse().forEach(sem => {
                         let mhtmld = "", gpacred = 0, total_term_cred = 0, termcredload = 0, gpasum = 0, haveunfilled = false
                         Object.keys(semsdb[sem]).forEach(course => {
@@ -1109,11 +1127,11 @@ function render_me(path) {
                     })
                 }
                 let courseSum = `<div class="flx" style="gap:0.5em;width:fit-content">` + ((total_gpacred) ? (`<h5>CGA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span></h5>`) : "") + `<h5>Passed Credits <span class="textbox">` + total_passed_cred + `</span></h5><h5>Total Credits <span class="textbox">` + total_cred + `</span></h5></div>`
-                
+
                 document.getElementById("titlecard_subtitle").innerHTML = `<div class="only_mobile" style="padding:0.25em 0"><br>` + courseSum + `</div>`
                 document.getElementById("topbar_title").innerHTML = `<div class="no_mobile" style="padding:0.25em 0">` + courseSum + `</div>`
                 document.getElementById("my_courses_content").innerHTML = htmld
-                
+
                 setLoadingStatus("hide")
             })
             break
@@ -1154,7 +1172,7 @@ function generate_year_of_intake_select(selection = "") {
 }
 
 function updateProfile(category, target, value, cb) {
-    try {setLoadingStatus("show")} catch (error) {}
+    try { setLoadingStatus("show") } catch (error) { }
     let configTemp = JSON.parse(JSON.stringify(config))
     if (typeof configTemp.profile === "undefined") configTemp.profile = {}
     if (typeof configTemp.profile[category] === "undefined") configTemp.profile[category] = {}
@@ -1218,7 +1236,7 @@ function wait_allSems(cb, path, title) {
 
     document.title = title
 
-    if (allSemsF.length) { allSems = JSON.parse(JSON.stringify(allSemsF)); cb(path); return }
+    if (allSemsF.length) { allSems = JSON.parse(JSON.stringify(allSemsF)); setOverlayStatus("hide", false, "cover"); cb(path); return }
 
     fetch("/!course/").then(r => r.json()).then(r => {
         if (r.status != 200 || !r.resp.length) {
@@ -1239,13 +1257,15 @@ function wait_allSems(cb, path, title) {
             }
             if (typeof config.profile == "undefined" && signinlevel >= 1) {
                 document.body.innerHTML += `<div id="profile_new_model"></div>`
-                create_new_profile_cb = () => {reboot()}
+                create_new_profile_cb = () => { reboot() }
                 create_new_profile()
             }
             cb(path)
         }).catch(error => {
             console.log(error)
             cb(path)
+        }).finally(() => {
+            setOverlayStatus("hide", true, "cover")
         })
 
     }).catch(error => {
@@ -1256,6 +1276,9 @@ function wait_allSems(cb, path, title) {
             <p3>Connect to the internet, and then refresh the page.</p3>
         </div>
         `
+        setOverlayStatus("hide", true, "cover")
+    }).finally(() => {
+        setOverlayStatus("hide", false, "cover")
     })
 
 }
@@ -1276,13 +1299,122 @@ function filterFunction(hideListIfEmpty = false) {
     }
 }
 
+function approval_course_selbox(snote) {
+    let d = `
+    <dialog id="approval_course_selbox_dialog">
+    <form id="approval_course_selbox_dialog_form" action="javascript:void(0);">
+        <div class="flx" style="gap:1em; flex-wrap: wrap-reverse;">
+            <div>
+                <h4>Any courses used to fulfill this requirement?</h4>
+                <p3>This is used to calculate related data like MCGA.</p3>
+            </div>
+            <button value="cancel" formmethod="dialog" class="closebtn"><img src="` + resourceNETpath + `image/circle-cross.png" title="Close" onclick="document.getElementById('aprvswitch-` + snote + `').checked = false"></button>
+        </div>
+
+        <div id="approval_course_selbox_dialog_content">
+            <p2><div class="box" id="approval_course_selbox_string"></div></p2>`
+
+    if (typeof config.courses == "undefined" || Object.keys(config.courses).length == 0) {
+        d += "No courses found!"
+    } else {
+        //create a list of checkbox to select courses of each semester using HTML
+        let semsdb = {}
+        Object.keys(config.courses).forEach(course => {
+            Object.keys(config.courses[course]).forEach(sem => {
+                if (typeof semsdb[sem] === "undefined") semsdb[sem] = {}
+                semsdb[sem][course] = config.courses[course][sem]
+            })
+        })
+        console.log(semsdb)
+        Object.keys(semsdb).sort().reverse().forEach(sem => {
+            let mhtmld = ``, unote = rndStr()
+            Object.keys(semsdb[sem]).sort().forEach(course => {
+                mhtmld += `<div class="flx" style="gap:0.5em;justify-content:flex-start;align-items:flex-start;margin:0.5em 0">
+                <input 
+                    style="flex-grow:unset" 
+                    onchange="
+                        document.getElementById('aprvcourse-titlecount-` + sem + `').innerText = (0 + parseInt(document.getElementById('aprvcourse-titlecount-` + sem + `').innerText) + (document.getElementById('aprvcourse-` + unote + `-` + course.replaceAll(" ", "") + `').checked ? 1 : -1));
+                        if (document.getElementById('aprvcourse-titlecount-` + sem + `').innerText == 0) {
+                            document.getElementById('aprvcourse-title-` + sem + `').style.fontWeight = 'unset'
+                        } else {
+                            document.getElementById('aprvcourse-title-` + sem + `').style.fontWeight = 'bolder'
+                        }
+                        " 
+                    type="checkbox" 
+                    id="aprvcourse-` + unote + `-` + course.replaceAll(" ", "") + `" 
+                    name="aprvcourse-coursecheckbox" 
+                    value="` + course + `-` + sem + `"
+                >
+                <label for="aprvcourse-` + unote + `-` + course.replaceAll(" ", "") + `">
+                    <p2>` + course + `</p2><br><p3>` + semsdb[sem][course].name + `</p3>
+                </label>
+                </div>`
+            })
+            d += `<details><summary style="cursor:pointer"><p2 id="aprvcourse-title-` + sem + `">` + ustTimeToString(sem) + ` - [<span id="aprvcourse-titlecount-` + sem + `">0</span>]</p2></summary><div style="margin:0 1em">` + mhtmld + `</div></details>`
+        })
+    }
+
+    d += `</div><br>
+
+        <div class="flx">
+            <button id="security_dialog_confirmBtn" class="acss aobh" onclick="submit_approval_course('` + snote + `', true)">No courses were used</button>
+            <button id="security_dialog_confirmBtn" onclick="submit_approval_course('` + snote + `')">Save</button>
+        </div>
+    </form>
+    </dialog>`
+
+    document.getElementById("aprvmodel-" + snote).innerHTML = d
+    document.getElementById("aprvmodel-" + snote).querySelectorAll('details').forEach((D, _, A) => { D.ontoggle = _ => { if (D.open) A.forEach(d => { if (d != D) d.open = false }) } })
+    document.getElementById('approval_course_selbox_string').innerHTML = document.getElementById('aprvstr-' + snote).innerText
+    document.getElementById('approval_course_selbox_dialog').showModal()
+}
+
+function submit_approval_course(snote, noCourse = false) {
+    document.getElementById('approval_course_selbox_dialog').close()
+
+    let mxc = []
+    if (typeof config.profile == "undefined" || typeof config.profile.specialApprovals == "undefined" || typeof config.profile.specialApprovals.selfDeclear == "undefined") {
+        mxc = [document.getElementById('aprvtext-' + snote).innerText]
+    } else {
+        mxc = [...config.profile.specialApprovals.selfDeclear, document.getElementById('aprvtext-' + snote).innerText]
+    }
+
+    updateProfile('specialApprovals', 'selfDeclear', mxc, () => {
+        let x = document.querySelectorAll('input[name=aprvcourse-coursecheckbox]:checked')
+
+        if (noCourse || !x.length) {
+            reboot(true)
+            return
+        }
+
+        let mappings = {}
+        x.forEach(item => {
+            let m = item.value.split("-")
+            if (typeof mappings[m[1]] === "undefined") mappings[m[1]] = []
+            mappings[m[1]].push(m[0])
+        })
+
+        let configTemp = JSON.parse(JSON.stringify(config))
+        if (typeof configTemp.profile === "undefined") configTemp.profile = {}
+        if (typeof configTemp.profile.specialApprovals === "undefined") configTemp.profile.specialApprovals = {}
+        if (typeof configTemp.profile.specialApprovals.selfDeclearMapping === "undefined") configTemp.profile.specialApprovals.selfDeclearMapping = {}
+        configTemp.profile.specialApprovals.selfDeclearMapping[document.getElementById('aprvtext-' + snote).innerText] = mappings
+
+        updateProfile('specialApprovals', 'selfDeclearMapping', configTemp.profile.specialApprovals.selfDeclearMapping, () => {
+            reboot(true)
+            return
+        })
+    })
+}
+
 function generate_html_from_action(json, ignoreMissingAction = false) {
     //json = JSON.parse(JSON.stringify(json))
     let html = "", htmlsigninpoints = ``, htmldft = ``, htmlcft = ``, bordercolorcss = `style="border:2px solid #8884"`, numPoints = 0, numPassed = 0
     switch (json.action) {
         case "not":
             htmldft = `<h4><small>Not fulfilling:</small></h4>`
-            if (!json.array) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
+            if (!json.array && !json.note) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
+            if (!json.array && json.note) json.array = json.note
             break;
 
         case "pass_course":
@@ -1381,7 +1513,7 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
             ignoreMissingAction = true
             break;
 
-        case "pass_qualification":            
+        case "pass_qualification":
             htmldft = `<h5>Pass this qualification:</h5>`
             htmlcft = `<p2>Level ` + json.level + ` or above in ` + json.quali.join(" ") + `</p2>`
             if (!json.quali || !json.level) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
@@ -1413,21 +1545,34 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
             //console.log((typeof json.pass == "undefined"), json.pass, snote, config.profile.specialApprovals.selfDeclear, json.note)
             if (typeof json.pass == "undefined" && signinlevel > 0) json.pass = (typeof config.profile != "undefined" && typeof config.profile.specialApprovals != "undefined" && typeof config.profile.specialApprovals.selfDeclear != "undefined" && config.profile.specialApprovals.selfDeclear.includes(json.note))
             let onclickScript = ``
-            if (typeof json.attr != "undefined" && typeof json.attr.requireUserFillCourses != "undefined" && json.attr.requireUserFillCourses) {
-                onclickScript = `alert("hvnt made the add course yet, coming soon")`
+            if (json.pass) {
+                onclickScript = `
+                    let tgx = document.getElementById('aprvtext-` + snote + `').innerText;
+                    updateProfile('specialApprovals', 'selfDeclear', config.profile.specialApprovals.selfDeclear.filter(a => a != tgx), () => {
+                        if (typeof config.profile.specialApprovals.selfDeclearMapping != 'undefined' && typeof config.profile.specialApprovals.selfDeclearMapping[tgx] != 'undefined') {
+                            delete config.profile.specialApprovals.selfDeclearMapping[tgx]
+                            updateProfile('specialApprovals', 'selfDeclearMapping', config.profile.specialApprovals.selfDeclearMapping, () => {
+                                reboot(true)
+                            })
+                        } else {
+                            reboot(true)
+                        }
+                    })`
             } else {
-                onclickScript = "updateProfile('specialApprovals', 'selfDeclear', " + (json.pass ? ("config.profile.specialApprovals.selfDeclear.filter(a => a != document.getElementById('aprvtext-" + snote + "').innerText)") : ((typeof config.profile == "undefined" || typeof config.profile.specialApprovals == "undefined" || typeof config.profile.specialApprovals.selfDeclear == "undefined") ? ("[document.getElementById('aprvtext-" + snote + "').innerText]") : ("[...config.profile.specialApprovals.selfDeclear, document.getElementById('aprvtext-" + snote + "').innerText]"))) + ", () => reboot(true))"
+                onclickScript = `approval_course_selbox('` + snote + `')`
             }
-            htmldft = `<h4><small>Fulfill this requirement:</small></h4>`
-            htmlcft = `<p2>` + json.note + `</p2>
-            <div class="flx box-dash" style="justify-content:flex-start;gap:0.5em;padding:0.75em 0 0 0;margin:0.5em 0 0 0">
-                <label class="switch">
-                    <input id="aprvswitch-` + snote + `" type="checkbox" ` + (json.pass ? "checked " : "") + `onclick="` + onclickScript + `">
-                    <span class="slider"></span>
-                </label>
-                <label for="aprvswitch-` + snote + `" style="cursor:pointer"><p2>I have fulfilled this requirement</p2></label>
-                <textarea style="display:none" id="aprvtext-` + snote + `"></textarea>
-            </div>`
+            htmldft = `<div id="aprvmodel-` + snote + `"></div><h4><small>Fulfill this requirement:</small></h4>`
+            htmlcft = `<p2 id="aprvstr-` + snote + `">` + json.note + `</p2>`
+            if (signinlevel > 0) {
+                htmlcft += `<div class="flx box-dash" style="justify-content:flex-start;gap:0.5em;padding:0.75em 0 0 0;margin:0.5em 0 0 0">
+                    <label class="switch">
+                        <input id="aprvswitch-` + snote + `" type="checkbox" ` + (json.pass ? "checked " : "") + `onclick="` + onclickScript + `">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="aprvswitch-` + snote + `" style="cursor:pointer"><p2>I have fulfilled this requirement</p2></label>
+                    <textarea style="display:none" id="aprvtext-` + snote + `"></textarea>
+                </div>`
+            }
             setTimeout(() => document.getElementById("aprvtext-" + snote).innerText = json.note, 100)
             if (!json.note) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
             break;
@@ -1646,7 +1791,7 @@ function enroll_course(sem, course, make_switch = false, is_SPO = false, possibl
             let unit = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[courseParts.code] != "undefined" && typeof newConfig.courses[courseParts.code][sem] != "undefined" && typeof newConfig.courses[courseParts.code][sem].units != "undefined") ? newConfig.courses[courseParts.code][sem].units : courseParts.units.split(" ")[0])
             model.innerHTML = `<dialog id="course_update_dialog">
             <form id="course_update_dialog_form" action="javascript:void(0);">
-                <div class="flx" style="gap:1em">
+                <div class="flx" style="gap:1em;flex-wrap: wrap-reverse">
                     <h4>Enroll Course</h4>
                     <button value="cancel" formmethod="dialog" class="closebtn"><img src="` + resourceNETpath + `image/circle-cross.png" title="Close"></button>
                 </div><br>
