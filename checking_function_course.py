@@ -20,8 +20,11 @@ def main(request_data):
     is_failattr = False
     # Receive course requirement base on request
     for course in request_data["course"]:
-        if course in globalVariable.phrased_course[globalVariable.insems[course][len(globalVariable.insems[course])-1]]:
-            check_data[course] = copy.deepcopy(globalVariable.phrased_course[globalVariable.insems[course][len(globalVariable.insems[course])-1]][course])
+        if globalVariable.insems[course] in globalVariable.phrased_course:
+            if course in globalVariable.phrased_course[globalVariable.insems[course][len(globalVariable.insems[course])-1]]:
+                check_data[course] = copy.deepcopy(globalVariable.phrased_course[globalVariable.insems[course][len(globalVariable.insems[course])-1]][course])
+            else:
+                check_data[course] = {"pass":True}
         else:
             check_data[course] = {"pass":True}
             
