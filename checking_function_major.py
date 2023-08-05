@@ -20,8 +20,6 @@ def major_checking(request_data):
     output = {}
     global user
     user = copy.deepcopy(userdb)
-    global majorUser
-    majorUser = request_data["prog"]
     for i in request_data["prog"]:
         try:
             year_ = copy.deepcopy(year)
@@ -29,6 +27,11 @@ def major_checking(request_data):
                 year_ = "0"
             if globalVariable.major[year_][i]["attr"]["type"] != "option":
                 user = copy.deepcopy(userdb)
+            if "selfDeclearMapping" in user["profile"]["specialApprovals"]:
+                for j in user["profile"]["specialApprovals"]["selfDeclearMapping"]:
+                    for k in user["profile"]["specialApprovals"]["selfDeclearMapping"][j]:
+                        if user["profile"]["specialApprovals"]["selfDeclearMapping"][j][k][0][1] == globalVariable.major[year_][i]["attr"]["short"]:
+                            removeCourse(k)
             recursion = priority(globalVariable.major[year_][i])
             output[i] = switch(globalVariable.major[year_][i]["action"], recursion)
             
@@ -357,20 +360,27 @@ def switch(action, code):
             credit, output = creditFind(code["course"], output)
             if "courses" in user:
                 if code["course"] not in user["courses"]:
-                    output["respattr"]["alternative"] = [[0, [code["course"]], credit, 0]]
-                    return output
-                
-                gpa, credit, actual_cred, output = courseInfo(code["course"], output)
+                    sub = []
+                    canUse = []
+                    courseList = list(globalVariable.courseids.keys())
+                    for i in range(len(courseList)):
+                        if code["course"] in courseList[i] and code["course"] != courseList[i]:
+                            sub.append(courseList[i])
+                    for i in sub:
+                        if i in user["courses"]:
+                            gpa, credit, actual_cred, output = courseInfo(i, output)
+                            canUse.append([gpa, [i], credit, actual_cred])
+                    if canUse == []:
+                        output["respattr"]["alternative"] = [[0, [code["course"]], credit, 0]]
+                        return output
+                    else:
+                        canUse.sort(reverse = True)
+                        output = info(canUse[0][0] * canUse[0][3], canUse[0][1], canUse[0][2], canUse[0][3], output)
+                else:               
+                    gpa, credit, actual_cred, output = courseInfo(code["course"], output)
+                    output = info(gpa * actual_cred, [code["course"]], credit, actual_cred, output)
 
-                if gpa == 0:
-                    output["respattr"]["alternative"] = [[0, [code["course"]], credit, 0]]
-                    return output
-                
-                output["pass"] = True
-                output["respattr"]["gpa"] = gpa / 10
-                output["respattr"]["courseUsed"] = [code["course"]]
-                output["respattr"]["credit"] = credit
-                output["respattr"]["actual_cred"] = actual_cred
+            output["pass"] = True
             return output
         
         case "pass_certain_level":
@@ -447,12 +457,8 @@ def switch(action, code):
             return output
         
         case "approval":
-            if "specialApprovals" not in user["profile"] or "selfDeclearMapping" not in user["profile"]["specialApprovals"] or code["note"] not in user["profile"]["specialApprovals"]["selfDeclearMapping"]:
+            if "specialApprovals" not in user["profile"] or"selfDeclear" not in user["profile"]["specialApprovals"] or code["note"] not in user["profile"]["specialApprovals"]["selfDeclear"]:
                 return output
-            sem = user["profile"]["specialApprovals"]["selfDeclearMapping"][code["note"]].keys()
-            for i in sem:
-                for j in user["profile"]["specialApprovals"]["selfDeclearMapping"][code["note"]][i]:
-                    removeCourse(j)
             output["pass"] = True
             return output
 
@@ -520,31 +526,31 @@ def semesterSort(course, output):
             output["respattr"]["error"] = "Course_not_found"
         return sem, output
     else:
-        return output
+        return {}, output
 
 def gradeMapping(grade, output):
     if grade in notPassGrade:
         return 0, output
     if grade in passNonLetterGrade:
-        return 1, output
+        return 0.1, output
     match grade[0]:
         case "A":
-            gpa = 40
+            gpa = 4
         case "B":
-            gpa = 30
+            gpa = 3
         case "C":
-            gpa = 20
+            gpa = 2
         case "D":
-            return 10, output
+            return 1, output
         case _:
             output["respattr"]["error"] = "Invalid_grade_received"
             return 0, output
     if len(grade) > 1:
         match grade[1]:
             case "+":
-                gpa += 3
+                gpa += 0.3
             case "-":
-                gpa -= 3
+                gpa -= 0.3
     return gpa, output
 
 def courseInfo(course, output):
@@ -553,7 +559,7 @@ def courseInfo(course, output):
     gpa, output = gradeMapping(grade, output)
 
     if len(sem) > 1:
-        credit = int(user["courses"][course][sem[len(sem) - 1]]["actual_cred"])
+        credit = int(user["courses"][course][sem[len(sem) - 1]]["units"])
     else:
         credit = int(user["courses"][course][sem[0]]["units"])
     if gpa == 1:
@@ -632,10 +638,13 @@ def bestCourse(course, alter, output):
 
 def info(gpaSum, courseUsed, credit, actual_cred, output):
     if courseUsed != []:
+        if gpaSum == 0:
+            output["respattr"]["alternative"] = [[0, courseUsed, credit, 0]]
+            return output
         if actual_cred:
-            output["respattr"]["gpa"] = gpaSum / (actual_cred * 10)
+            output["respattr"]["gpa"] = round(gpaSum / actual_cred, 3)
         else:
-            output["respattr"]["gpa"] = 0.1
+            output["respattr"]["gpa"] = 1
         output["respattr"]["courseUsed"] = courseUsed
         output["respattr"]["credit"] = credit
         output["respattr"]["actual_cred"] = actual_cred
@@ -668,7 +677,7 @@ def spread(attr, course, crossArea, output):
             alter.append(course[i][3][j])
         if course[i][0] < rank[i]:
             check = False
-            break
+            continue
         if check:
             depend = []
             for j in range(len(course[i][2])):

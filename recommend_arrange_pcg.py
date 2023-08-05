@@ -1,19 +1,28 @@
-import json
-import checking_function
+##############################
+# version number
+##############################
+version = 1
+
 import copy
+import globalVariable
 
-
-with open("test.json", "r", encoding="utf-8") as f:
-    requirement = json.load(f)
-with open("user.json", "r", encoding="utf-8") as f:
-    profile = json.load(f)
-with open("courseids.json", "r", encoding="utf-8") as f:
-    ids = json.load(f)
-with open("result.json", "r", encoding="utf-8") as f:
-    result = json.load(f)    
-
-Result = {}
 PCG = {}
+result = {}
+requirement = {}
+ids = {}
+
+
+##############################
+# main
+##############################
+# Main part
+def main():
+    global requirement
+    global ids
+    requirement = copy.deepcopy(globalVariable.phrased_course)
+    ids = copy.deepcopy(globalVariable.courseids)
+    return FormPCG()
+
 
 def Recur_function(items, array):
     if items["action"] == "pass_course":
@@ -27,8 +36,8 @@ def Recur_function(items, array):
     elif items["action"] == "or" or items["action"] == "and":
         for item in items["array"]:
             Recur_function(item, array)
-    
-#e.g.["prereq1", "prereq2", "coreq"] 
+
+
 def FormPrereq_Coreq(course, course_id, flag):
     prereq = []
     coreq = []
@@ -42,8 +51,8 @@ def FormPrereq_Coreq(course, course_id, flag):
         Recur_function(requirement[course_id][course]["CO-REQUISITE"], coreq)
     prereq.extend(coreq)
     return prereq
-      
-#e.g.{"action": "pass_course", "course": targeted course}
+
+
 def FormCourse(course, course_id):
     current = {}
     current.update([["action", "pass_course"]])
@@ -51,24 +60,36 @@ def FormCourse(course, course_id):
     current.update([["insem", course_id]])
     return current
 
-#e.g.{"EXCLUSION": ["exclu1", "exclu2"]}
+
 def FormExclu(course, course_id):
     exclu = {}
     exclu_list = []
     if "EXCLUSION" not in requirement[course_id][course]:
         pass
-    else:   
+    else:
         Recur_function(requirement[course_id][course]["EXCLUSION"], exclu_list)
     exclu.update([["EXCLUSION", exclu_list]])
     return exclu
+
 
 def FormResult():
     for id in requirement:
         if int(id) < 1830:
             continue
-        for course in requirement[id]: 
-            Result.update([[course, [FormPrereq_Coreq(course, id, ""), FormCourse(course, id), FormExclu(course, id)]]])
-    return Result
+        for course in requirement[id]:
+            result.update(
+                [
+                    [
+                        course,
+                        [
+                            FormPrereq_Coreq(course, id, ""),
+                            FormCourse(course, id),
+                            FormExclu(course, id),
+                        ],
+                    ]
+                ]
+            )
+
 
 def FormPrereq_by(course, course_list):
     course_prereq = []
@@ -79,6 +100,7 @@ def FormPrereq_by(course, course_list):
             elif i == "Start of CO-REQUISITE":
                 break
     return course_prereq
+
 
 def FormCoreq_by(course, course_list):
     course_coreq = []
@@ -91,6 +113,7 @@ def FormCoreq_by(course, course_list):
                 flag = 1
     return course_coreq
 
+
 def FormExclu_by(course, course_list):
     course_exclu = []
     for pre_course in course_list:
@@ -99,69 +122,62 @@ def FormExclu_by(course, course_list):
                 course_exclu.append(pre_course)
         course_exclu.sort()
     return course_exclu
-    
+
+
 def FormPCG():
+    FormResult()
     for id in requirement:
         if int(id) < 1830:
             continue
-        course_list = descending()
-        for course in requirement[id]:   
+        course_list = course_listing("descending")
+        for course in requirement[id]:
             PCG.update([[course, {}]])
-            PCG[course].update([["PRE-REQUISITE-BY", FormPrereq_by(course, course_list)]])
+            PCG[course].update(
+                [["PRE-REQUISITE-BY", FormPrereq_by(course, course_list)]]
+            )
             PCG[course].update([["CO-REQUISITE-BY", FormCoreq_by(course, course_list)]])
             PCG[course].update([["EXCLUSION-BY", FormExclu_by(course, course_list)]])
+        keys = ["PRE-REQUISITE-BY", "CO-REQUISITE-BY", "EXCLUSION-BY"]
+        for i in PCG:
+            for j in keys:
+                PCG[i][j].sort()
     return PCG
-    
+
+
 def sort_descend(a):
     b = []
     for i in range(len(a)):
-        for j in range(len(b)+1):
+        for j in range(len(b) + 1):
             if j == len(b):
                 b.insert(j, a[i])
                 break
-            if  a[i][4:8] >= b[j][4:8]:
+            if a[i][4:8] >= b[j][4:8]:
                 b.insert(j, a[i])
                 break
     return b
 
-def descending():
+
+def sort_ascend(a):
+    b = []
+    for i in range(len(a)):
+        for j in range(len(b) + 1):
+            if j == len(b):
+                b.insert(j, a[i])
+                break
+            if a[i][4:8] <= b[j][4:8]:
+                b.insert(j, a[i])
+                break
+    return b
+
+
+def course_listing(mode):
     i = []
     for id in requirement:
         if int(id) < 1830:
             continue
         for course in requirement[id]:
             i.append(course)
-    return sort_descend(i)
-
-def outputResult():
-    output = FormResult()
-    with open("result.json", "w") as f:
-        json.dump(output, f, indent = 4)
-
-def outputPCG():
-    output = FormPCG()
-    with open("PCG.json", "w") as f:
-        json.dump(output, f, indent = 4)
-
-# Main part
-
-l = {
-    "ACCT2200": [
-        [
-            "Start of PRE-REQUISITE",
-            "ACCT2010"
-        ],
-        {
-            "action": "pass_course",
-            "course": "ACCT2200",
-            "insem": "2230"
-        },
-        {
-            "EXCLUSION": ["ACCT2010", "ACCT2010", "ACCT2010"]
-        }
-    ]
-}
-
-outputResult()
-outputPCG()
-
+    if mode == "descending":
+        return sort_descend(i)
+    elif mode == "ascending":
+        return sort_ascend(i)

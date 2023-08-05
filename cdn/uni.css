@@ -65,6 +65,12 @@ input:read-only, input:read-only:hover, input:read-only:focus{background-color:t
 .requirement-showbtn-green{padding:0.5em 1.25em;border-radius:2em;margin-top:0.75em;border:2px solid #8fcc; background-color: #8fc8; color:#021; transition-duration: 0.1s;}
 .requirement-showbtn-green:hover{background-color: #8fcc}
 .requirement-showbtn-green:hover:active{transform:scale(0.95)}
+#EXCLUSION .boxcolor-green {
+    border: 2px solid #e45c;
+    background-color: #e452;
+}
+#EXCLUSION .boxcolor-green > .box-dash{border-color:#802c}
+#EXCLUSION .boxcolor-green > h4, #EXCLUSION .boxcolor-green > h5 {color:#401}
 
 .courses_specific_close {position:sticky;top:1.5em;top:calc(1.5em + env(safe-area-inset-top));text-align:right;padding-right:calc(5% + 2em);padding-right:calc(5% + 2em + env(safe-area-inset-right));z-index:10000}
 .courses_specific_close > button {padding:0;margin:0;border:none;border-radius:50%;transition-duration:0.05s;background:rgba(128,128,128,.25);opacity:0.8}
@@ -98,6 +104,8 @@ input:read-only, input:read-only:hover, input:read-only:focus{background-color:t
     .courses_specific_close > button > img, .closebtn > img{filter:invert(1)}
     .boxcolor-green > h4, .boxcolor-green > h5 {color:#ddfff6}
     .requirement-showbtn-green{border: 2px solid #8fc9; background-color: #8fc4; color: #ddfff6;}
+    #EXCLUSION .boxcolor-green > .box-dash{border-color:#ffddf6cc}
+    #EXCLUSION .boxcolor-green > h4, #EXCLUSION .boxcolor-green > h5 {color:#ffddf6}
 
     #fdigbtn, #digbtn:hover, #digbtn:active, #digbtn:focus, #digbtn:focus-within{background:#2c2c34}
 }

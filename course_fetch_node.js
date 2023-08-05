@@ -235,7 +235,7 @@ const JSONing = (starting_index, course_temp_path, course_path, latestSem, cb) =
                     var tempx = {}
                     var sectlist = {}
 
-                    if (typeof course.getElementsByClassName("sections")[0].children[0].children != "undefined") {
+                    if (typeof course.getElementsByClassName("sections") != "undefined" && typeof course.getElementsByClassName("sections")[0] != "undefined" && typeof course.getElementsByClassName("sections")[0].children != "undefined" && typeof course.getElementsByClassName("sections")[0].children[0] != "undefined" && typeof course.getElementsByClassName("sections")[0].children[0].children != "undefined") {
 
                         Array.from(course.getElementsByClassName("sections")[0].children[0].children).forEach((section, index) => {
 
@@ -276,7 +276,10 @@ const JSONing = (starting_index, course_temp_path, course_path, latestSem, cb) =
 
                     if (!noDiff) {
                         let timeNow = (new Date)
-                        let courseCode = course.getElementsByTagName("h2")[0].textContent.split(" - ")[0].replace(" ", "")
+                        let courseCode = "UNDF0000"
+                        if (typeof course.getElementsByTagName("h2") != "undefined" && typeof course.getElementsByTagName("h2")[0] != "undefined" && typeof course.getElementsByTagName("h2")[0].textContent != "undefined") {
+                            courseCode = course.getElementsByTagName("h2")[0].textContent.split(" - ")[0].replace(" ", "")
+                        
 
                         let diffFilePath = "" + item.split("\\").pop().slice(0, 4) + "\\" + courseCode + ".json"
                         if (!fs.existsSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")
@@ -314,10 +317,11 @@ const JSONing = (starting_index, course_temp_path, course_path, latestSem, cb) =
                         fs.writeFileSync(course_temp_path + "_diff\\" + diffFilePath, JSON.stringify(diff))
                         if (JSON.stringify(mdiff) != omdiff) fs.writeFileSync(course_temp_path + "_mdiff\\" + diffFilePath, JSON.stringify(mdiff))
                     }
+                    }
 
                     tempx = {}
 
-                    domJSON[course.getElementsByTagName("h2")[0].textContent] = JSON.parse(JSON.stringify(courseMeta))
+                    if (typeof course.getElementsByTagName("h2") != "undefined" && typeof course.getElementsByTagName("h2")[0] != "undefined" && typeof course.getElementsByTagName("h2")[0].textContent != "undefined") domJSON[course.getElementsByTagName("h2")[0].textContent] = JSON.parse(JSON.stringify(courseMeta))
                     courseMeta = {}
                 })
 

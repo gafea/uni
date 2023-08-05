@@ -1,9 +1,10 @@
 import flask
 from flask import Flask, request
 import requests
-import json
 import threading
 import sys
+import traceback
+
 try:
     import globalVariable
     if globalVariable.version != 1:
@@ -21,6 +22,21 @@ try:
     if checking_function_major.version != 1:
         raise Exception("version different")
     
+    import recommend_prog
+    if recommend_prog.version != 1:
+        raise Exception("version different")
+    
+    import recommend_courses
+    if recommend_courses.version != 1:
+        raise Exception("version different")
+    
+    import recommend_arrange_pcg
+    if recommend_arrange_pcg.version != 1:
+        raise Exception("version different")
+    
+    import recommend_arrange
+    if recommend_arrange.version != 1:
+        raise Exception("version different")
 ############################
 # Check if nodejs server is alive
 ############################
@@ -126,6 +142,8 @@ try:
             globalVariable.insems = request.json
             globalVariable.phrased_course = course_phrasing_B.main()
             requests.post("http://localhost:7002/!setvar/", json={"phrasedcourse": globalVariable.phrased_course})
+            globalVariable.arrange_PCG = recommend_arrange_pcg.main()
+            requests.post("http://localhost:7002/!setvar/", json={"pcg": globalVariable.arrange_PCG})
             return {"status": 200}
         except:
             return {"status": 400}
@@ -146,36 +164,40 @@ try:
             mxi = request.get_json()
             mx = {}
             if "course" in mxi:
-                #print(1, mxi)
                 mx = checking_function_course.main(mxi)
             else:
-                #print(2, mxi)
                 mx = checking_function_major.main(mxi)
             return {"status": 200, "resp": mx}
         except Exception as error:
-            #print(3, error)
             return {"status": 500}
 
-    @app.route('/!recommend/courses/', methods = ['POST'])
+    @app.route('/!recommend-courses/', methods = ['POST'])
     def recommend_course():
         try:
-            return {"status": 404}
+            request_data = request.get_json()
+            output_data = recommend_courses.main(request_data)
+            return {"status": 200, "resp": output_data}
         except:
-            return {"status": 404}
+            return {"status": 500}
 
-    @app.route('/!recommend/mm/', methods = ['POST'])
-    def recommend_major_minor():
+    @app.route('/!recommend-prog/', methods = ['POST'])
+    def recommend_program():
         try:
-            return {"status": 404}
-        except:
-            return {"status": 404}
+            request_data = request.get_json()
+            output_data = recommend_prog.main(request_data)
+            return {"status": 200, "resp": output_data}
+        except Exception:
+            print(traceback.format_exc())
+            return {"status": 500}
     
-    @app.route('/!recommend/arrange/', methods = ['POST'])
-    def recommend_arrange():
+    @app.route('/!arrange/', methods = ['POST'])
+    def recommend_arrange_():
         try:
-            return {"status": 404}
+            request_data = request.get_json()
+            output_data = recommend_arrange.main(request_data)
+            return {"status": 200, "resp": output_data}
         except:
-            return {"status": 404}
+            return {"status": 500}
     
     @app.errorhandler(404)
     def page_not_found(error):

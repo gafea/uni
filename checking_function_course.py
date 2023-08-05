@@ -17,7 +17,7 @@ targetAttr = ["PRE-REQUISITE", "EXCLUSION", "CO-REQUISITE"]
 def main(request_data):
     
     check_data = {} 
-    is_failattr = False
+    
     # Receive course requirement base on request
     for course in request_data["course"]:
         if globalVariable.insems[course] in globalVariable.phrased_course:
@@ -30,13 +30,13 @@ def main(request_data):
             
     # Check all courses in check_data
     for course in check_data:
+        is_failattr = [False]
         try:
             for attr in targetAttr:
                 if attr in check_data[course]:
                     if "pass" in check_data[course][attr]:
                         continue
                     check_data[course][attr] = course_action_checking(check_data[course][attr], request_data["userdb"], attr, check_data[course],is_failattr, request_data)
-        
             if "pass" in check_data[course]:
                 if request_data["userdb"]["profile"]["currentStudies"]["studyProgram"] == "UG" and int(course[4:8]) >= 5000:
                     check_data[course]["pass"] = False
@@ -50,7 +50,7 @@ def main(request_data):
                     continue
             
             if "PRE-REQUISITE" in check_data[course] and "CO-REQUISITE" in check_data[course]:
-                if is_failattr == True:
+                if is_failattr[0] == True:
                     if check_data[course]["PRE-REQUISITE"]["pass"] == True or check_data[course]["CO-REQUISITE"]["pass"] == True:
                         check_data[course]["pass"] = True
                         check_data[course] = course_alter_prev_checking(course, check_data[course] , request_data)
@@ -263,11 +263,11 @@ def course_fail_attr_checking(item, userdb, data, is_failattr, request_data):
         data[item["target_attr"]] = course_action_checking(data[item["target_attr"]], userdb, item["target_attr"], data, is_failattr, request_data)
         
     if data[item["target_attr"]]["pass"] == True:
-        is_failattr = True
-        item["pass"] = True  
+        is_failattr[0] = True
+        item["pass"] = False  
     else:
-        is_failattr = True
-        item["pass"] = False
+        is_failattr[0] = True
+        item["pass"] = True
     return item
 
 def course_CGA_checking(item, userdb):

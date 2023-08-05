@@ -1,10 +1,107 @@
 {
     "0": {
+        "Minor in Big Data Technology": {
+            "attr": {
+                "type": "minor",
+                "short": "MINOR-BDT",
+                "cred_fulfill": 19
+            },
+            "action": "and",
+            "array": {
+                "Internship": {
+                    "action": "approval",
+                    "note": "Students are expected to take a 6-week internship (COMP 1991) in the Summer or Winter term. For CSE students who have taken COMP 1991 as major required course, they may seek approval from the Minor Program Coordinator to reuse the course for fulfilling the requirement of this Minor Program.",
+                    "array": {
+                        "COMP 1991": {
+                            "action": "pass_course",
+                            "course": "COMP 1991"
+                        }
+                    }
+                },
+                "COMP 2011 OR COMP 2012H": {
+                    "action": "or",
+                    "array": {
+                        "COMP 2011": {
+                            "action": "pass_course",
+                            "course": "COMP 2011"
+                        },
+                        "COMP 2012H": {
+                            "action": "pass_course",
+                            "course": "COMP 2012H"
+                        }
+                    }
+                },
+                "COMP 4211 OR COMP 4331": {
+                    "action": "or",
+                    "array": {
+                        "COMP 4211": {
+                            "action": "pass_course",
+                            "course": "COMP 4211"
+                        },
+                        "COMP 4331": {
+                            "action": "pass_course",
+                            "course": "COMP 4331"
+                        }
+                    }
+                },
+                "COMP 4651":{
+                    "action": "pass_course",
+                    "course": "COMP 4651"
+                },
+                "Big Data Technology Electives": {
+                    "attr":{
+                        "min_credit" : 9,
+                        "min_course" : 3
+                    },
+                    "action": "approval",
+                    "note": "3 courses from the specified 9 elective list. Students may request to use up to 3 credits of courses listed under http://www.cse.ust.hk/ug/minor/BDT/ to count towards this requirement.",
+                    "array": {
+                        "COMP 4221": {
+                            "action": "pass_course",
+                            "course": "COMP 4221"
+                        },
+                        "COMP 4222": {
+                            "action": "pass_course",
+                            "course": "COMP 4222"
+                        },
+                        "COMP 4321": {
+                            "action": "pass_course",
+                            "course": "COMP 4321"
+                        },
+                        "COMP 4332": {
+                            "action": "pass_course",
+                            "course": "COMP 4332"
+                        },
+                        "COMP 4421": {
+                            "action": "pass_course",
+                            "course": "COMP 4421"
+                        },
+                        "COMP 4462": {
+                            "action": "pass_course",
+                            "course": "COMP 4462"
+                        },
+                        "COMP 4471": {
+                            "action": "pass_course",
+                            "course": "COMP 4471"
+                        },
+                        "COMP 4632": {
+                            "action": "pass_course",
+                            "course": "COMP 4632"
+                        },
+                        "COMP 4641": {
+                            "action": "pass_course",
+                            "course": "COMP 4641"
+                        }
+                    }
+                }
+            }
+        },
         "Minor in Business": {
             "attr": {
                 "type": "minor",
                 "short": "MINOR-BUS",
-                "min_course": 6
+                "min_course": 6,
+                "cred_fulfill": 18
             },
             "action": "and",
             "array": {
@@ -175,7 +272,8 @@
         "BEng in Bioengineering": {
             "attr": {
                 "type": "major",
-                "short": "bien"
+                "short": "BIEN",
+                "cred_fulfill": 77
             },
             "action": "and",
             "array": {
@@ -751,7 +849,8 @@
         "BEng in Chemical Engineering": {
             "attr": {
                 "type": "major",
-                "short": "ceng"
+                "short": "CENG",
+                "cred_fulfill": 95
             },
             "action": "and",
             "array": {
@@ -1097,7 +1196,8 @@
         "BEng in Chemical Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "ceng"
+                "short": "CENG",
+                "cred_fulfill": 6
             },
             "action": "and",
             "array": {
@@ -1141,7 +1241,8 @@
         "BEng in Chemical and Environmental Engineering": {
             "attr": {
                 "type": "major",
-                "short": "ceev"
+                "short": "ceev",
+                "cred_fulfill": 85
             },
             "action": "and",
             "array": {
@@ -1488,7 +1589,8 @@
         "BEng in Chemical and Environmental Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "ceev"
+                "short": "CEEV",
+                "cred_fulfill": 6
             },
             "action": "and",
             "array": {
@@ -1527,7 +1629,8 @@
         "BEng in Sustainable Energy Engineering": {
             "attr": {
                 "type": "major",
-                "short": "susee"
+                "short": "SUSEE",
+                "cred_fulfill": 91
             },
             "action": "and",
             "array": {
@@ -2015,7 +2118,8 @@
         "BEng in Civil Engineering": {
             "attr": {
                 "type": "major",
-                "short": "civl"
+                "short": "CIVL",
+                "cred_fulfill": 88
             },
             "action": "and",
             "array": {
@@ -2282,8 +2386,9 @@
         "BEng in Civil Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "civl",
-                "cga": 3.15
+                "short": "CIVL",
+                "cga": 3.15,
+                "cred_fulfill": 4
             },
             "action": "and",
             "array": {
@@ -2309,7 +2414,8 @@
         "BEng in Civil and Environmental Engineering": {
             "attr": {
                 "type": "major",
-                "short": "ciev"
+                "short": "CIEV",
+                "cred_fulfill": 88
             },
             "action": "and",
             "array": {
@@ -2645,8 +2751,9 @@
         "BEng in Civil and Environmental Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "ciev",
-                "cga": 3.15
+                "short": "CIEV",
+                "cga": 3.15,
+                "cred_fulfill": 4
             },
             "action": "and",
             "array": {
@@ -2672,7 +2779,8 @@
         "BEng in Computer Engineering": {
             "attr": {
                 "type": "major",
-                "short": "cpeg"
+                "short": "CPEG",
+                "cred_fulfill": 89
             },
             "action": "and",
             "array": {
@@ -3534,7 +3642,8 @@
         "BEng in Computer Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "cpeg"
+                "short": "CPEG",
+                "cred_fulfill": 5
             },
             "action": "and",
             "array": {
@@ -3575,10 +3684,11 @@
         "BEng in Computer Science": {
             "attr": {
                 "type": "major",
-                "short": "comp",
+                "short": "COMP",
                 "excl": [
-                    "cosc"
-                ]
+                    "COSC"
+                ],
+                "cred_fulfill": 81
             },
             "action": "and",
             "array": {
@@ -4199,11 +4309,12 @@
         "BSc in Computer Science": {
             "attr": {
                 "type": "additional_major",
-                "short": "cosc",
+                "short": "COSC",
                 "excl": [
-                    "comp"
+                    "COMP"
                 ],
-                "cga": 3.7
+                "cga": 3.7,
+                "cred_fulfill": 60
             },
             "action": "and",
             "array": {
@@ -4460,7 +4571,8 @@
         "BEng in Electronic Engineering": {
             "attr": {
                 "type": "major",
-                "short": "elec"
+                "short": "ELEC",
+                "cred_fulfill": 82
             },
             "action": "and",
             "array": {
@@ -4817,7 +4929,8 @@
         "BEng in Electronic Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "elec"
+                "short": "ELEC",
+                "cred_fulfill": 9
             },
             "action": "and",
             "array": {
@@ -4837,7 +4950,8 @@
         "BEng in Decision Analytics": {
             "attr": {
                 "type": "major",
-                "short": "da"
+                "short": "DA",
+                "cred_fulfill": 70
             },
             "action": "and",
             "array": {
@@ -5173,7 +5287,8 @@
         "BEng in Industrial Engineering and Engineering Management": {
             "attr": {
                 "type": "major",
-                "short": "ieem"
+                "short": "IEEM",
+                "cred_fulfill": 79
             },
             "action": "and",
             "array": {
@@ -5513,8 +5628,9 @@
         "BEng in Industrial Engineering and Engineering Management with Financial Engineering Option": {
             "attr": {
                 "type": "option",
-                "short": "ieem",
-                "cga": 3
+                "short": "IEEM",
+                "cga": 3,
+                "cred_fulfill": 9
             },
             "action": "and",
             "array": {
@@ -5551,7 +5667,8 @@
         "BEng in Industrial Engineering and Engineering Management with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "ieem"
+                "short": "IEEM",
+                "cred_fulfill": 6
             },
             "action": "and",
             "array": {
@@ -5588,7 +5705,8 @@
         "BSc in Integrative Systems and Design": {
             "attr": {
                 "type": "major",
-                "short": "isdn"
+                "short": "ISDN",
+                "cred_fulfill": 88
             },
             "action": "and",
             "array": {
@@ -6147,7 +6265,8 @@
         "BEng in Aerospace Engineering": {
             "attr": {
                 "type": "major",
-                "short": "ae"
+                "short": "AE",
+                "cred_fulfill": 85
             },
             "action": "and",
             "array": {
@@ -6410,7 +6529,8 @@
         "BEng in Aerospace Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "ae"
+                "short": "AE",
+                "cred_fulfill": 6
             },
             "action": "pass_course",
             "course": "MECH 4990"
@@ -6418,7 +6538,8 @@
         "BEng in Mechanical Engineering": {
             "attr": {
                 "type": "major",
-                "short": "mech"
+                "short": "MECH",
+                "cred_fulfill": 88
             },
             "action": "and",
             "array": {
@@ -6654,8 +6775,9 @@
         "BEng in Mechanical Engineering with Energy Option": {
             "attr": {
                 "type": "option",
-                "short": "mech",
-                "min_course": 3
+                "short": "MECH",
+                "min_course": 3,
+                "cred_fulfill": 9
             },
             "action": "or",
             "array": {
@@ -6708,8 +6830,9 @@
         "BEng in Mechanical Engineering with Engineering Design Option": {
             "attr": {
                 "type": "option",
-                "short": "mech",
-                "min_course": 3
+                "short": "MECH",
+                "min_course": 3,
+                "cred_fulfill": 9
             },
             "action": "or",
             "array": {
@@ -6746,8 +6869,9 @@
         "BEng in Mechanical Engineering with Materials Option": {
             "attr": {
                 "type": "option",
-                "short": "mech",
-                "min_course": 3
+                "short": "MECH",
+                "min_course": 3,
+                "cred_fulfill": 9
             },
             "action": "or",
             "array": {
@@ -6788,7 +6912,8 @@
         "BEng in Mechanical Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "mech"
+                "short": "MECH",
+                "cred_fulfill": 6
             },
             "action": "pass_course",
             "course": "MECH 4990"
@@ -6796,7 +6921,8 @@
         "BSc in Data Science and Technology": {
             "attr": {
                 "type": "major",
-                "short": "dsct"
+                "short": "DSCT",
+                "cred_fulfill": 68
             },
             "action": "and",
             "array": {
@@ -7324,7 +7450,8 @@
                 "type": "extended_major",
                 "short": "extm-ai",
                 "gpa": 2.15,
-                "single_count": 12
+                "single_count": 12,
+                "cred_fulfill": 22
             },
             "action": "and",
             "array": {
@@ -7604,7 +7731,8 @@
                 "type": "extended_major",
                 "short": "extm_dmca",
                 "gpa": 2.15,
-                "single_count": 12
+                "single_count": 12,
+                "cred_fulfill": 21
             },
             "action": "and",
             "array": {

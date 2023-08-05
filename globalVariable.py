@@ -12,3 +12,4 @@ phrased_course = {}
 major_school_mapping = {}
 major = {}
 replacement = {}
+arrange_PCG = {}
