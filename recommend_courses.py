@@ -11,16 +11,44 @@ def main(request_data):
     return recommendCourses(request_data)
 
 def recommendCourses(data):
-    courseDict = {}
     getUserInfo(data)
+    exclusionList = getExclusion(list(user["courses"].keys()))
+    recommend = []
     checkMajorOutput = checkMajor(data)
-    treatedMajorOutput = treatMajor(checkMajorOutput, data)
-    
-    for i in treatedMajorOutput:
-        courseDict[i] = {}
-        courseDict[i]["mustReg"] = fulfillMajor(treatedMajorOutput[i])
-        #courseDict[i]["forMCGA"] = forMCGA(treatedMajorOutput[i])
-    return courseDict
+    for i in checkMajorOutput:
+        temp = []
+        for j in range(len(checkMajorOutput[i]["respattr"]["alternative"])):
+            if checkMajorOutput[i]["respattr"]["alternative"][j][0] == 0 and checkMajorOutput[i]["respattr"]["alternative"][j][2] != -1:
+                for k in checkMajorOutput[i]["respattr"]["alternative"][j][1]:
+                    if k not in exclusionList and k not in temp:
+                        temp.append(k)
+        for j in temp:
+            for k in range(len(recommend)):
+                if j == recommend[k][0]:
+                    recommend[k][1] += 1
+                    recommend[k][2].append(i)
+                    break
+            recommend.append([j, 1, [i]])
+    output = []
+    for i in range(len(recommend)):
+        o = {}
+        courseCodeSep = recommend[i][0].split()
+        code = courseCodeSep[0] + courseCodeSep[1]
+        o["code"] = code
+        o["matches"] = recommend[i][1]
+        o["matched_by"] = recommend[i][2]
+        if code in globalVariable.courseids:
+            courseName = globalVariable.courseids[code]["NAME"]
+            courseid = globalVariable.courseids[code]["COURSEID"]
+            locater = courseid.find(courseName) + len(courseName) + 2
+        o["name"] = globalVariable.courseids[code]["NAME"]
+        o["sem"] = globalVariable.insems[code][len(globalVariable.insems[code]) - 1]
+        o["units"] = int(courseid[locater])
+        data["course"] = [code]
+        check = checking_function_course.main(data)
+        o["pass"] = check[code]["pass"]
+        output.append(o)
+    return output
 
 def getUserInfo(data):
     userdb = data["userdb"]
@@ -33,15 +61,15 @@ def getUserInfo(data):
     if "courses" in user:
         for i in course:
             if i in user["courses"]:
-                sem = user["courses"][i]
-                sem = sorted(sem.keys())
-                if len(sem) > 1:
-                    creditTaken += int(user["courses"][i][sem[len(sem) - 1]]["actual_cred"])
+                sem = sorted(user["courses"][i].keys())
+                if len(sem) == 1:
+                    creditTaken += int(user["courses"][i][sem[0]]["actual_cred"])
                 else:
-                    creditTaken += int(user["courses"][i][sem[0]]["units"])
+                    creditTaken += int(user["courses"][i][sem[len(sem) - 1]]["units"])
 
     current = datetime.now()
-    yearTaken = current.year % 2000 - int(int(user["profile"]["currentStudies"]["yearOfIntake"]) / 100)
+    global currentYear
+    currentYear = current.year % 2000 - int(int(user["profile"]["currentStudies"]["yearOfIntake"]) / 100)
     match user["profile"]["currentStudies"]["yearOfIntake"][2]:
         case "1":
             intakeMonth = 9
@@ -52,98 +80,39 @@ def getUserInfo(data):
         case "4":
             intakeMonth = 6
     month = 12 - intakeMonth + current.month
-    yearTaken += month / 12
+    currentYear += month / 12
     monthTaken = month % 12
-    
+
+    global currentSem
+    if monthTaken:
+        if monthTaken <= 4:
+            currentSem = "10"
+        elif monthTaken <= 6:
+            currentSem = "20"
+        elif monthTaken <= 10:
+            currentSem = "30"
+        else:
+            currentSem = "40"
+    else:
+        currentSem = "00"
+
 def checkMajor(data):
     requestCheckMajor = copy.deepcopy(data)
     requestCheckMajor["fx"] = "checking"
     if "prog" not in requestCheckMajor:
         requestCheckMajor["prog"] = user["profile"]["currentStudies"]["mm"]
     return checking_function_major.main(requestCheckMajor)
-
-def treatMajor(checkMajorOutput, data):
-    treatedMajorOutput = copy.deepcopy(checkMajorOutput)
-    for i in checkMajorOutput:
-        course = courseCheck(checkMajorOutput[i], data)
-        excluded = []
-        for j in course:
-            if "EXCLUSION" in course[j]:
-                if course[j]["EXCLUSION"]["pass"]:
+    
+def getExclusion(course):
+    excl = []
+    for i in course:
+        coursecodeSep = i.split()
+        coursecode = coursecodeSep[0] + coursecodeSep[1]
+        if coursecode in globalVariable.arrange_PCG:
+            if globalVariable.arrange_PCG[coursecode]["EXCLUSION-BY"] != []:
+                for j in globalVariable.arrange_PCG[coursecode]["EXCLUSION-BY"]:
                     code = j[:4]
                     code += " "
                     code += j[4:]
-                    excluded.append(code)
-        treatedMajor = removeExclusion(checkMajorOutput[i], excluded)
-        treatedMajorOutput[i] = treatedMajor
-    return treatedMajorOutput
-
-def courseCheck(majorOutput, data):
-    request = copy.deepcopy(data)
-    request["course"] = []
-
-    if majorOutput["respattr"]["alternative"]:
-        for i in range(len(majorOutput["respattr"]["alternative"])):
-            if majorOutput["respattr"]["alternative"][i][0] == 0 and majorOutput["respattr"]["alternative"][i][2] != -1:
-                for j in range(len(majorOutput["respattr"]["alternative"][i][1])):
-                    courseCodeSep = majorOutput["respattr"]["alternative"][i][1][j].split()
-                    code = courseCodeSep[0] + courseCodeSep[1]
-                    request["course"].append(code)        
-    return checking_function_course.main(request)
-
-def removeExclusion(major, excluded):
-    if "array" in major:
-        for i in major["array"]:
-            major["array"][i] = removeExclusion(major["array"][i], excluded)
-    if "alternative" in major["respattr"]:
-        alternative = []
-        for i in range(len(major["respattr"]["alternative"])):
-            for j in range(len(major["respattr"]["alternative"][i][1])):
-                if major["respattr"]["alternative"][i][1][j] in excluded:
-                    break
-                alternative.append(major["respattr"]["alternative"][i])
-        if alternative != []:
-            major["respattr"]["alternative"] = alternative
-        else:
-            del major["respattr"]["alternative"]
-    return major
-
-def fulfillMajor(treatedMajor):
-    major = copy.deepcopy(treatedMajor)
-    loop = loopMajor(major, False)
-    return loop["respattr"]["alternative"]
-    
-
-def loopMajor(major, passattr):
-    delete = []
-    alternative = []
-    del major["respattr"]
-    if "array" in major and major["pass"] == passattr:
-        for i in major["array"]:
-            major["array"][i] = loopMajor(major["array"][i], passattr)
-            if major["array"][i] == {}:
-                delete.append(i)
-            elif "respattr" in major["array"][i]:
-                if "alternative" in major["array"][i]["respattr"]:
-                    for j in major["array"][i]["respattr"]["alternative"]:
-                        alternative.append(j)
-    for i in delete:
-        del major["array"][i]
-    if major["pass"] != passattr:
-        return {}
-    elif major["action"] == "pass_course":
-        major["respattr"] = {}
-        major["respattr"]["alternative"] = [major["course"]]
-    else:
-        major["respattr"] = {}
-        major["respattr"]["alternative"] = alternative
-    return major
-
-def forMCGA(treatedMajor):
-    major = copy.deepcopy(treatedMajor)
-    loop = loopMajor(major, True)
-    mcgaUse = []
-    if "alternative" in loop["respattr"]:
-        for i in range(len(loop["respattr"]["alternative"])):
-            mcgaUse.append(loop["respattr"]["alternative"][i])
-    return mcgaUse
+                    excl.append(code)
+    return excl    

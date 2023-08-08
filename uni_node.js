@@ -59,39 +59,42 @@ try {
     //startPythonServer()
 
     function pushvar() {
-        try {
-            let target = ""
-            Object.keys(db).forEach(key => {
-                if (!["insems", "phrasedcourse", "pcg"].includes(key)) {
-                    switch (key) {
-                        case "majorminorreqs":
-                            target = "major"
-                            break
+        let target = "", doNotPush = ["insems", "phrasedcourse", "pcg"], pushvarcounter = Object.keys(db).length - doNotPush.length
+        Object.keys(db).forEach(key => {
+            if (!doNotPush.includes(key)) {
+                switch (key) {
+                    case "majorminorreqs":
+                        target = "major"
+                        break
 
-                        case "coursemasking":
-                            target = "replacement"
-                            break
+                    case "coursemasking":
+                        target = "replacement"
+                        break
 
-                        default:
-                            target = key
-                            break
-                    }
-                    post("http://127.0.0.1:7003/!setvar/" + target, JSON.stringify(db[key])).then(r => r.json()).then(r => {
-                        console.log("[" + servar.domain + "] " + key + " pushed to 7003")
-                    }).catch(error => {
-                        console.log(error)
-                    })
+                    default:
+                        target = key
+                        break
                 }
-            })
-            let key = "insems"
-            post("http://127.0.0.1:7003/!setvar/" + key, JSON.stringify(db[key])).then(r => r.json()).then(r => {
-                console.log("[" + servar.domain + "] " + key + " pushed to 7003")
-            }).catch(error => {
-                console.log(error)
-            })
-        } catch (error) {
-            console.log(error)
-        }
+                post("http://127.0.0.1:7003/!setvar/" + target, JSON.stringify(db[key])).then(r => r.json()).then(r => {
+                    console.log("[" + servar.domain + "] " + key + " pushed to 7003")
+                }).catch(error => {
+                    console.log(error)
+                }).finally(() => {
+                    pushvarcounter--
+                })
+            }
+        })
+        let pushvarTimer = setInterval(() => {
+            if (!pushvarcounter) {
+                clearInterval(pushvarTimer)
+                let key = "insems"
+                post("http://127.0.0.1:7003/!setvar/" + key, JSON.stringify(db[key])).then(r => r.json()).then(r => {
+                    console.log("[" + servar.domain + "] " + key + " pushed to 7003")
+                }).catch(error => {
+                    console.log(error)
+                })
+            }
+        }, 500)
     }
 
     //courses_fetch, including course_cache
@@ -133,7 +136,7 @@ try {
         let tmark = (new Date()).getTime()
         let resultsPending = { courseids: db.courseids, peoples: Object.keys(db.peoples), rooms: Object.keys(db.rooms) }
         query = query.normalize().toLowerCase().split(" ")
-        let lastQuery = query.pop(); if (lastQuery) {query.push(lastQuery)} else {query.push(query.pop() + " ")}; lastQuery = ""
+        let lastQuery = query.pop(); if (lastQuery) { query.push(lastQuery) } else { query.push(query.pop() + " ") }; lastQuery = ""
         let courseFoundIn = {}
 
         query.forEach(q => {
@@ -146,7 +149,7 @@ try {
                 let keepit = false
 
                 Object.keys(courseid).forEach(key => {
-                    if (key != "SEM" && key != "COURSEID" && key != "UNITS") { 
+                    if (key != "SEM" && key != "COURSEID" && key != "UNITS") {
                         if (courseid[key].normalize().toLowerCase().includes(q)) {
                             keepit = true
                             if (typeof courseFoundIn[CODE] === "undefined") courseFoundIn[CODE] = []
@@ -278,7 +281,7 @@ try {
 
                     if (year < 0) {
                         res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
-                        res.end(JSON.stringify({ status: 200, resp: Object.keys(db.majorminorreqs).sort().reverse()  }))
+                        res.end(JSON.stringify({ status: 200, resp: Object.keys(db.majorminorreqs).sort().reverse() }))
                         return
                     }
 
@@ -621,7 +624,7 @@ try {
                         rx.insem = db.insems[courseCode]
                     }
 
-                    if (typeof db.pcg[courseCode] != "undefined") {
+                    if (db.courseids[courseCode].SEM == semx && typeof db.pcg[courseCode] != "undefined") {
                         Object.keys(db.pcg[courseCode]).forEach(xby => {
                             if (Array.isArray(db.pcg[courseCode][xby]) && db.pcg[courseCode][xby].length) {
                                 let x = []
@@ -703,7 +706,7 @@ try {
                     })
 
                 } else if (req.url.startsWith('/!acc/')) {
-                    (servar.deployed) ? acc.handle(req, res, body, servar, {courseids: db.courseids, sems: db.sems}) : sharedfx.returnErr(res, 503, "not-supported", true)
+                    (servar.deployed) ? acc.handle(req, res, body, servar, { courseids: db.courseids, sems: db.sems }) : sharedfx.returnErr(res, 503, "not-supported", true)
 
                 } else if (req.url.toLowerCase() === '/init.js') {
                     res.writeHead(200, { 'Content-Type': 'application/javascript', 'Server': 'joutou', 'Cache-Control': 'max-age=7200' })
@@ -795,6 +798,14 @@ try {
                     setTimeout(() => {
                         pushvar()
                     }, 10)
+                    return
+
+                } else if (req.url === '/!dumpvar/') {
+                    sharedfx.returnErr(res, 200, "", true)
+                    if (!fs.existsSync(servar.course_temp_path)) fs.mkdirSync(servar.course_temp_path)
+                    Object.keys(db).forEach(key => {
+                        fs.writeFile(servar.course_temp_path + key + ".json", JSON.stringify(db[key]), (err) => { if (err) console.log(err) })
+                    })
                     return
 
                 } else if (req.url === '/!pyser/' && req.method.toUpperCase() === "POST" && bodytxt) {

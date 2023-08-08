@@ -122,5 +122,13 @@
     "Extended Major Program in Digital Media and Creative Arts": {
         "prog": "EXTM-DMCA",
         "school": "Academy of Interdisciplinary Studies"
+    },
+    "Minor in Big Data Technology": {
+        "prog": "MINOR-BDT",
+        "school": "School of Engineering"
+    },
+    "Minor in Business": {
+        "prog": "MINOR-BUS",
+        "school": "School of Business and Management"
     }
 }

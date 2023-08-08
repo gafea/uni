@@ -20,7 +20,7 @@ def main(request_data):
     
     # Receive course requirement base on request
     for course in request_data["course"]:
-        if globalVariable.insems[course] in globalVariable.phrased_course:
+        if globalVariable.insems[course][len(globalVariable.insems[course])-1] in globalVariable.phrased_course:
             if course in globalVariable.phrased_course[globalVariable.insems[course][len(globalVariable.insems[course])-1]]:
                 check_data[course] = copy.deepcopy(globalVariable.phrased_course[globalVariable.insems[course][len(globalVariable.insems[course])-1]][course])
             else:

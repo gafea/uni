@@ -218,13 +218,13 @@ Object.keys(xpeoples).forEach(people => {
     if (Object.keys(xpeoples[people]).length === 0) delete xpeoples[people]
 })
 
-pkgx = {}
 pkgx["courses"] = xcourses
 pkgx["peoples"] = xpeoples
 pkgx["rooms"] = xrooms
 pkgx["sems"] = xsems
 pkgx["courseids"] = xcourseids
 pkgx["coursegroups"] = xcoursegroups
+
 post("http://127.0.0.1:7002/!setvar/", JSON.stringify(pkgx)).then(r => r.json()).then(r => {
     console.log('[courses_cache] early cacheing to nodejs server done')
 

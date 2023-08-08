@@ -626,11 +626,21 @@ function render_plan(path) {
                             if (index || (typeof config.profile.currentStudies.mm[index] == "undefined" || config.profile.currentStudies.mm.length > 1)) {
                                 mmdraft += `<option value="----" selected>----</option>`
                             }
+                            let selectedmm = ["", "0"];
                             (index ? everymm : majoronly).forEach(mmx => {
-                                if (!(!(config.profile.currentStudies.mm[index] == mmx) && (config.profile.currentStudies.mm.includes(mmx))))
+                                if (!(!(config.profile.currentStudies.mm[index] == mmx) && (config.profile.currentStudies.mm.includes(mmx)))) {
                                     mmdraft += `<option ` + ((config.profile.currentStudies.mm[index] == mmx) ? "selected " : "") + `value="` + mmx + `">` + mmx + `</option>`
+                                    if (config.profile.currentStudies.mm[index] == mmx) {
+                                        selectedmm[0] = mmx
+                                        if (!r.resp.includes(mmx)) selectedmm[1] = "20" + config.profile.currentStudies.yearOfIntake.substring(0, 2)
+                                    }
+                                }
                             })
-                            mmdraft += `</select><br>`
+                            if (index + 1 < mmlength) {
+                                mmdraft += `</select><p2><button class="aobh acss" onclick="boot('/plan/` + selectedmm[1] + `/` + selectedmm[0].replaceAll(" ", "-") + `/', false, 4)">View details</button></p2><br>`
+                            } else {
+                                mmdraft += `</select><br>`
+                            }
                         }
 
                         if (typeof config.profile.currentStudies.mm[0] == "undefined" || config.profile.currentStudies.mm.length < 1) {
@@ -1738,6 +1748,13 @@ function generate_graph_from_action(json, startName = "Start") {
             pointStyle.push("rectRounded")
         }
 
+        switch (json.action) {
+            case "spread":
+            case "approval":
+                forcegrey = true
+                break
+        }
+
         if (typeof json.array === "object") {
             if (Array.isArray(json.array)) {
                 json.array.forEach(subarray => {
@@ -2066,6 +2083,9 @@ function generate_html_from_action(json, ignoreMissingAction = false, coursePlan
     if (json.pass) {
         bordercolorcss = `style="border: 2px solid #8fcc; background-color: #8fc2"`
         htmldft = htmldft.replace("<h4><small>", `<h4><small>✅ `).replace("<h5>", `<h5>✅ `)
+    } else if (json.action == "not") {
+        bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
+        htmldft = htmldft.replace("<h4><small>", `<h4><small>❌ `).replace("<h5>", `<h5>❌ `)
     }
 
     let boxcolorid = "boxcolor-normal"
@@ -2357,14 +2377,7 @@ function render_courses_specific(path, insideCoursePage = false) {
                     <a target="_blank" class="aobh" href="http://petergao.net/ustpastpaper/index.php?course=` + course.split(" ")[0] + course.split(" ")[1] + `">try check petergao</a>
                 </div>
             </div>
-            ` + ((false) ? `
-            <br><hr><br>
-            <div class="flx" style="gap:0.5em;justify-content:flex-start">
-                <button onclick="checkCourseEnrollOK('` + course.split(" ")[0] + course.split(" ")[1] + `')">can i enroll?</button><br><br>
-                <div id="exp-api-checking-result"></div>
-            </div>
-            ` : ``) + `
-            </div>`
+        </div>`
 
         document.getElementById('topbar_buttons_wrp').innerHTML = `<div class="enroll_btn_wrp flx">
             <button id="course_enroll_btn" ` + ((true || signinlevel > 0) ? "" : `style="display:none" `) + `onclick="enroll_course(` + '`' + path.split("/")[0] + '`,`' + course + '`' + `, true, ` + is_SPO + `, ` + JSON.stringify(possibleGrades).replaceAll('"', "'") + `, ` + JSON.stringify(actual_cred).replaceAll('"', "'") + `)">Enroll</button>
@@ -2501,7 +2514,7 @@ function render_courses_specific(path, insideCoursePage = false) {
         </style>`
         setTimeout(() => { document.getElementById("course_detail_topbar_specialStyles").innerHTML += "<style>#btn_back{transition-duration:0.1s!important}</style>" }, 500)
         setTimeout(enroll_course, 50, path.split("/")[0], course)
-        setTimeout(checkCourseEnrollOK, 50, course.split(" ")[0] + course.split(" ")[1])
+        if (path.split("/")[0] == r.resp[course].insem.sort().reverse()[0]) setTimeout(checkCourseEnrollOK, 50, course.split(" ")[0] + course.split(" ")[1])
     }).catch(error => {
         console.log(error)
         setLoadingStatus("error", false, "failed to contact server or script crashed")

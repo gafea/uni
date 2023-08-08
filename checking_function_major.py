@@ -27,7 +27,7 @@ def major_checking(request_data):
                 year_ = "0"
             if globalVariable.major[year_][i]["attr"]["type"] != "option":
                 user = copy.deepcopy(userdb)
-            if "selfDeclearMapping" in user["profile"]["specialApprovals"]:
+            if "specialApprovals" in user["profile"] and "selfDeclearMapping" in user["profile"]["specialApprovals"]:
                 for j in user["profile"]["specialApprovals"]["selfDeclearMapping"]:
                     for k in user["profile"]["specialApprovals"]["selfDeclearMapping"][j]:
                         if user["profile"]["specialApprovals"]["selfDeclearMapping"][j][k][0][1] == globalVariable.major[year_][i]["attr"]["short"]:
@@ -362,25 +362,32 @@ def switch(action, code):
                 if code["course"] not in user["courses"]:
                     sub = []
                     canUse = []
-                    courseList = list(globalVariable.courseids.keys())
-                    for i in range(len(courseList)):
-                        if code["course"] in courseList[i] and code["course"] != courseList[i]:
-                            sub.append(courseList[i])
+                    courseCodeSep = code["course"].split()
+                    courseCode = courseCodeSep[0] + courseCodeSep[1]
+                    for i in globalVariable.courseids:
+                        if courseCode == i:
+                            output["respattr"]["alternative"] = [[0, [code["course"]], credit, 0]]
+                            return output
+                        elif courseCode in i:
+                            sub.append(i)
                     for i in sub:
-                        if i in user["courses"]:
-                            gpa, credit, actual_cred, output = courseInfo(i, output)
-                            canUse.append([gpa, [i], credit, actual_cred])
+                        courseCode = i[:4] + " " + i[4:]
+                        if courseCode in user["courses"]:
+                            gpa, credit, actual_cred, output = courseInfo(courseCode, output)
+                            canUse.append([gpa, [courseCode], credit, actual_cred])
                     if canUse == []:
                         output["respattr"]["alternative"] = [[0, [code["course"]], credit, 0]]
                         return output
                     else:
                         canUse.sort(reverse = True)
                         output = info(canUse[0][0] * canUse[0][3], canUse[0][1], canUse[0][2], canUse[0][3], output)
+                        output["pass"] = True
                 else:               
                     gpa, credit, actual_cred, output = courseInfo(code["course"], output)
                     output = info(gpa * actual_cred, [code["course"]], credit, actual_cred, output)
-
-            output["pass"] = True
+                    output["pass"] = True
+            else:
+                output["respattr"]["alternative"] = [[0, [code["course"]], credit, 0]]
             return output
         
         case "pass_certain_level":
@@ -562,7 +569,7 @@ def courseInfo(course, output):
         credit = int(user["courses"][course][sem[len(sem) - 1]]["units"])
     else:
         credit = int(user["courses"][course][sem[0]]["units"])
-    if gpa == 1:
+    if gpa == 0.1:
         actual_cred = 0
     else:
         actual_cred = credit
@@ -638,13 +645,10 @@ def bestCourse(course, alter, output):
 
 def info(gpaSum, courseUsed, credit, actual_cred, output):
     if courseUsed != []:
-        if gpaSum == 0:
-            output["respattr"]["alternative"] = [[0, courseUsed, credit, 0]]
-            return output
         if actual_cred:
-            output["respattr"]["gpa"] = round(gpaSum / actual_cred, 3)
+            output["respattr"]["gpa"] = gpaSum / actual_cred
         else:
-            output["respattr"]["gpa"] = 1
+            output["respattr"]["gpa"] = 0.1
         output["respattr"]["courseUsed"] = courseUsed
         output["respattr"]["credit"] = credit
         output["respattr"]["actual_cred"] = actual_cred
