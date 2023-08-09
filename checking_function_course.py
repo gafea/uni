@@ -251,8 +251,8 @@ def course_is_major_checking(item, userdb, request_data):
     return item
 
 def course_is_school_checking(item, userdb, request_data):
-    school = copy.deepcopy(globalVariable.major_school_mapping[request_data["prog"]]["school"])
-    if school == item["school"]:
+    school = copy.deepcopy(globalVariable.major_school_mapping[request_data["prog"][0]]["school"])
+    if school[9:].lower().strip() == item["school"]:
         item["pass"] = True
         return item
     item["pass"] = False
