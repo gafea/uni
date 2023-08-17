@@ -1,8 +1,10 @@
+import flask
 from flask import Flask, request
 import requests
-import json
 import threading
 import sys
+import traceback
+
 try:
     import globalVariable
     if globalVariable.version != 1:
@@ -20,6 +22,21 @@ try:
     if checking_function_major.version != 1:
         raise Exception("version different")
     
+    import recommend_prog
+    if recommend_prog.version != 1:
+        raise Exception("version different")
+    
+    import recommend_courses
+    if recommend_courses.version != 1:
+        raise Exception("version different")
+    
+    import recommend_arrange_pcg
+    if recommend_arrange_pcg.version != 1:
+        raise Exception("version different")
+    
+    import recommend_arrange
+    if recommend_arrange.version != 1:
+        raise Exception("version different")
 ############################
 # Check if nodejs server is alive
 ############################
@@ -52,6 +69,8 @@ try:
 ############################
 
     app = Flask(__name__)
+    app.config['JSON_SORT_KEYS'] = False
+    flask.json.provider.DefaultJSONProvider.sort_keys = False
 
     @app.route('/')
     def home():
@@ -65,16 +84,20 @@ try:
         try:
             globalVariable.replacement = request.json
             return {"status": 200}
-        except:
-            return {"status": 400}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
         
     @app.route('/!setvar/major', methods = ['POST'])
     def update_major():
         try:
             globalVariable.major = request.json
             return {"status": 200}
-        except:
-            return {"status": 400}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
 
 
     @app.route('/!setvar/majorschoolmapping', methods = ['POST'])
@@ -82,50 +105,63 @@ try:
         try:
             globalVariable.major_school_mapping = request.json
             return {"status": 200}
-        except:
-            return {"status": 400}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
     
     @app.route('/!setvar/courses', methods = ['POST'])
     def update_courses():
         try:
             globalVariable.courses = request.json
             return {"status": 200}
-        except:
-            return {"status": 400}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
         
     @app.route('/!setvar/courseids', methods = ['POST'])
     def update_courseids():
         try:
             globalVariable.courseids = request.json
             return {"status": 200}
-        except:
-            return {"status": 400}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
 
     @app.route('/!setvar/coursegroups', methods = ['POST'])
     def update_coursegroups():
         try:
             globalVariable.coursegroups = request.json
             return {"status": 200}
-        except:
-            return {"status": 400}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
         
     @app.route('/!setvar/sems', methods = ['POST'])
     def update_sems():
         try:
             globalVariable.sems = request.json
             return {"status": 200}
-        except:
-            return {"status": 400}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
         
     @app.route('/!setvar/insems', methods = ['POST'])
     def update_insems():
         try:
             globalVariable.insems = request.json
             globalVariable.phrased_course = course_phrasing_B.main()
-            requests.post("http://localhost:7002/!setvar/", json={"phrasedcourse": globalVariable.phrased_course})
+            globalVariable.arrange_PCG = recommend_arrange_pcg.main()
+            requests.post("http://localhost:7002/!setvar/", json={"phrasedcourse": globalVariable.phrased_course, "pcg": globalVariable.arrange_PCG})
             return {"status": 200}
-        except:
-            return {"status": 400}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
         
 ############################
 # Data output / Accessor
@@ -134,8 +170,10 @@ try:
     def get_phrased_course():
         try:
             return {"status": 200, "resp": globalVariable.phrased_course}
-        except:
-            return {"status": 404}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "phrasedcourse crashed", traceback.format_exc())
+            return {"status": 500}
 
     @app.route('/!checking/', methods = ['POST'])
     def checking():
@@ -143,44 +181,59 @@ try:
             mxi = request.get_json()
             mx = {}
             if "course" in mxi:
-                #print(1, mxi)
                 mx = checking_function_course.main(mxi)
             else:
-                #print(2, mxi)
                 mx = checking_function_major.main(mxi)
             return {"status": 200, "resp": mx}
-        except Exception as error:
-            #print(3, error)
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "checking crashed", traceback.format_exc())
             return {"status": 500}
 
-    @app.route('/!recommend/courses/', methods = ['POST'])
+    @app.route('/!recommend-courses/', methods = ['POST'])
     def recommend_course():
         try:
-            return {"status": 404}
-        except:
-            return {"status": 404}
+            request_data = request.get_json()
+            output_data = recommend_courses.main(request_data)
+            return {"status": 200, "resp": output_data}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "recommend-course crashed", traceback.format_exc())
+            return {"status": 500}
 
-    @app.route('/!recommend/mm/', methods = ['POST'])
-    def recommend_major_minor():
+    @app.route('/!recommend-prog/', methods = ['POST'])
+    def recommend_program():
         try:
-            return {"status": 404}
-        except:
-            return {"status": 404}
+            request_data = request.get_json()
+            output_data = recommend_prog.main(request_data)
+            return {"status": 200, "resp": output_data}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "recommend-prog crashed", traceback.format_exc())
+            return {"status": 500}
     
-    @app.route('/!recommend/arrange/', methods = ['POST'])
-    def recommend_arrange():
+    @app.route('/!arrange/', methods = ['POST'])
+    def recommend_arrange_():
         try:
-            return {"status": 404}
-        except:
-            return {"status": 404}
+            request_data = request.get_json()
+            output_data = recommend_arrange.main(request_data)
+            return {"status": 200, "resp": output_data}
+        except Exception:
+            print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "arrange crashed", traceback.format_exc())
+            return {"status": 500}
     
     @app.errorhandler(404)
     def page_not_found(error):
         return {"status": 404}
 
     if __name__ == '__main__':
+        requests.get("http://localhost:7002/!pushvar/")
         app.run(debug=True, port=7003)
+
 except ImportError:
     print("File missing or outdated")
 except Exception as Argument:
+    print(traceback.format_exc())
+    globalVariable.deathDump("uni.gafea.net@7003", "unrecoverable global crash", traceback.format_exc())
     print(Argument)

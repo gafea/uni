@@ -235,7 +235,7 @@ const JSONing = (starting_index, course_temp_path, course_path, latestSem, cb) =
                     var tempx = {}
                     var sectlist = {}
 
-                    if (typeof course.getElementsByClassName("sections")[0].children[0].children != "undefined") {
+                    if (typeof course.getElementsByClassName("sections") != "undefined" && typeof course.getElementsByClassName("sections")[0] != "undefined" && typeof course.getElementsByClassName("sections")[0].children != "undefined" && typeof course.getElementsByClassName("sections")[0].children[0] != "undefined" && typeof course.getElementsByClassName("sections")[0].children[0].children != "undefined") {
 
                         Array.from(course.getElementsByClassName("sections")[0].children[0].children).forEach((section, index) => {
 
@@ -276,48 +276,52 @@ const JSONing = (starting_index, course_temp_path, course_path, latestSem, cb) =
 
                     if (!noDiff) {
                         let timeNow = (new Date)
-                        let courseCode = course.getElementsByTagName("h2")[0].textContent.split(" - ")[0].replace(" ", "")
+                        let courseCode = "UNDF0000"
+                        if (typeof course.getElementsByTagName("h2") != "undefined" && typeof course.getElementsByTagName("h2")[0] != "undefined" && typeof course.getElementsByTagName("h2")[0].textContent != "undefined") {
+                            courseCode = course.getElementsByTagName("h2")[0].textContent.split(" - ")[0].replace(" ", "")
 
-                        let diffFilePath = "" + item.split("\\").pop().slice(0, 4) + "\\" + courseCode + ".json"
-                        if (!fs.existsSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")
-                        if (!fs.existsSync(course_temp_path + "_mdiff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_mdiff\\" + item.split("\\").pop().slice(0, 4) + "\\")
 
-                        let diff = {}, mdiff = {}, lessonDetails = {}
-                        if (fs.existsSync(course_path + "_diff\\" + diffFilePath)) diff = JSON.parse(fs.readFileSync(course_path + "_diff\\" + diffFilePath, "utf-8"))
-                        if (fs.existsSync(course_path + "_mdiff\\" + diffFilePath)) mdiff = JSON.parse(fs.readFileSync(course_path + "_mdiff\\" + diffFilePath, "utf-8"))
-                        let omdiff = JSON.stringify(mdiff)
+                            let diffFilePath = "" + item.split("\\").pop().slice(0, 4) + "\\" + courseCode + ".json"
+                            if (!fs.existsSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")
+                            if (!fs.existsSync(course_temp_path + "_mdiff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_mdiff\\" + item.split("\\").pop().slice(0, 4) + "\\")
 
-                        if (typeof currentDiffIndex[item.split("\\").pop().slice(0, 4)] != "undefined" && typeof currentDiffIndex[item.split("\\").pop().slice(0, 4)][courseCode] != "undefined") {
-                            delete currentDiffIndex[item.split("\\").pop().slice(0, 4)][courseCode]
-                            if (!Object.keys(currentDiffIndex[item.split("\\").pop().slice(0, 4)])) {
-                                delete currentDiffIndex[item.split("\\").pop().slice(0, 4)]
-                            }
-                        }
+                            let diff = {}, mdiff = {}, lessonDetails = {}
+                            if (fs.existsSync(course_path + "_diff\\" + diffFilePath)) diff = JSON.parse(fs.readFileSync(course_path + "_diff\\" + diffFilePath, "utf-8"))
+                            if (fs.existsSync(course_path + "_mdiff\\" + diffFilePath)) mdiff = JSON.parse(fs.readFileSync(course_path + "_mdiff\\" + diffFilePath, "utf-8"))
+                            let omdiff = JSON.stringify(mdiff)
 
-                        Object.keys(tempx).forEach(lesson => {
-                            lessonDetails = tempx[lesson][Object.keys(tempx[lesson])[0]]
-
-                            if (typeof diff[lesson] === "undefined") diff[lesson] = {}
-                            diff[lesson][timeNow.getTime()] = Number((((parseInt(lessonDetails.Enrol) + parseInt(lessonDetails.Wait)) / parseInt(lessonDetails.Quota.split("Quota/Enrol/Avail")[0])) * 100).toFixed(2))
-
-                            if (typeof mdiff[lesson] === "undefined") mdiff[lesson] = {}
-                            Object.keys(mdiff[lesson]).forEach(attr => {
-                                if (!Object.values(mdiff[lesson][attr].slice(-1)[0]).slice(-1)[0] && typeof lessonDetails[attr] === "undefined") mdiff[lesson][attr].push({ [timeNow.getTime()]: "" })
-                            })
-                            Object.keys(lessonDetails).forEach(attr => {
-                                if (typeof mdiff[lesson][attr] === "undefined" || Object.values(mdiff[lesson][attr].slice(-1)[0]).slice(-1)[0] != lessonDetails[attr]) {
-                                    if (typeof mdiff[lesson][attr] === "undefined") mdiff[lesson][attr] = []
-                                    mdiff[lesson][attr].push({ [timeNow.getTime()]: lessonDetails[attr] })
+                            if (typeof currentDiffIndex[item.split("\\").pop().slice(0, 4)] != "undefined" && typeof currentDiffIndex[item.split("\\").pop().slice(0, 4)][courseCode] != "undefined") {
+                                delete currentDiffIndex[item.split("\\").pop().slice(0, 4)][courseCode]
+                                if (!Object.keys(currentDiffIndex[item.split("\\").pop().slice(0, 4)])) {
+                                    delete currentDiffIndex[item.split("\\").pop().slice(0, 4)]
                                 }
+                            }
+
+                            Object.keys(tempx).forEach(lesson => {
+                                lessonDetails = tempx[lesson][Object.keys(tempx[lesson])[0]]
+
+                                if (typeof diff[lesson] === "undefined") diff[lesson] = {}
+                                diff[lesson][timeNow.getTime()] = Number((((parseInt(lessonDetails.Enrol) + parseInt(lessonDetails.Wait)) / parseInt(lessonDetails.Quota.split("Quota/Enrol/Avail")[0])) * 100).toFixed(2))
+
+                                if (typeof mdiff[lesson] === "undefined") mdiff[lesson] = {}
+                                Object.keys(mdiff[lesson]).forEach(attr => {
+                                    if (!Object.values(mdiff[lesson][attr].slice(-1)[0]).slice(-1)[0] && typeof lessonDetails[attr] === "undefined") mdiff[lesson][attr].push({ [timeNow.getTime()]: "" })
+                                })
+                                Object.keys(lessonDetails).forEach(attr => {
+                                    if (typeof mdiff[lesson][attr] === "undefined" || Object.values(mdiff[lesson][attr].slice(-1)[0]).slice(-1)[0] != lessonDetails[attr]) {
+                                        if (typeof mdiff[lesson][attr] === "undefined") mdiff[lesson][attr] = []
+                                        mdiff[lesson][attr].push({ [timeNow.getTime()]: lessonDetails[attr] })
+                                    }
+                                })
                             })
-                        })
-                        fs.writeFileSync(course_temp_path + "_diff\\" + diffFilePath, JSON.stringify(diff))
-                        if (JSON.stringify(mdiff) != omdiff) fs.writeFileSync(course_temp_path + "_mdiff\\" + diffFilePath, JSON.stringify(mdiff))
+                            fs.writeFileSync(course_temp_path + "_diff\\" + diffFilePath, JSON.stringify(diff))
+                            if (JSON.stringify(mdiff) != omdiff) fs.writeFileSync(course_temp_path + "_mdiff\\" + diffFilePath, JSON.stringify(mdiff))
+                        }
                     }
 
                     tempx = {}
 
-                    domJSON[course.getElementsByTagName("h2")[0].textContent] = JSON.parse(JSON.stringify(courseMeta))
+                    if (typeof course.getElementsByTagName("h2") != "undefined" && typeof course.getElementsByTagName("h2")[0] != "undefined" && typeof course.getElementsByTagName("h2")[0].textContent != "undefined") domJSON[course.getElementsByTagName("h2")[0].textContent] = JSON.parse(JSON.stringify(courseMeta))
                     courseMeta = {}
                 })
 

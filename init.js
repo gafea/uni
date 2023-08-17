@@ -1,9 +1,11 @@
 var script1 = document.createElement('script'); script1.src = '/!acc/uniplus.js'; document.head.appendChild(script1);
 
+const bottombarIcon = "" + resourceNETpath + "image/uni.svg"
+
 const bottombarbuttons = [
     'Me,/me/,me,' + resourceNETpath + 'image/me.png,1',
     'Browse,/course/,course,' + resourceNETpath + 'image/browse.png,2',
-    'Planning,/plan/,plan,' + resourceNETpath + 'image/nullicon.png,4',
+    'Planning,/plan/,plan,' + resourceNETpath + 'image/plan.png,4',
     'Search,/search/,search,' + resourceNETpath + 'image/search.png,3',
     'About,/about/,about,' + resourceNETpath + 'image/info.png,0'
 ]
@@ -87,6 +89,15 @@ function init(path) {
             }
         })
 
+        // document.getElementById("cover_screen").innerHTML = `
+        // <img src="` + resourceNETpath + `image/uni.svg" style="height:8em;width:100%;object-fit:contain;margin:3em 0 1.5em 0">
+        //     <div id="cover_spin"></div>
+        //     <style>
+        //   #cover_screen{background-color:var(--bw);z-index:10000;opacity:1;transition-duration:0.15s;display:flex;flex-flow:column;justify-content:center;align-items:center;width:100%;height:100%;position:fixed;top:0;bottom:0;left:0;right:0}
+        //   #cover_spin{padding:0.005em;text-align:center;line-height:1;opacity:1;transition-duration:0.15s;border-radius:50%;animation:1.25s linear infinite spinner;border:solid 0.25em rgba(96,96,96,.3);border-top-color:#99f;height:1em;width:1em;will-change:transform}
+        //   @keyframes spinner { 0% {transform:rotate(0deg)} 100% {transform:rotate(360deg)} }
+        // </style>`
+
         if (path == '/' || path == '') { //home page, not decided what to do yet so redir to /course/ ;)
             setTimeout(() => {
                 boot("/course/", true, 2)
@@ -94,7 +105,7 @@ function init(path) {
             return `<meta http-equiv="refresh" content="0;URL=/course/">`
 
         } else if (path.toLowerCase().startsWith("/me/")) { //me page
-            return `<div id="me_wrp"></div>` + renderBottomBar('me')
+            return `<div id="me_wrp"></div>` + renderBottomBar('me', false, bottombarIcon)
 
         } else if (path.toLowerCase().startsWith("/course/") || path.toLowerCase().startsWith("/group/") || path.toLowerCase().startsWith("/people/") || path.toLowerCase().startsWith("/room/")) { //course + people + room
             return `<div id="courses_select_wrp">
@@ -109,7 +120,7 @@ function init(path) {
                             <div id="courses_select_left_top"></div>
                             <div class="flx" style="justify-content:center;gap:0.5em;margin:0.5em 0;border-top:0.15em dotted rgba(128,128,128,.2);padding-top:0.75em" id="courses_select_left_optionBox"></div>
                             <div id="courses_select_left_extra">
-                                <div class="box" style="margin:1em 0">
+                                <div class="box" style="margin:1em 0;display:none">
                                     <h4>Experiments</h4>
                                     ` + exphtml + `
                                 </div>
@@ -118,7 +129,7 @@ function init(path) {
                     </div>
                     <div class="LR_Right" id="courses_select_right"></div>
                 </div>
-            </div>` + renderBottomBar('course')
+            </div>` + renderBottomBar('course', false, bottombarIcon)
 
         } else if (path.toLowerCase().startsWith("/search/")) { //search
 
@@ -133,7 +144,7 @@ function init(path) {
                     </div>
                     <div class="LR_Right" id="courses_select_right"></div>
                 </div>
-            </div>` + renderBottomBar('search')
+            </div>` + renderBottomBar('search', false, bottombarIcon)
 
         } else if (path.toLowerCase().startsWith("/plan/")) { //plan
 
@@ -143,9 +154,9 @@ function init(path) {
                         <div class="LR_Left_Content">
                             <br>
                             <div id="courses_select_left_top"></div>
-                            <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0" id="courses_select_left_optionBox"></div>
+                            <div class="flx" style="gap:0.5em;margin:0.5em 0;border-top:0.15em dotted rgba(128,128,128,.2);padding-top:0.75em" id="courses_select_left_optionBox"></div>
                             <div id="courses_select_left_extra">
-                                <div class="box" style="margin:1em 0">
+                                <div class="box" style="margin:1em 0;display:none">
                                     <h4>Experiments</h4>
                                     ` + exphtml + `
                                 </div>
@@ -157,7 +168,7 @@ function init(path) {
                         <div id="major_select_cont"></div>
                     </div>
                 </div>
-            </div>` + renderBottomBar('plan')
+            </div>` + renderBottomBar('plan', false, bottombarIcon)
 
         } else if (path.toLowerCase().startsWith("/about/")) { //about page
             return `<div id="about"><div class="edge2edge_page">
@@ -228,7 +239,7 @@ function init(path) {
                 Feature Request/Bug Reports? Find me at <a href="mailto:gafea@icloud.com">gafea@icloud.com</a>.
             </p3>
 
-            </div></div>` + renderBottomBar('about')
+            </div></div>` + renderBottomBar('about', false, bottombarIcon)
 
         } else if (false && path.startsWith('/!') && !(path === '/!404' || path.startsWith('/!404/'))) { //reserved for api call, invalid for HTML
             let spath = document.createTextNode(path).textContent
@@ -259,7 +270,7 @@ function exe(path) {
                 exe_people(path.substring(8))
             }).catch(error => {
                 console.log(error)
-                html.innerHTML = "failed to contact server"
+                html.innerHTML = "failed to contact server or script crashed"
             })
         } else {
             exe_people(path.substring(8))
@@ -274,7 +285,7 @@ function exe(path) {
                 exe_room(path.substring(6))
             }).catch(error => {
                 console.log(error)
-                html.innerHTML = "failed to contact server"
+                html.innerHTML = "failed to contact server or script crashed"
             })
         } else {
             exe_room(path.substring(6))
@@ -298,17 +309,18 @@ function exe(path) {
 
 }
 
-function exe_about() {
-    document.title = "About - uni"
-    return
-}
-
 const exe_courses = (path) => wait_allSems(render_courses, path, "Courses - uni")
 const exe_people = (path) => wait_allSems(render_people, path, "Instructors - uni")
 const exe_room = (path) => wait_allSems(render_room, path, "Rooms - uni")
 const exe_me = (path) => wait_allSems(render_me, path, "Me - uni")
 const exe_search = (path) => wait_allSems(render_search, path, "Search - uni")
 const exe_plan = (path) => wait_allSems(render_plan, path, "Planning - uni")
+const exe_about = (path) => wait_allSems(render_about, path, "About - uni")
+
+function render_about() {
+    document.title = "About - uni"
+    return
+}
 
 const courseCodeNamedb = JSON.parse('{"ACCT":"Accounting","BIBU":"Biotechnology and Business","BIEN":"Bioengineering","BIPH":"Biological Physics","CENG":"Chemical and Biological Engineering","CHEM":"Chemistry","CIVL":"Civil and Environmental Engineering","COMP":"Computer Science and Engineering","CORE":"Common Core","CPEG":"Computer Engineering","DASC":"Data Analytics in Science","DSCT":"Data Science and Technology","ECON":"Economics","ELEC":"Electronic and Computer Engineering","EMIA":"Emerging Interdisciplinary Areas","ENEG":"Energy","ENGG":"School of Engineering","ENTR":"Entrepreneurship","ENVR":"Environment","ENVS":"Environmental Science","FINA":"Finance","FYTG":"HKUST Fok Ying Tung Graduate School","GBUS":"Global Business","GNED":"General Education","HART":"Studio Arts courses offered by HUMA","HLTH":"Health and Physical Education","HUMA":"Humanities","IDPO":"Interdisciplinary Programs Office","IEDA":"Industrial Engineering and Decision Analytics","IIMP":"Individualized Interdisciplinary Major","IROP":"International Research Opportunities Program","ISDN":"Integrative Systems and Design","ISOM":"Information Systems, Business Statistics and Operations Management","LABU":"Language for Business","LANG":"Language","LEGL":"Legal Education","LIFS":"Life Science","MARK":"Marketing","MATH":"Mathematics","MECH":"Mechanical and Aerospace Engineering","MGMT":"Management","OCES":"Ocean Science","PHYS":"Physics","PPOL":"Public Policy","RMBI":"Risk Management and Business Intelligence","SBMT":"School of Business and Management","SCIE":"School of Science","SHSS":"School of Humanities and Social Science","SISP":"Summer Institute for Secondary School Students","SOSC":"Social Science","SUST":"Sustainability","TEMG":"Technology and Management","UROP":"Undergraduate Research Opportunities Program","WBBA":"SF program in World Business"}')
 const courseCode_to_fullName = (code) => {
@@ -318,12 +330,13 @@ const courseCode_to_fullName = (code) => {
         return courseCodeNamedb[code]
 }
 
-function generate_course_selbox(courseCode = "COMP 3511", courseName = "Operating Systems", sem = "2230", picbox_inner_up_html = "", noSpecialOverlay = false) { //this only support courses
+function generate_course_selbox(courseCode = "COMP 3511", courseName = "Operating Systems", sem = "2230", units = "3", picbox_inner_up_html = "", noSpecialOverlay = false, onclickfx = "") { //this only support courses
     let code = courseCode.replaceAll(" ", ""), url = "" + resourceNETpath + `uni_ai/` + code + `.webp`, deptName = courseCode_to_fullName(courseCode.split(" ")[0])
 
     if (courseCode == "COMP 3511") url = `https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`
 
-    return `<button id="` + code + `" aria-label="Course selection button. ` + courseCode.replace(new RegExp(`.{${1}}`, 'g'), '$&' + " ") + ", " + courseName + `. A` + ((deptName[0] == "A" || deptName[0] == "E" || deptName[0] == "I" || deptName[0] == "O" || deptName[0] == "U") ? "n " : " ") + deptName + ` course, offered in ` + ustTimeToString(sem).replace("-", " to ") + `. Double click for details." class="course_sel selbox picbox" onclick="boot('/course/` + sem + "/" + courseCode.split(' ')[0] + "/" + code + `/', false, 2)">
+    return `<button id="` + code + `" aria-label="Course selection button. ` + courseCode.replace(new RegExp(`.{${1}}`, 'g'), '$&' + " ") + ", " + courseName + `. A` + ((deptName[0] == "A" || deptName[0] == "E" || deptName[0] == "I" || deptName[0] == "O" || deptName[0] == "U") ? "n " : " ") + deptName + ` course, offered in ` + ustTimeToString(sem, true).replace("-", " to ") + `. Double click for details." class="course_sel selbox picbox" 
+    onclick="` + ((onclickfx) ? onclickfx(courseCode, courseName, sem, units) : (`boot('/course/` + sem + "/" + courseCode.split(' ')[0] + "/" + code + `/', false, 2)`)) + `">
         <img src="` + url + `" loading="lazy" fetchpriority="low" onerror="this.onerror=null;this.src=emptyimg">    
         <div class="picbox_inner flx">
             <div class="picbox_inner_up flx">
@@ -350,28 +363,37 @@ function courseStringToParts(course) {
     return { dept: dept, code: code, units: units, name: name }
 }
 
-function render_search(path) {
-    path = window.location.search
+const startSearchingHTML = `<br><br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Type in keywords to start searching!</b></p1></center>`
 
-    let params = new URLSearchParams(path)
-    let query = params.get('q')
-
-    document.getElementById("courses_select_left_top").innerHTML = `<div class="flx"><h2>Search</h2></div>`
-    document.getElementById("courses_select_left_optionBox").innerHTML = `<style>#courses_select_left_optionBox{display:none}</style>`
-    document.getElementById("courses_select_right").innerHTML = `<br><div id="fdigbtn" class="flx"><label for="search_dw_box"><img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false"></label><p3 id="digsrtxt">Search</p3>
-    <form onsubmit="boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_dw_box').value)), true, 3);this.blur();return false"><input ` + ((!query) ? "autofocus " : "") + `id="search_dw_box" name="dw" type="search" placeholder="Search for anything" value="" title="Search"></form></div>
-    <div id="search_result"></div>`
-    document.getElementById("search_dw_box").focus()
-
-    if (!query) {
-        document.title = "Search - uni"
-        document.getElementById("search_result").innerHTML = `<br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Type in keywords to start searching!</b></p1></center>`
-        return
+function render_search(path, queryX = "", selectCourse = false) {
+    let query = ""
+    if (!path && queryX) {
+        path = "?q=" + queryX
+        query = queryX
+    } else {
+        path = window.location.search
+        let params = new URLSearchParams(path)
+        query = params.get('q')
     }
 
-    document.title = "🔍 " + query + " - uni"
-    document.getElementById("search_dw_box").value = query
-    document.getElementById("search_dw_box").blur()
+    if (!selectCourse) {
+        document.getElementById("courses_select_left_top").innerHTML = `<div class="flx"><h2>Search</h2></div>`
+        document.getElementById("courses_select_left_optionBox").innerHTML = `<style>#courses_select_left_optionBox{display:none}</style>`
+        document.getElementById("courses_select_right").innerHTML = `<br><div id="fdigbtn" class="flx"><label for="search_dw_box"><img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false"></label><p3 id="digsrtxt">Search</p3>
+    <form onsubmit="boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_dw_box').value)), true, 3);this.blur();return false"><input ` + ((!query) ? "autofocus " : "") + `id="search_dw_box" name="dw" type="search" placeholder="Search for anything" value="" title="Search"></form></div>
+    <div id="search_result"></div>`
+        document.getElementById("search_dw_box").focus()
+
+        if (!query) {
+            document.title = "Search - uni"
+            document.getElementById("search_result").innerHTML = startSearchingHTML
+            return
+        }
+
+        document.title = "🔍 " + query + " - uni"
+        document.getElementById("search_dw_box").value = query
+        document.getElementById("search_dw_box").blur()
+    }
     document.getElementById("search_result").innerHTML = `<br><div class="flx" style="justify-content:center;gap:0.5em;text-align:center"><div id="d_loading"></div><p2><b>Loading...</b></p2></div>`
 
     let tmark = (new Date()).getTime()
@@ -380,13 +402,19 @@ function render_search(path) {
             case 404:
                 r.resp = []
             case 200:
+                if (selectCourse && r.resp.length > 100) {
+                    if (queryX == add_course_search_history) {
+                        document.getElementById("search_result").innerHTML = `<br><p3 style="margin-left:0.5em">Total ` + r.resp.length + ` result` + ((r.resp.length === 1) ? "" : "s") + ` (` + ((new Date()).getTime() - tmark) + ` ms).</p3><br><center><img class="searchimg" src="` + resourceNETpath + `image/bigsearch_empty.png" alt="Search"><br><br><p1 style="opacity:0.8"><b>Too many results, try using course codes (e.g. COMP1021) ?</b></p1></center>`
+                    }
+                    return
+                }
                 document.getElementById("search_result").innerHTML = `<br><p3 style="margin-left:0.5em">Total ` + r.resp.length + ` result` + ((r.resp.length === 1) ? "" : "s") + ` (` + ((new Date()).getTime() - tmark) + ` ms).</p3><br><div class="flx" id="search_out"><div id="d_loading"></div></div>`
                 setTimeout(() => {
                     let draft = [], scores = [], score = 0, queryAmt = query.split(" "), lastQueryAmt = queryAmt.pop(), qLength = queryAmt.length; if (lastQueryAmt) qLength++
                     r.resp.sort((a, b) => { return parseInt(b.result.SEM) - parseInt(a.result.SEM) }).forEach(ans => {
                         switch (ans.type) {
                             case "course":
-                                if (r.resp.length === 1) {
+                                if (r.resp.length === 1 && !selectCourse) {
                                     boot(`/course/` + ans.result.SEM + "/" + ans.result.CODE.substring(0, 4) + "/" + ans.result.CODE + `/`, true, 2)
                                     return
                                 }
@@ -395,15 +423,24 @@ function render_search(path) {
                                     if (f === "CODE") score += 1 / qLength
                                     if (f === "NAME") score += 0.6 / qLength / qLength + 0.3 / qLength / qLength + 0.1 / qLength / qLength
                                 })
-                                draft.push({ score: score, html: generate_course_selbox(ans.result.CODE.substring(0, 4) + " " + ans.result.CODE.substring(4), ans.result.NAME, ans.result.SEM, "", true) /*+ score /* + ", " + JSON.stringify(ans.found) */ })
+                                if (selectCourse) {
+                                    draft.push({
+                                        score: score, html: generate_course_selbox(ans.result.CODE.substring(0, 4) + " " + ans.result.CODE.substring(4), ans.result.NAME, ans.result.SEM, ans.result.UNITS, `<h5></h5><h5 style="opacity:0.85">` + ans.result.UNITS + ` unit` + ((ans.result.UNITS === "1") ? '' : 's') + `</h5>`, true, (courseCode = "COMP 3511", courseName = "Operating Systems", sem = "2230", units = "3") => {
+                                            return `add_course(false, {'code': '` + courseCode + `', 'name': '` + courseName.replaceAll('"', '\\"').replaceAll("'", "\\'") + `', 'sem': '` + sem + `', 'units': '` + units + `'})`
+                                        }) /*+ score /* + ", " + JSON.stringify(ans.found) */
+                                    })
+                                } else {
+                                    draft.push({ score: score, html: generate_course_selbox(ans.result.CODE.substring(0, 4) + " " + ans.result.CODE.substring(4), ans.result.NAME, ans.result.SEM, ans.result.UNITS, `<h5></h5><h5 style="opacity:0.85">` + ans.result.UNITS + ` unit` + ((ans.result.UNITS === "1") ? '' : 's') + `</h5>`, true) /*+ score /* + ", " + JSON.stringify(ans.found) */ })
+                                }
                                 break;
 
                             case "people":
-                                if (r.resp.length === 1) {
+                                if (r.resp.length === 1 && !selectCourse) {
                                     peoplex = ans.result
                                     boot(`/people/` + ans.result + `/`, true, 2)
                                     return
                                 }
+                                if (selectCourse) return
                                 score = 1
                                 draft.push({
                                     score: score, html: `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="peoplex='` + ans.result + `';boot('/people/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
@@ -413,11 +450,12 @@ function render_search(path) {
                                 break;
 
                             case "room":
-                                if (r.resp.length === 1) {
+                                if (r.resp.length === 1 && !selectCourse) {
                                     roomx = ans.result
                                     boot(`/room/` + ans.result + `/`, true, 2)
                                     return
                                 }
+                                if (selectCourse) return
                                 score = 1
                                 draft.push({
                                     score: score, html: `<div style="padding:0;page-break-inside:avoid" id="` + ans.result + `" class="course_sel selbox picbox" onclick="roomx='` + ans.result + `';boot('/room/` + ans.result + `/', false, 2)" title="` + ans.result + `"><div class="picbox_inner flx">
@@ -427,6 +465,7 @@ function render_search(path) {
                                 break;
 
                             default:
+                                if (selectCourse) return
                                 score = 0
                                 draft.push({ score: score, html: `<div class="box">` + JSON.stringify(ans) + "</div>" })
                                 break;
@@ -457,64 +496,6 @@ function render_search(path) {
 
 function render_plan(path) {
     document.getElementById("courses_select_left_top").innerHTML = "<h2>Planning</h2>"
-
-    if (!experiments.plan_beta.enabled) {
-        document.getElementById("courses_select_left_optionBox").innerHTML = "coming soon!"
-        document.getElementById("courses_select_right").innerHTML = `<div class="box" style="aspect-ratio:2.25"><canvas id="canvas"></canvas></div>`
-
-        let colors = ["red", "green", "green", "green", "green", "green", "grey", "red", "green", "red", "green", "green", "green", "red", "red", "grey", "grey", "green"]
-        const chart = new Chart(document.getElementById('canvas').getContext('2d'), {
-            type: 'tree',
-            data: {
-                labels: ["Start", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q"],
-                datasets: [
-                    {
-                        pointBackgroundColor: colors,
-                        pointBorderColor: colors,
-                        edgeLineBorderColor: colors.slice(1),
-                        edgeLineBorderWidth: [1, 1, 1, 1, 1, 0.25, 3, 1, 3, 1, 1, 1, 3, 3, 0.25, 0.25, 1],
-                        pointRadius: [9, 6, 6, 6, 6, 6, 7, 9, 6, 9, 6, 6, 6, 9, 9, 7, 7, 6],
-                        pointStyle: ["rectRounded", "circle", "circle", "circle", "circle", "circle", "crossRot", "rectRounded", "circle", "rectRounded", "circle", "circle", "circle", "rectRounded", "rectRounded", "crossRot", "crossRot", "circle"],
-                        pointHoverRadius: 10,
-                        data: [
-                            { name: "Start", },
-                            { name: "A", parent: 0 },
-                            { name: "B", parent: 1 },
-                            { name: "C", parent: 1 },
-                            { name: "D", parent: 0 },
-                            { name: "E", parent: 4 },
-                            { name: "F", parent: 4 },
-                            { name: "G", parent: 0 },
-                            { name: "H", parent: 7 },
-                            { name: "I", parent: 7 },
-                            { name: "J", parent: 2 },
-                            { name: "K", parent: 2 },
-                            { name: "L", parent: 2 },
-                            { name: "M", parent: 9 },
-                            { name: "N", parent: 9 },
-                            { name: "O", parent: 6 },
-                            { name: "P", parent: 6 },
-                            { name: "Q", parent: 9 },
-                        ]
-                    },
-                ],
-            },
-            options: {
-                maintainAspectRatio: false,
-                interaction: {
-                    intersect: false,
-                    mode: 'nearest',
-                    axis: 'xy'
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        })
-        return
-    }
 
     function find_in_local_cache(year, majorminor, cb) {
         if (majorminor && year > -1) { //return major/minor data of that year
@@ -554,9 +535,15 @@ function render_plan(path) {
 
     find_in_local_cache(-1, "", (years) => {
 
-        years.forEach(mm => {
-            mmdraft += `<button onclick="boot('/plan/` + mm + `/', false, 3)">` + mm + `</button>`
+        if (signinlevel > 0 && yearx > -1) mmdraft += `<button onclick="boot('/plan/', false, 4)" class="aobh acss"><b>く home</b></button><div class="flx" style="gap:0.5em">`
+        years.sort().reverse().forEach(mm => {
+            if (mm == "0") {
+                mmdraft += `<button onclick="boot('/plan/` + mm + `/', false, 4)">For all students</button>`
+            } else {
+                mmdraft += `<button onclick="boot('/plan/` + mm + `/', false, 4)">For students intaked in ` + mm + `</button>`
+            }
         })
+        if (signinlevel > 0) mmdraft += `</div>`
         mmdraft += "<br>"
         document.getElementById("courses_select_left_optionBox").innerHTML = mmdraft
         mmdraft = ""
@@ -564,10 +551,11 @@ function render_plan(path) {
         if (yearx < 0) {
 
             if (signinlevel <= 0 || typeof config.profile == "undefined" || typeof config.profile.currentStudies == "undefined" || typeof config.profile.currentStudies.yearOfIntake == "undefined") {
-                setTimeout(() => { boot("/plan/" + years[0] + "/", true, 3) }, 150);
+                setTimeout(() => { boot("/plan/" + years[0] + "/", true, 4) }, 150);
                 return
             }
 
+            document.getElementById("major_select_topbox").innerHTML = ``
             setTimeout(() => {
                 let htmldft = `
                 <div class="flx" style="justify-content:space-around">
@@ -585,13 +573,39 @@ function render_plan(path) {
                         </div>
                         <div><center>
                             <p2> Study Program: <b>` + config.profile.currentStudies.studyProgram + `</b></p2><br>
-                            <p2> Year of Intake: <b>` + ustTimeToString(config.profile.currentStudies.yearOfIntake) + `</b></p2><br>
+                            <p2> Year of Intake: <b>` + ustTimeToString(config.profile.currentStudies.yearOfIntake, true) + `</b></p2><br>
                             <button class="acss aobh" onclick="boot('/me/profile/', false, 1)">Modify in My Profile</button>
                         </center></div>
                     </div>`
 
                 document.getElementById("major_select_topbox").innerHTML = htmldft
             }, 500)
+
+            document.getElementById("major_select_cont").innerHTML = `
+            <br>
+            <h4>My programs</h4><br>
+            <div id="major_minor_sel">
+                <div id="d_loading"></div>
+            </div>
+
+            <br><br>
+            <h4>Recommended courses</h4><br>
+            <div id="courses_recommend">
+                <div id="d_loading"></div>
+            </div>
+
+            <br><br>
+            <h4>Recommended programs</h4><br>
+            <div id="major_minor_recommend">
+                <div id="d_loading"></div>
+            </div>
+
+            <br><br>
+            <h4>Recommended study pathway</h4><br>
+            <div id="arrange_recommend">
+                <div id="d_loading"></div>
+            </div>
+            `
 
             fetch("/!plan/20" + config.profile.currentStudies.yearOfIntake.substring(0, 2) + "/?majoronly=true").then(r => r.json()).then(r => {
                 if (r.status != 200) { document.getElementById("major_select_cont").innerHTML = `failed to contact server`; return }
@@ -612,11 +626,21 @@ function render_plan(path) {
                             if (index || (typeof config.profile.currentStudies.mm[index] == "undefined" || config.profile.currentStudies.mm.length > 1)) {
                                 mmdraft += `<option value="----" selected>----</option>`
                             }
+                            let selectedmm = ["", "0"];
                             (index ? everymm : majoronly).forEach(mmx => {
-                                if (!(!(config.profile.currentStudies.mm[index] == mmx) && (config.profile.currentStudies.mm.includes(mmx))))
+                                if (!(!(config.profile.currentStudies.mm[index] == mmx) && (config.profile.currentStudies.mm.includes(mmx)))) {
                                     mmdraft += `<option ` + ((config.profile.currentStudies.mm[index] == mmx) ? "selected " : "") + `value="` + mmx + `">` + mmx + `</option>`
+                                    if (config.profile.currentStudies.mm[index] == mmx) {
+                                        selectedmm[0] = mmx
+                                        if (!r.resp.includes(mmx)) selectedmm[1] = "20" + config.profile.currentStudies.yearOfIntake.substring(0, 2)
+                                    }
+                                }
                             })
-                            mmdraft += `</select><br>`
+                            if (index + 1 < mmlength) {
+                                mmdraft += `</select><p2><button class="aobh acss" onclick="boot('/plan/` + selectedmm[1] + `/` + selectedmm[0].replaceAll(" ", "-") + `/', false, 4)">View details</button></p2><br>`
+                            } else {
+                                mmdraft += `</select><br>`
+                            }
                         }
 
                         if (typeof config.profile.currentStudies.mm[0] == "undefined" || config.profile.currentStudies.mm.length < 1) {
@@ -625,22 +649,115 @@ function render_plan(path) {
 
                         }
 
-                        document.getElementById("major_select_cont").innerHTML = mmdraft
+                        document.getElementById("major_minor_sel").innerHTML = mmdraft
                     })
                 })
             }).catch(e => {
                 console.log(e)
-                document.getElementById("major_select_cont").innerHTML = `failed to contact server`
+                document.getElementById("major_minor_sel").innerHTML = `failed to contact server or script crashed`
                 return
             })
+
+            let reqx1 = { "fx": "recommend-courses" }
+            if (signinlevel < 1) reqx1.userdb = config
+            post((signinlevel >= 1) ? "/!acc/userfx/" : "/!guestfx/", reqx1).then(r => r.json()).then(r => {
+                if (r.status != 200 || (typeof r.resp != "undefined" && typeof r.resp.error != "undefined")) {
+                    document.getElementById("courses_recommend").innerHTML = `failed to contact server`
+                    return
+                }
+
+                let draft = ""
+                r.resp.sort((a, b) => a.matches < b.matches).forEach(course => {
+                    if (course.pass && course.units && parseInt(course.sem) > parseInt(allSemsF[0]) - 600) {
+                        draft += generate_course_selbox(course.code.substring(0, 4) + " " + course.code.substring(4), course.name, course.sem, course.units, `
+                        <h5>
+                            ` + ((course.matches == 1) ? '' : ('' + course.matches + ` matches`)) + `
+                        </h5>
+                        <h5 style="opacity:0.85">
+                            ` + course.units + ` unit` + ((course.units == "1") ? '' : 's') + `
+                        </h5>`)
+                    }
+                })
+
+                document.getElementById("courses_recommend").innerHTML = `<div class="flx">` + draft + `</div>`
+
+            }).catch(error => {
+                console.log(error)
+                document.getElementById("courses_recommend").innerHTML = `failed to contact server or script crashed`
+                return
+            })
+
+            let reqx2 = { "fx": "recommend-prog", "prog": config.profile.currentStudies.mm }
+            if (signinlevel < 1) reqx2.userdb = config
+            post((signinlevel >= 1) ? "/!acc/userfx/" : "/!guestfx/", reqx2).then(r => r.json()).then(r => {
+                if (r.status != 200 || (typeof r.resp != "undefined" && typeof r.resp.error != "undefined")) {
+                    document.getElementById("major_minor_recommend").innerHTML = `failed to contact server`
+                    return
+                }
+
+                let draft = ""
+                r.resp.sort((a, b) => a.percent < b.percent).forEach(mm => {
+                    draft += `<div class="box">`
+                    draft += `<h5>` + mm.name + `</h5>`
+                    draft += `<p3>[` + mm.type + `] Completed ` + mm.percent + `%</p3>`
+                    draft += `<p2><br><br><button class="aobh acss" onclick="boot('/plan/` + mm.year + `/` + mm.name.replaceAll(" ", "-") + `/', false, 4)">View details</button></p2>`
+                    draft += `</div>`
+                })
+
+                document.getElementById("major_minor_recommend").innerHTML = `<div class="flx" style="gap:1em;justify-content:flex-start">` + draft + `</div>`
+
+            }).catch(error => {
+                console.log(error)
+                document.getElementById("major_minor_recommend").innerHTML = `failed to contact server or script crashed`
+                return
+            })
+
+            let reqx3 = { "fx": "arrange" }
+            if (signinlevel < 1) reqx3.userdb = config
+            post((signinlevel >= 1) ? "/!acc/userfx/" : "/!guestfx/", reqx3).then(r => r.json()).then(r => {
+                if (r.status != 200 || (typeof r.resp != "undefined" && typeof r.resp.error != "undefined")) {
+                    document.getElementById("arrange_recommend").innerHTML = `failed to contact server`
+                    return
+                }
+
+                let draft = ""
+                Object.keys(r.resp["arrange"]).sort().forEach(sem => {
+                    draft += `<div id="` + sem + `">
+                    <h5>` + ustTimeToString(sem) + `</h5><br>
+                    ` + generate_html_from_action(r.resp["arrange"][sem], false, true) + `
+                    </div>`
+                })
+
+                document.getElementById("arrange_recommend").innerHTML = `<div class="flx" style="gap:1em">` + draft + `</div>`
+
+            }).catch(error => {
+                console.log(error)
+                document.getElementById("arrange_recommend").innerHTML = `failed to contact server or script crashed`
+                return
+            })
+
+            document.getElementById('courses_select_main').classList.remove('edge2edge_wide')
 
             return
         }
 
+        document.getElementById('courses_select_main').classList.add('edge2edge_wide')
         find_in_local_cache(yearx, "", (majorminors) => {
-            if (!majorminorx) { setTimeout(() => { boot("/plan/" + yearx + "/" + majorminors[0].replaceAll(" ", "-") + "/", true, 3) }, 150); return }
+            if (!majorminorx) {
+                setTimeout(() => {
+                    let gotomm = majorminors[0].replaceAll(" ", "-")
+                    if (signinlevel > 0) {
+                        if (yearx.toString().length == 4 && config.profile.currentStudies.yearOfIntake.substring(0, 2) == yearx.toString().substring(2, 4)) {
+                            gotomm = config.profile.currentStudies.mm[0].replaceAll(" ", "-")
+                        }
+                    }
+                    boot("/plan/" + yearx + "/" + gotomm + "/", true, 4)
+                }, 150)
+                return
+            }
+            document.title = "" + majorminorx + ((yearx != "0") ? " (" + yearx + ")" : "") + " - Planning - uni"
             majorminors.forEach(mm => {
-                mmdraft += `<button onclick="boot('/plan/` + yearx + `/` + mm.replaceAll(" ", "-") + `/', false, 3)">` + mm + `</button>`
+                mmdraft += `<button onclick="boot('/plan/` + yearx + `/` + mm.replaceAll(" ", "-") + `/', false, 4)">` + mm + `</button>`
             })
             document.getElementById("major_select_topbox").innerHTML = mmdraft
             mmdraft = ""
@@ -649,14 +766,33 @@ function render_plan(path) {
                 if (signinlevel < 1) reqx.userdb = config
                 post((signinlevel >= 1) ? "/!acc/userfx/" : "/!guestfx/", reqx).then(r => r.json()).then(r => {
                     if (r.status === 200) {
-                        //document.getElementById("exp-api-checking-result").innerHTML = ""
-                        document.getElementById("major_select_cont").innerHTML = `<h3>` + majorminorx + ((yearx != "0") ? " (" + yearx + ")" : "") + `</h3><br>` + generate_html_from_action(JSON.parse(JSON.stringify(r.resp[majorminorx])))
+
+                        let mnote = rndStr(10)
+
+                        document.getElementById("major_select_cont").innerHTML = `<br>
+                        <h3>` + majorminorx + ((yearx != "0") ? " (" + yearx + ")" : "") + `</h3><br>
+                        <div style="display:none">
+                            <div id="mminfo-short-` + mnote + `"></div>
+                            <div id="mminfo-type-` + mnote + `"></div>
+                            <div id="mminfo-year-` + mnote + `"></div>
+                        </div>
+                        <div class="box" style="aspect-ratio:2.25"><canvas id="canvas"></canvas></div><br>
+                        <div id="major_select_cont_out"></div>`
+
+                        generate_graph_from_action(JSON.parse(JSON.stringify(r.resp[majorminorx])), majorminorx + ((yearx != "0") ? " (" + yearx + ")" : ""))
+
+                        document.getElementById("mminfo-short-" + mnote).innerText = r.resp[majorminorx].attr.short
+                        document.getElementById("mminfo-type-" + mnote).innerText = r.resp[majorminorx].attr.type
+                        document.getElementById("mminfo-year-" + mnote).innerText = yearx
+
+                        document.getElementById("major_select_cont_out").innerHTML = generate_html_from_action(JSON.parse(JSON.stringify(r.resp[majorminorx])), false, false, {}, mnote)
+
                     } else {
                         document.getElementById("major_select_cont").innerHTML = "failed to contact server"
                     }
                 }).catch(error => {
                     console.log(error)
-                    document.getElementById("major_select_cont").innerHTML = "failed to contact server"
+                    document.getElementById("major_select_cont").innerHTML = "failed to contact server or script crashed"
                 })
             } else {
                 find_in_local_cache(yearx, majorminorx, (reqs) => {
@@ -684,9 +820,9 @@ function create_new_profile(studyProgram = "----", yearOfIntake = "----", mm = [
 
     document.getElementById("profile_new_model").innerHTML = `<dialog id="profile_new_dialog">
     <form id="profile_new_dialog_form" action="javascript:void(0);">
-        <div class="flx" style="gap:1em">
+        <div class="flx" style="gap:1em;flex-wrap: wrap-reverse;">
             <h4>Create ` + (signinlevel >= 1 ? `New` : `Guest`) + ` Profile</h4>
-            <button value="cancel" formmethod="dialog" class="closebtn"` + ((false && signinlevel >= 1) ? ` style="display:none"` : ``) + `><img src="` + resourceNETpath + `image/circle-cross.png" title="Close"></button>
+            <button value="cancel" formmethod="dialog" class="closebtn"` + ((signinlevel >= 1) ? ` style="display:none"` : ``) + `><img src="` + resourceNETpath + `image/circle-cross.png" title="Close"></button>
         </div><br>
 
         <div id="profile_new_dialog_content">
@@ -737,15 +873,12 @@ function create_new_profile(studyProgram = "----", yearOfIntake = "----", mm = [
 
         }).catch(e => {
             console.log(e)
-            document.getElementById("major_select_cont").innerHTML = `failed to contact server`
+            document.getElementById("major_select_cont").innerHTML = `failed to contact server or script crashed`
             return
         })
         document.getElementById("profile_new_dialog").showModal()
     } else {
         document.getElementById("profile_new_dialog").close()
-        if (signinlevel < 1) {
-            signinlevel = 0.1
-        }
         config = {
             profile: {
                 currentStudies: {
@@ -753,15 +886,95 @@ function create_new_profile(studyProgram = "----", yearOfIntake = "----", mm = [
                     yearOfIntake: yearOfIntake,
                     mm: mm
                 }
+            },
+            courses: {
             }
         }
         if (signinlevel >= 1) {
-            update_config("profile", config.profile, () => create_new_profile_cb())
+            update_config("profile", config.profile, () => {
+                update_config("courses", config.courses, () => {
+                    create_new_profile_cb()
+                })
+            })
         } else {
+            signinlevel = 0.1
+            if (localStorage) {
+                localStorage.clear()
+                Object.keys(config).forEach(key => {
+                    localStorage.setItem(key, JSON.stringify(config[key]))
+                })
+            }
             create_new_profile_cb()
         }
     }
 
+}
+
+function check_course_exists(code, sem, cb) {
+    if (typeof config.courses[code] != "undefined" && typeof config.courses[code][sem] != "undefined") { cb(true); return }
+    fetch("/!course/" + sem + "/" + code.substring(0, 4) + "/" + code + "/").then(r => r.json()).then(r => {
+        if (r.status != 200) { cb(false); return }
+        cb(true)
+    })
+}
+
+var add_course_search_history = ""
+
+function add_course(back = false, course = {}) {
+    document.getElementById("add_course_model").innerHTML = `<dialog id="add_course_dialog">
+    <form id="add_course_dialog_form" action="javascript:void(0)" onsubmit="return false">
+        <div class="flx" style="gap:1em;flex-wrap: wrap-reverse;">
+            <h4>Add Course</h4>
+            <button value="cancel" formmethod="dialog" class="closebtn" onclick="document.getElementById('add_course_dialog').close()"><img src="` + resourceNETpath + `image/circle-cross.png" title="Close"></button>
+        </div><br>
+
+        <div id="add_course_dialog_content">
+        </div>
+
+        <div id="add_course_dialog_buttons" class="flx">
+        </div>
+    </form>
+    </dialog>`
+
+    let contentDiv = document.getElementById("add_course_dialog_content")
+    let buttonDiv = document.getElementById("add_course_dialog_buttons")
+
+    if (!Object.keys(course).length || back) {
+        contentDiv.innerHTML = `<div class="flx" style="gap:0.5em; margin:0.5em 0"><label for="search_dw_box">
+        <img alt="Search" src="` + resourceNETpath + `image/search.png" draggable="false" style="vertical-align: middle;object-fit: contain;width: 2rem;height: 2rem;cursor: pointer;user-select: none;-webkit-touch-callout: none;"></label><p3 id="digsrtxt">Search</p3>
+        <input autofocus autocomplete="off" id="search_dw_boxX" name="dw" type="search" placeholder="Search for courses" value="" title="Search" onkeypress="if ((event.charCode || event.keyCode || 0) == 13) event.preventDefault();" onkeyup="
+            let nc = document.getElementById('search_dw_boxX').value;
+            if (!nc) {document.getElementById('search_result').innerHTML = startSearchingHTML; add_course_search_history = nc; return false}; 
+            if (nc != add_course_search_history) {render_search('', nc, true); add_course_search_history = nc; return false}
+        "></form></div>
+        <style>@media (min-width:800px) {dialog #search_result {max-height:35em}}</style>
+        <div id="search_result" style="width:45em;max-width:100%;min-height:17.5em;overflow:scroll">`+ startSearchingHTML + `</div>`
+        buttonDiv.innerHTML = ``
+    } else if (Object.keys(course).length) {
+        console.log(course)
+        contentDiv.innerHTML = `
+                    Course: <input readonly name="code" type="text" value="` + course.code + `"><br>
+                    Name: <input readonly name="name" type="text" value="` + course.name + `"><br>
+                    Semester: <select id="course_update_sem" name="sem">` + generate_year_of_intake_select(course.sem, true) + `</select><br>
+                    Grade: <select name="grade">` + generate_grade_selection("----", []) + `</select><br>
+                    <br><h4>Extra</h4><br>
+                    <input type="checkbox" id="is_SPO" name="is_SPO" value="yes"> <label for="is_SPO"> [SPO] Self-Paced Online Learning</label><br>
+                    Actual credit: <input name="actual_cred" type="number" min="0" value="` + course.units + `"><br>
+                    Total credit: <input name="units" type="number" min="0" value="` + course.units + `"><br>
+                    <div class="box" style="display:none">
+                        <p2>Lec: </p2><br>
+                        <p2>Lab: </p2><br>
+                        <p2>Tut: </p2><br>
+                        <p2>Rsh: </p2><br>
+                    </div>
+                    <br>`
+        buttonDiv.innerHTML = `
+                    <br>
+                    <button id="security_dialog_confirmBtn" onclick="submitCourseUpdate(false, () => {reboot(true)})">Add</button>
+                    `
+    }
+
+    document.getElementById("add_course_dialog").showModal()
 }
 
 function generate_new_profile_selHTML(configTemp, onChangeScript = true) {
@@ -795,8 +1008,8 @@ function render_me(path) {
         <button onclick="create_new_profile_cb = () => {reboot()}; create_new_profile()">
             Guest Profile
         </button>
-        , this temporary profile will be wiped when you close or refresh your browser, and is not migratable when you sign in later
-        </p2><!--<br><br><button onclick="signinlevel = 0.1; reboot()">hi chris</button>-->
+        , this temporary profile ` + ((localStorage) ? "" : " will be wiped when you close or refresh your browser, and ") + `is not migratable when you sign in later
+        </p2>
         </div>`
         return
     }
@@ -811,10 +1024,19 @@ function render_me(path) {
             </div>
 
             <div class="edge2edge_page">
-                <h3>Home</h3><br>
-                ` + ((signinlevel < 1) ? `<div class="box">[!] You are using a Guest Profile, this temporary profile will be wiped when you close or refresh your browser, and is not migratable when you sign in later<br><br>
-                    <button onclick="config = {}; signinlevel = 0; reboot(); setTimeout(() => alert('Guest Profile Deleted'), 1)">delete this profile now</button></div><br>` : "") + `
-                <p2>Coming soon!</p2>
+                <h3>Welcome back!</h3><br>
+                ` + ((signinlevel < 1) ? `<div class="box">[!] You are using a Guest Profile, this temporary profile ` + ((localStorage) ? "" : " will be wiped when you close or refresh your browser, and ") + `is not migratable when you sign in later<br><br>
+                    <button onclick="config = {}; signinlevel = 0; if (localStorage) {localStorage.clear()}; reboot(); setTimeout(() => alert('Guest Profile Deleted'), 1)">delete this profile now</button></div><br>` : "") + `
+                <div class="flx">
+                    <div class="selbox" onclick="boot('/me/course/', false, 1)" style="flex-grow:1">
+                        <h4>My Courses</h4><br><br>
+                        <div style="text-align:right"><p2 class="acss aobh">View My Courses →</p2></div>
+                    </div>
+                    <div class="selbox" onclick="boot('/me/profile/', false, 1)" style="flex-grow:1">
+                        <h4>My Profile</h4><br><br>
+                        <div style="text-align:right"><p2 class="acss aobh">View My Profile →</p2></div>
+                    </div>
+                </div>
             </div>`
             break
 
@@ -995,7 +1217,19 @@ function render_me(path) {
                     let snote = rndStr()
                     selfDeclearTemplate += `<div class='flx' style="gap:0.5em;padding:1em;border-radius:1em;width:calc(100% - 2em);` + ((i % 2) ? "" : "background-color:#ccc1") + `">
                     <p2> ` + item + `</p2>
-                    <button onclick="updateProfile('specialApprovals', 'selfDeclear', config.profile.specialApprovals.selfDeclear.filter(a => a != document.getElementById('aprvtext-` + snote + `').innerText), reboot)">delete</button>
+                    <button onclick="
+                        xm = document.getElementById('aprvtext-` + snote + `').innerText;
+                        updateProfile('specialApprovals', 'selfDeclear', config.profile.specialApprovals.selfDeclear.filter(a => a != xm), () => {
+                            if (typeof config.profile.specialApprovals.selfDeclearMapping == 'undefined' || typeof config.profile.specialApprovals.selfDeclearMapping[xm] == 'undefined') {
+                                reboot();
+                                return
+                            }
+
+                            delete config.profile.specialApprovals.selfDeclearMapping[xm]
+                            updateProfile('specialApprovals', 'selfDeclearMapping', config.profile.specialApprovals.selfDeclearMapping, () => {
+                                reboot()
+                            })
+                        })">delete</button>
                     <textarea id="aprvtext-` + snote + `" style="display:none"></textarea>
                     </div>`
                     setTimeout(() => document.getElementById("aprvtext-" + snote).innerText = item, 100)
@@ -1054,79 +1288,96 @@ function render_me(path) {
             </div>
             
             <div id="my_courses">
-                ` + renderTopBar(`...`, " ", `<button>add course</button>`, false, "", false, "", true) + `
+                ` + renderTopBar(`...`, " ", `<div><button onclick="add_course()">add course</button><div id="add_course_model"></div></div>`, false, "", false, "", true) + `
                 <div id="my_courses_content"></div>
+                <div id="course_enroll_model"></div>
             </div>`
 
-            update_config("", "", () => {
-                let htmld = "", total_cred = 0, total_passed_cred = 0, total_gpacred = 0, total_grade_points = 0
-                if (typeof config.courses === "undefined" || Object.keys(config.courses).length === 0) {
-                    htmld = `<div class="edge2edge_page"><p2>No courses found!</p2></div>`
-                } else {
-                    let semsdb = {}
-    
-                    Object.keys(config.courses).forEach(course => {
-                        Object.keys(config.courses[course]).forEach(sem => {
-                            if (typeof semsdb[sem] === "undefined") semsdb[sem] = {}
-                            semsdb[sem][course] = config.courses[course][sem]
-                        })
+            let htmld = "", total_cred = 0, total_passed_cred = 0, total_gpacred = 0, total_grade_points = 0
+            if (typeof config.courses === "undefined" || Object.keys(config.courses).length === 0) {
+                htmld = `<div class="edge2edge_page"><p2>No courses found!</p2></div>`
+            } else {
+                let semsdb = {}
+
+                Object.keys(config.courses).forEach(course => {
+                    Object.keys(config.courses[course]).forEach(sem => {
+                        if (typeof semsdb[sem] === "undefined") semsdb[sem] = {}
+                        semsdb[sem][course] = config.courses[course][sem]
                     })
-    
-                    Object.keys(semsdb).sort().reverse().forEach(sem => {
-                        let mhtmld = "", gpacred = 0, total_term_cred = 0, termcredload = 0, gpasum = 0, haveunfilled = false
-                        Object.keys(semsdb[sem]).forEach(course => {
-                            let cred = parseInt(semsdb[sem][course].units)
-                            let actualcred = cred
-                            if (typeof semsdb[sem][course].actual_cred != "undefined") actualcred = parseInt(semsdb[sem][course].actual_cred)
-                            mhtmld += generate_course_selbox(course, semsdb[sem][course].name, sem, `` + ((semsdb[sem][course].grade === "----") ? (`<style>#` + course.replace(" ", "") + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">`) : (`<h5 class="textbox">`)) + semsdb[sem][course].grade + `</h5><h5 style="opacity:0.85">` + ((actualcred != cred) ? ("" + actualcred + " of ") : "") + semsdb[sem][course].units + ` unit` + ((semsdb[sem][course].units === "1") ? '' : 's') + `</h5>`, true)
-                            total_term_cred += actualcred
-                            total_cred += actualcred
-                            termcredload += actualcred
-                            if (semsdb[sem][course].grade === "----") {
-                                haveunfilled = true
-                                return
-                            };
-                            ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"].forEach((grade, index) => {
-                                if (semsdb[sem][course].grade === grade) {
-                                    gpacred += cred
-                                    total_gpacred += cred
-                                    if (grade != "F") total_passed_cred += cred
-                                    gpasum += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
-                                    total_grade_points += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
+                })
+
+                Object.keys(semsdb).sort().reverse().forEach(sem => {
+                    let mhtmld = "", gpacred = 0, total_term_cred = 0, termcredload = 0, gpasum = 0, haveunfilled = false
+                    Object.keys(semsdb[sem]).forEach(course => {
+                        let cred = parseInt(semsdb[sem][course].units)
+                        let actualcred = cred
+                        if (typeof semsdb[sem][course].actual_cred != "undefined") actualcred = parseInt(semsdb[sem][course].actual_cred)
+                        mhtmld += generate_course_selbox(
+                            course,
+                            semsdb[sem][course].name,
+                            sem,
+                            cred,
+                            `` + ((semsdb[sem][course].grade === "----") ? (`<style>#` + course.replace(" ", "") + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">`) : (`<h5 class="textbox">`)) + semsdb[sem][course].grade + `</h5><h5 style="opacity:0.85">` + ((actualcred != cred) ? ("" + actualcred + " of ") : "") + semsdb[sem][course].units + ` unit` + ((semsdb[sem][course].units === "1") ? '' : 's') + `</h5>`,
+                            true,
+                            (course, name, sem, units) => {
+                                let coursen = course.replaceAll(" ", ""); return `setLoadingStatus('show'); check_course_exists('` + coursen + `', '` + sem + `', (exist) => {
+                                if (exist) {
+                                    boot('/course/` + sem + `/` + coursen.substring(0, 4) + '/' + coursen + `/', false, 2)
+                                } else {
+                                    setLoadingStatus('hide');
+                                    add_course(false, {'code': '` + course + `', 'name': '` + name + `', 'sem': '` + sem + `', 'units': '` + units + `'})
                                 }
-                            })
-                            if (["P", "T", "CR", "DI", "DN", "PA", "PS"].includes(semsdb[sem][course].grade)) {
-                                total_passed_cred += cred
-                                if (semsdb[sem][course].grade === "T") termcredload -= actualcred
-                            }
-                            if (["AU", "W"].includes(semsdb[sem][course].grade)) {
-                                total_term_cred -= actualcred
-                                total_cred -= actualcred
-                                if (semsdb[sem][course].grade === "W") termcredload -= actualcred
+                            })`},
+                        )
+                        total_term_cred += actualcred
+                        total_cred += actualcred
+                        termcredload += actualcred
+                        if (semsdb[sem][course].grade === "----") {
+                            haveunfilled = true
+                            return
+                        };
+                        ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"].forEach((grade, index) => {
+                            if (semsdb[sem][course].grade === grade) {
+                                gpacred += cred
+                                total_gpacred += cred
+                                if (grade != "F") total_passed_cred += cred
+                                gpasum += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
+                                total_grade_points += ([4.3, 4, 3.7, 3.3, 3, 2.7, 2.3, 2, 1.7, 1, 0][index]) * cred
                             }
                         })
-                        htmld += `<div class="edge2edge_page"><div class="flx"><h3>` + ustTimeToString(sem) + `</h3><div class="flx" style="gap:0.5em">` + ((gpacred) ? (`<h5>TGA <span class="textbox"` + (haveunfilled ? ` title="There are courses missing grade information">⌛ ` : ">") + (gpasum / gpacred).toFixed(3) + `</span></h5>`) : "") + ((termcredload != total_term_cred) ? (`<h5>Actual Credit Load <span class="textbox" title="The actual credit load after deducting transferred credits">` + termcredload + `</span></h5>`) : "") + `<h5>Credits <span class="textbox">` + total_term_cred + `</span></h5></div></div><div class="flx">` + mhtmld + `</div></div>`
+                        if (["P", "T", "CR", "DI", "DN", "PA", "PS"].includes(semsdb[sem][course].grade)) {
+                            total_passed_cred += cred
+                            if (semsdb[sem][course].grade === "T") termcredload -= actualcred
+                        }
+                        if (["AU", "W"].includes(semsdb[sem][course].grade)) {
+                            total_term_cred -= actualcred
+                            total_cred -= actualcred
+                            if (semsdb[sem][course].grade === "W") termcredload -= actualcred
+                        }
                     })
-                }
-                let courseSum = `<div class="flx" style="gap:0.5em;width:fit-content">` + ((total_gpacred) ? (`<h5>CGA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span></h5>`) : "") + `<h5>Passed Credits <span class="textbox">` + total_passed_cred + `</span></h5><h5>Total Credits <span class="textbox">` + total_cred + `</span></h5></div>`
-                
-                document.getElementById("titlecard_subtitle").innerHTML = `<div class="only_mobile" style="padding:0.25em 0"><br>` + courseSum + `</div>`
-                document.getElementById("topbar_title").innerHTML = `<div class="no_mobile" style="padding:0.25em 0">` + courseSum + `</div>`
-                document.getElementById("my_courses_content").innerHTML = htmld
-                
-                setLoadingStatus("hide")
-            })
+                    htmld += `<div class="edge2edge_page"><div class="flx"><h3>` + ustTimeToString(sem) + `</h3><div class="flx" style="gap:0.5em">` + ((gpacred) ? (`<h5>TGA <span class="textbox"` + (haveunfilled ? ` title="There are courses missing grade information">⌛ ` : ">") + (gpasum / gpacred).toFixed(3) + `</span></h5>`) : "") + ((termcredload != total_term_cred) ? (`<h5>Actual Credit Load <span class="textbox" title="The actual credit load after deducting transferred credits">` + termcredload + `</span></h5>`) : "") + `<h5>Credits <span class="textbox">` + total_term_cred + `</span></h5></div></div><div class="flx">` + mhtmld + `</div></div>`
+                })
+            }
+            let courseSum = `<div class="flx" style="gap:0.5em;width:fit-content">` + ((total_gpacred) ? (`<h5>CGA <span class="textbox">` + (total_grade_points / total_gpacred).toFixed(3) + `</span></h5>`) : "") + `<h5>Passed Credits <span class="textbox">` + total_passed_cred + `</span></h5><h5>Total Credits <span class="textbox">` + total_cred + `</span></h5></div>`
+
+            document.getElementById("titlecard_subtitle").innerHTML = `<div class="only_mobile" style="padding:0.25em 0"><br>` + courseSum + `</div>`
+            document.getElementById("topbar_title").innerHTML = `<div class="no_mobile" style="padding:0.25em 0">` + courseSum + `</div>`
+            document.getElementById("my_courses_content").innerHTML = htmld
+
+            setLoadingStatus("hide")
             break
     }
 }
 
-function generate_year_of_intake_select(selection = "") {
+function generate_year_of_intake_select(selection = "", full = false) {
     let years = [], pyears = []
     if (!selection) {
         years.push("----")
     }
     for (let y = (new Date().getFullYear()); y > (new Date().getFullYear()) - 7; y--) {
+        if (full) pyears.push("" + ((y - 2000) * 100 + 40))
         pyears.push("" + ((y - 2000) * 100 + 30))
+        if (full) pyears.push("" + ((y - 2000) * 100 + 20))
         pyears.push("" + ((y - 2000) * 100 + 10))
     }
     if (selection && !pyears.includes(selection)) {
@@ -1136,7 +1387,7 @@ function generate_year_of_intake_select(selection = "") {
 
     let prevSem = "----", draft = ""
     years.forEach(sem => {
-        let thisSem = ustTimeToString(sem)
+        let thisSem = ustTimeToString(sem, true)
         if (thisSem.split(" ")[0] != prevSem) {
             if (prevSem != '----') draft += `</optgroup>`
             draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
@@ -1146,7 +1397,7 @@ function generate_year_of_intake_select(selection = "") {
         if (sem == selection) {
             draft += " selected"
         }
-        draft += `>` + ustTimeToString(sem) + `</option>`
+        draft += `>` + ustTimeToString(sem, true) + `</option>`
     })
     draft += `</optgroup>`
 
@@ -1154,7 +1405,7 @@ function generate_year_of_intake_select(selection = "") {
 }
 
 function updateProfile(category, target, value, cb) {
-    try {setLoadingStatus("show")} catch (error) {}
+    try { setLoadingStatus("show") } catch (error) { }
     let configTemp = JSON.parse(JSON.stringify(config))
     if (typeof configTemp.profile === "undefined") configTemp.profile = {}
     if (typeof configTemp.profile[category] === "undefined") configTemp.profile[category] = {}
@@ -1175,7 +1426,12 @@ function update_config(newKey = "", newVal = "", cb = (err) => { }) {
         return
     }
     if (signinlevel < 1) {
-        if (newKey) config[newKey] = newVal
+        if (newKey) {
+            config[newKey] = newVal
+            if (localStorage) {
+                localStorage.setItem(newKey, JSON.stringify(newVal))
+            }
+        }
         apply_config()
         cb()
         return
@@ -1218,7 +1474,7 @@ function wait_allSems(cb, path, title) {
 
     document.title = title
 
-    if (allSemsF.length) { allSems = JSON.parse(JSON.stringify(allSemsF)); cb(path); return }
+    if (allSemsF.length) { allSems = JSON.parse(JSON.stringify(allSemsF)); setOverlayStatus("hide", false, "cover"); cb(path); return }
 
     fetch("/!course/").then(r => r.json()).then(r => {
         if (r.status != 200 || !r.resp.length) {
@@ -1239,13 +1495,21 @@ function wait_allSems(cb, path, title) {
             }
             if (typeof config.profile == "undefined" && signinlevel >= 1) {
                 document.body.innerHTML += `<div id="profile_new_model"></div>`
-                create_new_profile_cb = () => {reboot()}
+                create_new_profile_cb = () => { reboot() }
                 create_new_profile()
             }
             cb(path)
         }).catch(error => {
             console.log(error)
             cb(path)
+        }).finally(() => {
+            if (localStorage.getItem("profile")) {
+                signinlevel = 0.1
+                for (var i = 0, len = localStorage.length; i < len; ++i) {
+                    config[localStorage.key(i)] = JSON.parse(localStorage.getItem(localStorage.key(i)))
+                }
+            }
+            setOverlayStatus("hide", true, "cover")
         })
 
     }).catch(error => {
@@ -1256,6 +1520,15 @@ function wait_allSems(cb, path, title) {
             <p3>Connect to the internet, and then refresh the page.</p3>
         </div>
         `
+        setOverlayStatus("hide", true, "cover")
+    }).finally(() => {
+        if (localStorage.getItem("profile")) {
+            signinlevel = 0.1
+            for (var i = 0, len = localStorage.length; i < len; ++i) {
+                config[localStorage.key(i)] = JSON.parse(localStorage.getItem(localStorage.key(i)))
+            }
+        }
+        setOverlayStatus("hide", false, "cover")
     })
 
 }
@@ -1276,13 +1549,234 @@ function filterFunction(hideListIfEmpty = false) {
     }
 }
 
-function generate_html_from_action(json, ignoreMissingAction = false) {
+function approval_course_selbox(snote, mnote) {
+    let d = `
+    <dialog id="approval_course_selbox_dialog_` + snote + `">
+    <form id="approval_course_selbox_dialog_form" action="javascript:void(0);">
+        <div class="flx" style="gap:1em; flex-wrap: wrap-reverse;">
+            <div>
+                <h4>Any courses used to fulfill this requirement?</h4>
+                <p3>This is used to calculate related data like MCGA.</p3>
+            </div>
+            <button value="cancel" formmethod="dialog" class="closebtn"><img src="` + resourceNETpath + `image/circle-cross.png" title="Close" onclick="document.getElementById('aprvswitch-` + snote + `').checked = false"></button>
+        </div>
+
+        <div id="approval_course_selbox_dialog_content">
+            <p2><div class="box" id="approval_course_selbox_string_` + snote + `"></div></p2>`
+
+    if (typeof config.courses == "undefined" || Object.keys(config.courses).length == 0) {
+        d += "No courses found!"
+    } else {
+        //create a list of checkbox to select courses of each semester using HTML
+        let semsdb = {}
+        Object.keys(config.courses).forEach(course => {
+            Object.keys(config.courses[course]).forEach(sem => {
+                if (typeof semsdb[sem] === "undefined") semsdb[sem] = {}
+                semsdb[sem][course] = config.courses[course][sem]
+            })
+        })
+        //console.log(semsdb)
+        Object.keys(semsdb).sort().reverse().forEach(sem => {
+            let mhtmld = ``, unote = rndStr()
+            Object.keys(semsdb[sem]).sort().forEach(course => {
+                mhtmld += `<div class="flx" style="gap:0.5em;justify-content:flex-start;align-items:flex-start;margin:0.5em 0">
+                <input 
+                    style="flex-grow:unset" 
+                    onchange="
+                        document.getElementById('aprvcourse-titlecount-` + sem + `').innerText = (0 + parseInt(document.getElementById('aprvcourse-titlecount-` + sem + `').innerText) + (document.getElementById('aprvcourse-` + unote + `-` + course.replaceAll(" ", "") + `').checked ? 1 : -1));
+                        if (document.getElementById('aprvcourse-titlecount-` + sem + `').innerText == 0) {
+                            document.getElementById('aprvcourse-title-` + sem + `').style.fontWeight = 'unset'
+                        } else {
+                            document.getElementById('aprvcourse-title-` + sem + `').style.fontWeight = 'bolder'
+                        }
+                        " 
+                    type="checkbox" 
+                    id="aprvcourse-` + unote + `-` + course.replaceAll(" ", "") + `" 
+                    name="aprvcourse-coursecheckbox-` + snote + `" 
+                    value="` + course + `-` + sem + `"
+                >
+                <label for="aprvcourse-` + unote + `-` + course.replaceAll(" ", "") + `">
+                    <p2>` + course + `</p2><br><p3>` + semsdb[sem][course].name + `</p3>
+                </label>
+                </div>`
+            })
+            d += `<details><summary style="cursor:pointer"><p2 id="aprvcourse-title-` + sem + `">` + ustTimeToString(sem) + ` - [<span id="aprvcourse-titlecount-` + sem + `">0</span>]</p2></summary><div style="margin:0 1em">` + mhtmld + `</div></details>`
+        })
+    }
+
+    d += `</div><br>
+
+        <div class="flx">
+            <button id="security_dialog_confirmBtn" class="acss aobh" onclick="submit_approval_course('` + snote + `', true, '` + mnote + `')">No courses were used</button>
+            <button id="security_dialog_confirmBtn" onclick="submit_approval_course('` + snote + `', false, '` + mnote + `')">Save</button>
+        </div>
+    </form>
+    </dialog>`
+
+    document.getElementById("aprvmodel-" + snote).innerHTML = d
+    document.getElementById("aprvmodel-" + snote).querySelectorAll('details').forEach((D, _, A) => { D.ontoggle = _ => { if (D.open) A.forEach(d => { if (d != D) d.open = false }) } })
+    document.getElementById('approval_course_selbox_string_' + snote).innerHTML = document.getElementById('aprvtext-' + snote).innerText
+    document.getElementById('approval_course_selbox_dialog_' + snote).showModal()
+}
+
+function submit_approval_course(snote, noCourse = false, mnote = "") {
+    document.getElementById('approval_course_selbox_dialog_' + snote).close()
+
+    let mxc = []
+    if (typeof config.profile == "undefined" || typeof config.profile.specialApprovals == "undefined" || typeof config.profile.specialApprovals.selfDeclear == "undefined") {
+        mxc = [document.getElementById('aprvtext-' + snote).innerText]
+    } else {
+        mxc = [...config.profile.specialApprovals.selfDeclear, document.getElementById('aprvtext-' + snote).innerText]
+    }
+
+    updateProfile('specialApprovals', 'selfDeclear', mxc, () => {
+        let x = document.querySelectorAll('input[name=aprvcourse-coursecheckbox-' + snote + ']:checked')
+
+        if (noCourse || !x.length) {
+            reboot(true)
+            return
+        }
+
+        let mappings = {}
+        x.forEach(item => {
+            let m = item.value.split("-")
+            if (typeof mappings[m[0]] === "undefined") mappings[m[0]] = []
+            if (mnote) {
+                mappings[m[0]].push([m[1], document.getElementById('mminfo-short-' + mnote).innerText, document.getElementById('mminfo-type-' + mnote).innerText, document.getElementById('mminfo-year-' + mnote).innerText])
+            } else {
+                mappings[m[0]].push([m[1]])
+            }
+        })
+
+        let configTemp = JSON.parse(JSON.stringify(config))
+        if (typeof configTemp.profile === "undefined") configTemp.profile = {}
+        if (typeof configTemp.profile.specialApprovals === "undefined") configTemp.profile.specialApprovals = {}
+        if (typeof configTemp.profile.specialApprovals.selfDeclearMapping === "undefined") configTemp.profile.specialApprovals.selfDeclearMapping = {}
+        configTemp.profile.specialApprovals.selfDeclearMapping[document.getElementById('aprvtext-' + snote).innerText] = mappings
+
+        updateProfile('specialApprovals', 'selfDeclearMapping', configTemp.profile.specialApprovals.selfDeclearMapping, () => {
+            reboot(true)
+            return
+        })
+    })
+}
+
+function generate_graph_from_action(json, startName = "Start") {
+    let colors = [((json.pass) ? "green" : "red")]
+    let pointRadius = [3]
+    let pointStyle = [((json.pass) ? "rectRounded" : "circle")]
+    let edgeLineBorderWidth = []
+    let labels = [startName]
+    let data = [
+        { name: startName },
+    ]
+
+    function recur(json, prevID = 0, prevPass = false, keyName = "", forcegrey = false) {
+        let thisID = data.length, thisName = json.action
+        if (keyName) thisName = keyName
+
+        switch (json.action) {
+            case "not":
+                if (!json.array && json.note) json.array = json.note
+                break
+
+            case "pass_course":
+                thisName = json.course
+                break
+
+            case "spread":
+                json.array = json.attr.array
+                break
+        }
+
+        data.push({ name: thisName, parent: prevID })
+        labels.push(thisName)
+        if (json.pass && !forcegrey) {
+            colors.push("green")
+            edgeLineBorderWidth.push(1)
+            pointRadius.push(3)
+            pointStyle.push("circle")
+        } else if (forcegrey || prevPass) {
+            colors.push("grey")
+            edgeLineBorderWidth.push(0.25)
+            pointRadius.push(2)
+            pointStyle.push("crossRot")
+            forcegrey = true
+        } else {
+            colors.push("#ff3333")
+            edgeLineBorderWidth.push(1)
+            pointRadius.push(3)
+            pointStyle.push("rectRounded")
+        }
+
+        switch (json.action) {
+            case "spread":
+            case "approval":
+                forcegrey = true
+                break
+        }
+
+        if (typeof json.array === "object") {
+            if (Array.isArray(json.array)) {
+                json.array.forEach(subarray => {
+                    recur(subarray, thisID, json.pass, "", forcegrey)
+                })
+            } else {
+                Object.keys(json.array).forEach(key => {
+                    recur(json.array[key], thisID, json.pass, key, forcegrey)
+                })
+            }
+        }
+    }
+
+    recur(json, 0, json.pass)
+
+    const chart = new Chart(document.getElementById('canvas').getContext('2d'), {
+        type: 'tree',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    pointBackgroundColor: colors,
+                    pointBorderColor: colors,
+                    edgeLineBorderColor: colors.slice(1),
+                    edgeLineBorderWidth: edgeLineBorderWidth,
+                    pointRadius: pointRadius,
+                    pointStyle: pointStyle,
+                    pointHoverRadius: 6,
+                    data: data
+                },
+            ],
+        },
+        options: {
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'nearest',
+                axis: 'xy'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            tree: {
+                orientation: "vertical",
+            },
+        }
+    })
+
+    return
+}
+
+function generate_html_from_action(json, ignoreMissingAction = false, coursePlanning = false, courseids = {}, mminfo_note = "") {
     //json = JSON.parse(JSON.stringify(json))
     let html = "", htmlsigninpoints = ``, htmldft = ``, htmlcft = ``, bordercolorcss = `style="border:2px solid #8884"`, numPoints = 0, numPassed = 0
     switch (json.action) {
         case "not":
             htmldft = `<h4><small>Not fulfilling:</small></h4>`
-            if (!json.array) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
+            if (!json.array && !json.note) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
+            if (!json.array && json.note) json.array = json.note
             break;
 
         case "pass_course":
@@ -1307,10 +1801,18 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
             if (!json.level || (!json.dept && !json.school)) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
             break;
 
+
+        case "CGA":
         case "cga":
             htmldft = `<h5>Attaining minimum CGA:</h5>`
-            htmlcft = `<p2>` + json.cga + `</p2>`
-            if (!json.cga) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
+            if (json.cga) {
+                htmlcft = `<p2>` + json.cga + `</p2>`
+            } else if (json.CGA) {
+                htmlcft = `<p2>` + json.CGA + `</p2>`
+            } else {
+                htmlcft = `<p2>` + json.CGA + `</p2>`
+                bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
+            }
             break;
 
         case "is_major":
@@ -1381,7 +1883,7 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
             ignoreMissingAction = true
             break;
 
-        case "pass_qualification":            
+        case "pass_qualification":
             htmldft = `<h5>Pass this qualification:</h5>`
             htmlcft = `<p2>Level ` + json.level + ` or above in ` + json.quali.join(" ") + `</p2>`
             if (!json.quali || !json.level) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
@@ -1413,21 +1915,38 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
             //console.log((typeof json.pass == "undefined"), json.pass, snote, config.profile.specialApprovals.selfDeclear, json.note)
             if (typeof json.pass == "undefined" && signinlevel > 0) json.pass = (typeof config.profile != "undefined" && typeof config.profile.specialApprovals != "undefined" && typeof config.profile.specialApprovals.selfDeclear != "undefined" && config.profile.specialApprovals.selfDeclear.includes(json.note))
             let onclickScript = ``
-            if (typeof json.attr != "undefined" && typeof json.attr.requireUserFillCourses != "undefined" && json.attr.requireUserFillCourses) {
-                onclickScript = `alert("hvnt made the add course yet, coming soon")`
+            if (json.pass) {
+                onclickScript = `
+                    let tgx = document.getElementById('aprvtext-` + snote + `').innerText;
+                    updateProfile('specialApprovals', 'selfDeclear', config.profile.specialApprovals.selfDeclear.filter(a => a != tgx), () => {
+                        if (typeof config.profile.specialApprovals.selfDeclearMapping != 'undefined' && typeof config.profile.specialApprovals.selfDeclearMapping[tgx] != 'undefined') {
+                            delete config.profile.specialApprovals.selfDeclearMapping[tgx]
+                            updateProfile('specialApprovals', 'selfDeclearMapping', config.profile.specialApprovals.selfDeclearMapping, () => {
+                                reboot(true)
+                            })
+                        } else {
+                            reboot(true)
+                        }
+                    })`
             } else {
-                onclickScript = "updateProfile('specialApprovals', 'selfDeclear', " + (json.pass ? ("config.profile.specialApprovals.selfDeclear.filter(a => a != document.getElementById('aprvtext-" + snote + "').innerText)") : ((typeof config.profile == "undefined" || typeof config.profile.specialApprovals == "undefined" || typeof config.profile.specialApprovals.selfDeclear == "undefined") ? ("[document.getElementById('aprvtext-" + snote + "').innerText]") : ("[...config.profile.specialApprovals.selfDeclear, document.getElementById('aprvtext-" + snote + "').innerText]"))) + ", () => reboot(true))"
+                if (mminfo_note) {
+                    onclickScript = `approval_course_selbox('` + snote + `', '` + mminfo_note + `')`
+                } else {
+                    onclickScript = `approval_course_selbox('` + snote + `')`
+                }
             }
-            htmldft = `<h4><small>Fulfill this requirement:</small></h4>`
-            htmlcft = `<p2>` + json.note + `</p2>
-            <div class="flx box-dash" style="justify-content:flex-start;gap:0.5em;padding:0.75em 0 0 0;margin:0.5em 0 0 0">
-                <label class="switch">
-                    <input id="aprvswitch-` + snote + `" type="checkbox" ` + (json.pass ? "checked " : "") + `onclick="` + onclickScript + `">
-                    <span class="slider"></span>
-                </label>
-                <label for="aprvswitch-` + snote + `" style="cursor:pointer"><p2>I have fulfilled this requirement</p2></label>
-                <textarea style="display:none" id="aprvtext-` + snote + `"></textarea>
-            </div>`
+            htmldft = `<div id="aprvmodel-` + snote + `"></div><h4><small>Fulfill this requirement:</small></h4>`
+            htmlcft = `<p2 id="aprvstr-` + snote + `">` + json.note + `</p2>`
+            if (signinlevel > 0) {
+                htmlcft += `<div class="flx box-dash" style="justify-content:flex-start;gap:0.5em;padding:0.75em 0 0 0;margin:0.5em 0 0 0">
+                    <label class="switch">
+                        <input id="aprvswitch-` + snote + `" type="checkbox" ` + (json.pass ? "checked " : "") + `onclick="` + onclickScript + `">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="aprvswitch-` + snote + `" style="cursor:pointer"><p2>I have fulfilled this requirement</p2></label>
+                    <textarea style="display:none" id="aprvtext-` + snote + `"></textarea>
+                </div>`
+            }
             setTimeout(() => document.getElementById("aprvtext-" + snote).innerText = json.note, 100)
             if (!json.note) bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
             break;
@@ -1450,7 +1969,7 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
             html += `<div class="flx" style="gap:0.5em;align-items:start;justify-content:flex-start">`
             json.array.forEach(subarray => {
                 html += `<div style="min-width:12em">`
-                html += generate_html_from_action(subarray, ignoreMissingAction)
+                html += generate_html_from_action(subarray, ignoreMissingAction, coursePlanning, courseids, mminfo_note)
                 html += `</div>`
             })
             html += `</div>`
@@ -1459,8 +1978,8 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
             Object.keys(json.array).forEach(key => {
                 let rs = "reqbid-" + rndStr()
                 html += `<div style="min-width:12em">`
-                let rslt = generate_html_from_action(json.array[key], ignoreMissingAction)
-                html += `` + ((json.array[key].pass) ? `✅ ` : ` • `) + `<p3>` + key + `</p3>`
+                let rslt = generate_html_from_action(json.array[key], ignoreMissingAction, coursePlanning, courseids, mminfo_note)
+                html += `<div style="margin:0.25em 0">` + ((json.array[key].pass) ? `✅ ` : ` • `) + `<p3>` + key + `</p3></div>`
                 html += `<div id="` + rs + `-wrp">`
                 if ((!json.pass && json.array[key].pass)) {
                     html += ` <button id="` + rs + `-button" class="requirement-showbtn-green" onclick="document.getElementById('` + rs + `-wrp').innerHTML = document.getElementById('` + rs + `-buf').innerHTML">show</button><div id="` + rs + `-buf" style="display:none">` + rslt + `</div>`
@@ -1525,6 +2044,9 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
     if (json.pass) {
         bordercolorcss = `style="border: 2px solid #8fcc; background-color: #8fc2"`
         htmldft = htmldft.replace("<h4><small>", `<h4><small>✅ `).replace("<h5>", `<h5>✅ `)
+    } else if (json.action == "not") {
+        bordercolorcss = `style="border: 2px solid #f8cc; background-color: #f8c2"`
+        htmldft = htmldft.replace("<h4><small>", `<h4><small>❌ `).replace("<h5>", `<h5>❌ `)
     }
 
     let boxcolorid = "boxcolor-normal"
@@ -1542,7 +2064,7 @@ function generate_html_from_action(json, ignoreMissingAction = false) {
             break
     }
 
-    htmldft = `<div id="` + rs + `" class="` + boxcolorid + ` box">` + htmldft
+    htmldft = `<div id="` + rs + `" class="` + boxcolorid + ` box" style="margin:0">` + htmldft
     if (typeof json.attr != "undefined") {
         let htmlaft = []
         if (json.attr.course) { json.attr.min_course = json.attr.course; json.attr.max_course = json.attr.course; delete json.attr.course }
@@ -1572,13 +2094,15 @@ function generate_grade_selection(selection = "----", possibleGrades = []) {
     return ((possibleGrades.length) ? ("" + loop(["----"], selection) + `<optgroup label="Grades">` + loop(possibleGrades, selection) + `</optgroup><optgroup>` + loop(["AU", "I", "T", "W"], selection)) + `</optgroup>` : ("" + loop(["----"], selection) + `<optgroup label="Toward GPA">` + loop(["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"], selection) + `</optgroup><optgroup label="Not for GPA">` + loop(["P", "PP", "T", "AU", "W", "CR", "DI", "DN", "I", "PA", "PS"].sort(), selection) + `</optgroup>`))
 }
 
-function submitCourseUpdate(remove = false) {
+function submitCourseUpdate(remove = false, cb = "") {
 
-    document.getElementById('course_update_dialog').close()
+    if (document.getElementById('course_update_dialog')) document.getElementById('course_update_dialog').close()
+    if (document.getElementById('add_course_dialog')) document.getElementById('add_course_dialog').close()
     setLoadingStatus('show')
-    const formData = formToJson(new FormData(document.getElementById("course_update_dialog_form")))
+    let formData = {}
+    if (document.getElementById("course_update_dialog_form")) formData = formToJson(new FormData(document.getElementById("course_update_dialog_form")))
+    if (document.getElementById("add_course_dialog_form")) formData = formToJson(new FormData(document.getElementById("add_course_dialog_form")))
     let newConfig = JSON.parse(JSON.stringify(config))
-    let btn = document.getElementById("course_enroll_btn")
 
     if (remove) {
         delete newConfig.courses[formData.code][formData.sem]
@@ -1605,48 +2129,53 @@ function submitCourseUpdate(remove = false) {
     }
 
     update_config("courses", newConfig.courses, (err) => {
-        if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); return }
+        if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); if (cb) cb(); return }
         setLoadingStatus('success', false)
         update_enroll_course_gui(formData.currentsem, formData.code)
+        if (cb) cb()
     })
 
 }
 
 function update_enroll_course_gui(sem, code) {
-    let btn = document.getElementById("course_enroll_btn")
-    let newConfig = JSON.parse(JSON.stringify(config))
-    if (typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).includes(sem)) {
-        btn.innerText = "✅ Enrolled (grade: " + newConfig.courses[code][sem].grade + ")"
-        document.getElementById("course_enroll_notice").innerHTML = ""
-    } else {
-        btn.innerText = "Enroll"
-        document.getElementById("course_enroll_notice").innerHTML = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).length) ? (`<p4>Last enrolled at ` + ustTimeToString(Object.keys(newConfig.courses[code]).sort().reverse()[0]) + `</p4>`) : "")
+    try {
+        let btn = document.getElementById("course_enroll_btn")
+        let newConfig = JSON.parse(JSON.stringify(config))
+        if (typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).includes(sem)) {
+            btn.innerText = "✅ Enrolled (grade: " + newConfig.courses[code][sem].grade + ")"
+            document.getElementById("course_enroll_notice").innerHTML = ""
+        } else {
+            btn.innerText = "Enroll"
+            document.getElementById("course_enroll_notice").innerHTML = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).length) ? (`<p4>Last enrolled at ` + ustTimeToString(Object.keys(newConfig.courses[code]).sort().reverse()[0]) + `</p4>`) : "")
+        }
+    } catch (error) {
+
     }
 }
 
 function enroll_course(sem, course, make_switch = false, is_SPO = false, possibleGrades = [], actual_cred = []) {
     let btn = document.getElementById("course_enroll_btn")
     let model = document.getElementById("course_enroll_model")
-    if (btn) {
-        if (make_switch && !(signinlevel > 0)) {
-            if (confirm("You are not signed in. Do you want to create a Guest Profile now?\n\nThis temporary profile will be wiped when you close or refresh your browser, and is not migratable when you sign in later.")) {
-                document.getElementById("course_enroll_notice").innerHTML = `<div id="profile_new_model"></div>`
-                create_new_profile_cb = () => { alert("Guest Profile Created"); enroll_course(sem, course, make_switch, is_SPO, possibleGrades, actual_cred) }
-                create_new_profile()
-            }
-            return
+
+    if (make_switch && !(signinlevel > 0)) {
+        if (confirm("You are not signed in. Do you want to create a Guest Profile now?\n\nThis temporary profile " + ((localStorage) ? "" : " will be wiped when you close or refresh your browser, and ") + "is not migratable when you sign in later.")) {
+            document.getElementById("course_enroll_notice").innerHTML = `<div id="profile_new_model"></div>`
+            create_new_profile_cb = () => { alert("Guest Profile Created"); enroll_course(sem, course, make_switch, is_SPO, possibleGrades, actual_cred) }
+            create_new_profile()
         }
-        let newConfig = JSON.parse(JSON.stringify(config))
-        let courseParts = courseStringToParts(course)
-        //console.log(courseParts)
-        if (typeof newConfig.courses === "undefined") newConfig.courses = {}
-        if (typeof newConfig.courses[courseParts.code] === "undefined") newConfig.courses[courseParts.code] = {}
-        if (make_switch) {
-            //TODO: make this less ugly and a unified way of calling "add new course" dialog
-            let unit = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[courseParts.code] != "undefined" && typeof newConfig.courses[courseParts.code][sem] != "undefined" && typeof newConfig.courses[courseParts.code][sem].units != "undefined") ? newConfig.courses[courseParts.code][sem].units : courseParts.units.split(" ")[0])
-            model.innerHTML = `<dialog id="course_update_dialog">
+        return
+    }
+    let newConfig = JSON.parse(JSON.stringify(config))
+    let courseParts = courseStringToParts(course)
+    //console.log(courseParts)
+    if (typeof newConfig.courses === "undefined") newConfig.courses = {}
+    if (typeof newConfig.courses[courseParts.code] === "undefined") newConfig.courses[courseParts.code] = {}
+    if (make_switch) {
+        //TODO: make this less ugly and a unified way of calling "add new course" dialog
+        let unit = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[courseParts.code] != "undefined" && typeof newConfig.courses[courseParts.code][sem] != "undefined" && typeof newConfig.courses[courseParts.code][sem].units != "undefined") ? newConfig.courses[courseParts.code][sem].units : courseParts.units.split(" ")[0])
+        model.innerHTML = `<dialog id="course_update_dialog">
             <form id="course_update_dialog_form" action="javascript:void(0);">
-                <div class="flx" style="gap:1em">
+                <div class="flx" style="gap:1em;flex-wrap: wrap-reverse">
                     <h4>Enroll Course</h4>
                     <button value="cancel" formmethod="dialog" class="closebtn"><img src="` + resourceNETpath + `image/circle-cross.png" title="Close"></button>
                 </div><br>
@@ -1678,12 +2207,12 @@ function enroll_course(sem, course, make_switch = false, is_SPO = false, possibl
             </form>
             </dialog>`
 
-            document.getElementById('course_update_sem').value = sem
-            document.getElementById('course_update_dialog').showModal()
-        } else {
-            update_enroll_course_gui(sem, courseParts.code)
-        }
+        document.getElementById('course_update_sem').value = sem
+        document.getElementById('course_update_dialog').showModal()
+    } else {
+        update_enroll_course_gui(sem, courseParts.code)
     }
+
 }
 
 function checkCourseEnrollOK(course) {
@@ -1703,7 +2232,7 @@ function checkCourseEnrollOK(course) {
             }
         }).catch(error => {
             console.log(error)
-            setLoadingStatus("error", false, "failed to contact server")
+            setLoadingStatus("error", false, "failed to contact server or script crashed")
         })
     } else {
         if (!(typeof config._[course] === "undefined" || typeof config._[course] != "undefined" && typeof config._[course].respattr != "undefined" && typeof config._[course].respattr.error != "undefined")) {
@@ -1735,7 +2264,7 @@ function render_courses_specific(path, insideCoursePage = false) {
             }
 
             history.replaceState(null, window.title, "/course/" + path)
-            document.title = "" + course.split(" - ")[0] + " - " + ustTimeToString(path.split("/")[0]) + " - uni"
+            document.title = "" + course.split(" - ")[0] + " - " + ustTimeToString(path.split("/")[0], true) + " - uni"
         }
 
         temp_prev_course_attr = r.resp[course].attr
@@ -1780,17 +2309,18 @@ function render_courses_specific(path, insideCoursePage = false) {
         let draft = `<select style="width:100%" name="timeidx" id="timeidx" title="Select Semester" onchange="boot('/course/' + document.getElementById('timeidx').value + '/' + '` + course.split(" ")[0] + `' + '/' + '` + course.split(" ")[0] + course.split(" ")[1] + `' + '/', false, 2)">`
         let prevSem = "----"
         r.resp[course].insem.sort().reverse().forEach(sem => {
-            let thisSem = ustTimeToString(sem)
-            if (thisSem.split(" ")[0] != prevSem) {
+            let thisSem = ustTimeToString(sem), thisSemSel = thisSem.split(" ")[0] + " " + thisSem.split(" ")[1]
+            if (thisSem.includes("-")) thisSemSel = thisSem.split(" ")[0]
+            if (thisSemSel != prevSem) {
                 if (prevSem != '----') draft += `</optgroup>`
-                draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
-                prevSem = thisSem.split(" ")[0]
+                draft += `<optgroup label="` + ustTimeToString(sem, true).split(" ")[0] + `">`
+                prevSem = thisSemSel
             }
             draft += `<option value="` + sem + `"`
             if (sem == path.split("/")[0]) {
                 draft += " selected"
             }
-            draft += `>` + ustTimeToString(sem) + `</option>`
+            draft += `>` + ustTimeToString(sem, true) + `</option>`
         })
         draft += `</optgroup></select>`
 
@@ -1808,14 +2338,7 @@ function render_courses_specific(path, insideCoursePage = false) {
                     <a target="_blank" class="aobh" href="http://petergao.net/ustpastpaper/index.php?course=` + course.split(" ")[0] + course.split(" ")[1] + `">try check petergao</a>
                 </div>
             </div>
-            ` + ((false) ? `
-            <br><hr><br>
-            <div class="flx" style="gap:0.5em;justify-content:flex-start">
-                <button onclick="checkCourseEnrollOK('` + course.split(" ")[0] + course.split(" ")[1] + `')">can i enroll?</button><br><br>
-                <div id="exp-api-checking-result"></div>
-            </div>
-            ` : ``) + `
-            </div>`
+        </div>`
 
         document.getElementById('topbar_buttons_wrp').innerHTML = `<div class="enroll_btn_wrp flx">
             <button id="course_enroll_btn" ` + ((true || signinlevel > 0) ? "" : `style="display:none" `) + `onclick="enroll_course(` + '`' + path.split("/")[0] + '`,`' + course + '`' + `, true, ` + is_SPO + `, ` + JSON.stringify(possibleGrades).replaceAll('"', "'") + `, ` + JSON.stringify(actual_cred).replaceAll('"', "'") + `)">Enroll</button>
@@ -1931,7 +2454,7 @@ function render_courses_specific(path, insideCoursePage = false) {
 
         setLoadingStatus("hide")
         document.getElementById("topbar_title").innerText = course.replace(course.split(" - ")[0] + " - ", "").substring(course.replace(course.split(" - ")[0] + " - ", ""), course.replace(course.split(" - ")[0] + " - ", "").lastIndexOf(" ("))
-        document.getElementById("topbar_subtitle").innerText = path.split("/")[2].substring(0, 4) + " " + path.split("/")[2].replace(path.split("/")[2].substring(0, 4), "") + " • " + ustTimeToString(path.split("/")[0])
+        document.getElementById("topbar_subtitle").innerText = path.split("/")[2].substring(0, 4) + " " + path.split("/")[2].replace(path.split("/")[2].substring(0, 4), "") + " • " + ustTimeToString(path.split("/")[0], true)
         document.getElementById('courses_select_main').classList.add('edge2edge_wide')
         document.getElementById("course_detail_topbar_specialStyles").innerHTML = `<style>
         #courses_select_main{padding:0}
@@ -1952,7 +2475,7 @@ function render_courses_specific(path, insideCoursePage = false) {
         </style>`
         setTimeout(() => { document.getElementById("course_detail_topbar_specialStyles").innerHTML += "<style>#btn_back{transition-duration:0.1s!important}</style>" }, 500)
         setTimeout(enroll_course, 50, path.split("/")[0], course)
-        setTimeout(checkCourseEnrollOK, 50, course.split(" ")[0] + course.split(" ")[1])
+        if (path.split("/")[0] == r.resp[course].insem.sort().reverse()[0]) setTimeout(checkCourseEnrollOK, 50, course.split(" ")[0] + course.split(" ")[1])
     }).catch(error => {
         console.log(error)
         setLoadingStatus("error", false, "failed to contact server or script crashed")
@@ -1991,7 +2514,7 @@ function render_courses_details(path, scrollIntoView = false, isGroup = false) {
             if ((studprog === "ug" && parseInt(course[5]) > 0 && parseInt(course[5]) < 5) || (studprog === "pg" && parseInt(course[5]) >= 5)) {
                 if (listMode === "card") {
                     let courseParts = courseStringToParts(course)
-                    html_draft += generate_course_selbox(courseParts.code, courseParts.name, path.split('/')[0], "" + ((typeof config.courses != "undefined" && typeof config.courses[course.split(" - ")[0]] != "undefined" && typeof config.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (`<style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + config.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : "<h5></h5>") + ((typeof r.resp[course].attr._cancelled != "undefined" && r.resp[course].attr._cancelled) ? `<div class="textbox"><h5>❌ Cancelled</h5></div>` : (`<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"])) + "</h5>"))
+                    html_draft += generate_course_selbox(courseParts.code, courseParts.name, path.split('/')[0], courseParts.units.split(" ")[0], "" + ((typeof config.courses != "undefined" && typeof config.courses[course.split(" - ")[0]] != "undefined" && typeof config.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (`<style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + config.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : "<h5></h5>") + ((typeof r.resp[course].attr._cancelled != "undefined" && r.resp[course].attr._cancelled) ? `<div class="textbox"><h5>❌ Cancelled</h5></div>` : (`<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"])) + "</h5>"))
                 } else {
                     html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + course.split(" ")[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)">
                     <div>
@@ -2012,7 +2535,7 @@ function render_courses_details(path, scrollIntoView = false, isGroup = false) {
 
         setLoadingStatus("hide")
         document.getElementById("topbar_title").innerText = path.split("/")[1]
-        document.getElementById("topbar_subtitle").innerText = ustTimeToString(path.split("/")[0])
+        document.getElementById("topbar_subtitle").innerText = ustTimeToString(path.split("/")[0], true)
         document.getElementById('courses_select_main').classList.remove('edge2edge_wide')
         document.getElementById("course_detail_topbar_specialStyles").innerHTML = `
         <style>
@@ -2039,7 +2562,7 @@ function render_courses(pathF) {
     let isGroup = (pathF.toLowerCase().startsWith("/group/"))
     let path = pathF.substring(isGroup ? 7 : 8)
 
-    if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0]), `<div id="topbar_buttons_wrp"></div>`, true, "", true, `boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_box').value)), false, 3)`) + `
+    if (!document.getElementById("course_detail_topbar_specialStyles")) document.getElementById("courses_select_right").innerHTML = renderTopBar(path.split("/")[1], ustTimeToString(path.split("/")[0], true), `<div id="topbar_buttons_wrp"></div>`, true, "", true, `boot('/search/?q='.concat(encodeURIComponent(document.getElementById('search_box').value)), false, 3)`) + `
     <style>#btn_back, .topbar, #courses_select_main, #courses_select_left, #courses_select_right{transition-timing-function: cubic-bezier(.65,.05,.36,1);transition-duration: 0.5s !important}</style>
     <div id="course_detail_topbar_specialStyles">
         <style>
@@ -2066,7 +2589,7 @@ function render_courses(pathF) {
     render_UGPG_switch()
 
     html = document.getElementById("courses_select_left_optionBox")
-    let semx = ((ustTimeToString(decodeURI(path.split("/")[0])) != '----') ? decodeURI(path.split("/")[0]) : allSems[0])
+    let semx = ((ustTimeToString(decodeURI(path.split("/")[0]), true) != '----') ? decodeURI(path.split("/")[0]) : allSems[0])
     let html_draft = ""
 
     if (isGroup) {
@@ -2084,11 +2607,12 @@ function render_courses(pathF) {
     html_draft += `<select style="width:100%" name="timeid" id="timeid" title="Select Semester" onchange="boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/' + deptx + '/', false, 2)">`
     let prevSem = "----"
     allSemsF.forEach(sem => {
-        let thisSem = ustTimeToString(sem)
-        if (thisSem.split(" ")[0] != prevSem) {
+        let thisSem = ustTimeToString(sem), thisSemSel = thisSem.split(" ")[0] + " " + thisSem.split(" ")[1]
+        if (thisSem.includes("-")) thisSemSel = thisSem.split(" ")[0]
+        if (thisSemSel != prevSem) {
             if (prevSem != '----') html_draft += `</optgroup>`
-            html_draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
-            prevSem = thisSem.split(" ")[0]
+            html_draft += `<optgroup label="` + ustTimeToString(sem, true).split(" ")[0] + ((thisSemSel.startsWith("Year")) ? (` (` + thisSemSel + `)`) : "") + `">`
+            prevSem = thisSemSel
         }
         html_draft += `<option value="` + sem + `"`
         if (sem == semx) {
@@ -2143,7 +2667,7 @@ function render_courses(pathF) {
         depts.forEach(dept => {
             html_draft += `<button title="` + courseCode_to_fullName(dept) + `" onclick="scrollIntoView = true, doNotCheckUGPG = false; boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/` + dept + `/', false, 2)"`
             if (dept == deptx) {
-                document.title = "" + deptx + " - " + ustTimeToString(semx) + " - uni"
+                document.title = "" + deptx + " - " + ustTimeToString(semx, true) + " - uni"
                 history.replaceState(null, window.title, "/" + (isGroup ? "group" : "course") + "/" + semx + "/" + deptx + "/")
                 html_draft += ` style="background:rgba(255,255,0,.4)"`
             }
@@ -2224,8 +2748,8 @@ function render_people(path) {
             allSems = peopleAvilSems.filter(n => parseInt(n) > peopleMinSem)
         }
         html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="boot('/people/' + peoplex + '/' + document.getElementById('timeid').value + '/', false, 2)">`
-        if ((path.split("/")[1] && ((!skippeopleRestriction && parseInt(decodeURI(path.split("/")[1])) < peopleMinSem) || ustTimeToString(decodeURI(path.split("/")[1])) === '----'))) {
-            html_draft += `<option value="1009" selected disabled hidden>` + ustTimeToString(decodeURI(path.split("/")[1])) + `</option>`
+        if ((path.split("/")[1] && ((!skippeopleRestriction && parseInt(decodeURI(path.split("/")[1])) < peopleMinSem) || ustTimeToString(decodeURI(path.split("/")[1]), true) === '----'))) {
+            html_draft += `<option value="1009" selected disabled hidden>` + ustTimeToString(decodeURI(path.split("/")[1]), true) + `</option>`
             history.replaceState(null, window.title, "/people/" + target_people + "/" + decodeURI(path.split("/")[1]) + "/")
             target_time = decodeURI(path.split("/")[1])
         } else if (path.split("/")[1] && !allSems.includes(decodeURI(path.split("/")[1]))) {
@@ -2239,7 +2763,7 @@ function render_people(path) {
         let noSigninAdDisplayed = (signinlevel === 0)
         allSems.every((time, index) => {
             if (!peopleAvilSems.includes(time) && time != decodeURI(path.split("/")[1])) return true
-            let thisSem = ustTimeToString(time)
+            let thisSem = ustTimeToString(time, true)
             if (thisSem.split(" ")[0] != prevSem) {
                 if (prevSem != '----') html_draft += `</optgroup>`
                 html_draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
@@ -2276,7 +2800,7 @@ function render_people(path) {
 
         html_draft = ""
 
-        if (ustTimeToString(target_time) === '----') { html.innerHTML = `the url is not in a valid format`; return }
+        if (ustTimeToString(target_time, true) === '----') { html.innerHTML = `the url is not in a valid format`; return }
         if (parseInt(target_time) > maxSem) { html.innerHTML = `i hope i can know what courses will exist in the future too 👀`; return }
         if (!disableSigninRequirement) { if (signinlevel === 0 && parseInt(target_time) < peopleMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.` + rootdomain + `/">sign in</a> now to get access to this page`; return } }
         if ((!skippeopleRestriction && parseInt(target_time) < peopleMinSem) || parseInt(target_time) < 1200) { html.innerHTML = `we don't have data for semesters that are too old :(`; return }
@@ -2368,8 +2892,8 @@ function render_room(path) {
         } else {
             html_draft += ` <select name="timeid" id="timeid" title="Select Semester" onchange="boot('/room/' + document.getElementById('roomid').value + '/' + document.getElementById('timeid').value + '/', false, 2)">`
         }
-        if (path.split("/")[1] && ((!skipRoomRestriction && parseInt(decodeURI(path.split("/")[1])) < roomMinSem) || ustTimeToString(decodeURI(path.split("/")[1])) === '----')) {
-            html_draft += `<option value="1009" selected disabled hidden>` + ustTimeToString(decodeURI(path.split("/")[1])) + `</option>`
+        if (path.split("/")[1] && ((!skipRoomRestriction && parseInt(decodeURI(path.split("/")[1])) < roomMinSem) || ustTimeToString(decodeURI(path.split("/")[1]), true) === '----')) {
+            html_draft += `<option value="1009" selected disabled hidden>` + ustTimeToString(decodeURI(path.split("/")[1]), true) + `</option>`
             history.replaceState(null, window.title, "/room/" + target_room + "/" + decodeURI(path.split("/")[1]) + "/")
             target_time = decodeURI(path.split("/")[1])
         } else if (path.split("/")[1] && !allSems.includes(decodeURI(path.split("/")[1]))) {
@@ -2383,7 +2907,7 @@ function render_room(path) {
         let noSigninAdDisplayed = (signinlevel === 0)
         allSems.every((time, index) => {
             if (!roomAvilSems.includes(time) && time != decodeURI(path.split("/")[1])) return true
-            let thisSem = ustTimeToString(time)
+            let thisSem = ustTimeToString(time, true)
             if (thisSem.split(" ")[0] != prevSem) {
                 if (prevSem != '----') html_draft += `</optgroup>`
                 html_draft += `<optgroup label="` + thisSem.split(" ")[0] + `">`
@@ -2420,7 +2944,7 @@ function render_room(path) {
 
         html_draft = ""
 
-        if (ustTimeToString(target_time) === '----') { html.innerHTML = `the url is not in a valid format`; return }
+        if (ustTimeToString(target_time, true) === '----') { html.innerHTML = `the url is not in a valid format`; return }
         if (parseInt(target_time) > maxSem) { html.innerHTML = `i hope i can know what courses will exist in the future too 👀`; return }
         if (!disableSigninRequirement) { if (signinlevel === 0 && parseInt(target_time) < roomMinSem && parseInt(target_time) > 1200) { html.innerHTML = `<a href="https://me.` + rootdomain + `/">sign in</a> now to get access to this page`; return } }
         if ((!skipRoomRestriction && parseInt(target_time) < roomMinSem) || parseInt(target_time) < 1200) { html.innerHTML = `we don't have data for semesters that are too old :(`; return }
@@ -2527,7 +3051,8 @@ const renderCourseAttr = (attrs, course, orgattrs = {}) => {
     Object.keys(attrs).forEach(attr => {
         if (attr != "DESCRIPTION" && !attr.startsWith("_")) {
             if (attr === "INTENDED LEARNING OUTCOMES") { html_draft += `</div><div>` }
-            html_draft += `<div style="margin:0.5em;border-radius:0.5em;padding:0.5em;padding-top:0.25em;border:0.1em solid rgba(128,128,128,.3)"><div style="padding:0.25em 0em;border-bottom:0.1em dotted #888;margin-bottom:0.25em"><p4>`
+            html_draft += `<div id="` + attr.replaceAll(" ", "_").replaceAll('"', "'") + `" style="border-radius:1em;background-color:#88888808;box-shadow:inset 0 0 0 1px #8882">
+            <div style="padding:0.5em 1em 0.4em 1em;border-bottom:0.1em dotted #888"><p4>`
             switch (attr) {
                 case "MATCHING":
                     html_draft += "⛓️ Matching"
@@ -2573,20 +3098,33 @@ const renderCourseAttr = (attrs, course, orgattrs = {}) => {
                     html_draft += "🚨 Required For"
                     break
 
+                case "CO-REQUISITE-BY":
+                    html_draft += "🛎️ Co-Required For"
+                    break
+
                 case "EXCLUSION-BY":
                     html_draft += "⛔ Excluded By"
+                    break
+
+                case "respattr":
                     break
 
                 default:
                     html_draft += "[" + attr + "]"
                     break
             }
-            html_draft += '</p4></div><div><p2>'
+            html_draft += '</p4></div><div><p2><div style="padding:1em">'
 
             if (typeof attrs[attr] === "object" && !Array.isArray(attrs[attr]) && typeof attrs[attr].action != "undefined") {
-                html_draft += orgattrs[attr] + generate_html_from_action(JSON.parse(JSON.stringify(attrs[attr])))
+                html_draft += orgattrs[attr] + `</div>` + generate_html_from_action(JSON.parse(JSON.stringify(attrs[attr])))
+            } else if (attr == "ATTRIBUTES" && window.location.pathname.toLowerCase().startsWith("/course/") && !isNaN(window.location.pathname.split("/")[2]) && !isNaN(parseFloat(window.location.pathname.split("/")[2]))) {
+                let sem = parseInt(window.location.pathname.split("/")[2]).toString(), x = []
+                attrs[attr].split("<br>").forEach(attr => {
+                    x.push(`<a class="ax" onclick="boot('/group/` + sem + `/` + attr + `/', false, 2)">` + attr + `</a>`)
+                })
+                html_draft += x.join(",<br>") + `</div>`
             } else {
-                html_draft += attrs[attr]
+                html_draft += attrs[attr] + `</div>`
             }
 
             if (attr === "VECTOR") {
@@ -2604,7 +3142,7 @@ const renderCourseAttr = (attrs, course, orgattrs = {}) => {
             html_draft += "</p2></div></div>"
         }
     })
-    return ((html_draft) ? (`<div class="flx" style="justify-content:flex-start">` + html_draft + `</div>`) : "")
+    return ((html_draft) ? (`<br><div class="flx" style="justify-content:flex-start;gap:1em;align-items:baseline">` + html_draft + `</div>`) : "")
 }
 
 const zeroPad = (num, places) => String(num).padStart(places, '0')
@@ -2630,9 +3168,15 @@ const ustTimeToMinute = (time) => {
     return [(hour * 60 + minute), "" + zeroPad(hour, 2) + ":" + zeroPad(minute, 2)]
 }
 
-const ustTimeToString = (time) => {
+const ustTimeToString = (time, noYear = false) => {
     if (!(time.length === 4 && time[3] === "0" && parseInt(time) > 1009 && parseInt(time) < 9900 && parseInt(time) % 100 < 41)) return "----"
     let string = `20` + time.substring(0, 2) + "-" + (parseInt(time.substring(0, 2)) + 1) + " "
+    if (!noYear && signinlevel > 0 && typeof config != "undefined" && typeof config.profile != "undefined" && typeof config.profile.currentStudies != "undefined" && typeof config.profile.currentStudies.yearOfIntake != "undefined") {
+        if (parseInt(time.substring(0, 2)) >= parseInt(config.profile.currentStudies.yearOfIntake.substring(0, 2))) {
+            let yearnum = parseInt(time.substring(0, 2)) - parseInt(config.profile.currentStudies.yearOfIntake.substring(0, 2)) + 1
+            string = "Year " + yearnum + " "
+        }
+    }
     switch (time[2]) {
         case "1":
             string += "Fall"

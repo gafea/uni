@@ -1,10 +1,107 @@
 {
     "0": {
+        "Minor in Big Data Technology": {
+            "attr": {
+                "type": "minor",
+                "short": "MINOR-BDT",
+                "cred_fulfill": 19
+            },
+            "action": "and",
+            "array": {
+                "Internship": {
+                    "action": "approval",
+                    "note": "Students are expected to take a 6-week internship (COMP 1991) in the Summer or Winter term. For CSE students who have taken COMP 1991 as major required course, they may seek approval from the Minor Program Coordinator to reuse the course for fulfilling the requirement of this Minor Program.",
+                    "array": {
+                        "COMP 1991": {
+                            "action": "pass_course",
+                            "course": "COMP 1991"
+                        }
+                    }
+                },
+                "COMP 2011 OR COMP 2012H": {
+                    "action": "or",
+                    "array": {
+                        "COMP 2011": {
+                            "action": "pass_course",
+                            "course": "COMP 2011"
+                        },
+                        "COMP 2012H": {
+                            "action": "pass_course",
+                            "course": "COMP 2012H"
+                        }
+                    }
+                },
+                "COMP 4211 OR COMP 4331": {
+                    "action": "or",
+                    "array": {
+                        "COMP 4211": {
+                            "action": "pass_course",
+                            "course": "COMP 4211"
+                        },
+                        "COMP 4331": {
+                            "action": "pass_course",
+                            "course": "COMP 4331"
+                        }
+                    }
+                },
+                "COMP 4651":{
+                    "action": "pass_course",
+                    "course": "COMP 4651"
+                },
+                "Big Data Technology Electives": {
+                    "attr":{
+                        "min_credit" : 9,
+                        "min_course" : 3
+                    },
+                    "action": "approval",
+                    "note": "3 courses from the specified 9 elective list. Students may request to use up to 3 credits of courses listed under http://www.cse.ust.hk/ug/minor/BDT/ to count towards this requirement.",
+                    "array": {
+                        "COMP 4221": {
+                            "action": "pass_course",
+                            "course": "COMP 4221"
+                        },
+                        "COMP 4222": {
+                            "action": "pass_course",
+                            "course": "COMP 4222"
+                        },
+                        "COMP 4321": {
+                            "action": "pass_course",
+                            "course": "COMP 4321"
+                        },
+                        "COMP 4332": {
+                            "action": "pass_course",
+                            "course": "COMP 4332"
+                        },
+                        "COMP 4421": {
+                            "action": "pass_course",
+                            "course": "COMP 4421"
+                        },
+                        "COMP 4462": {
+                            "action": "pass_course",
+                            "course": "COMP 4462"
+                        },
+                        "COMP 4471": {
+                            "action": "pass_course",
+                            "course": "COMP 4471"
+                        },
+                        "COMP 4632": {
+                            "action": "pass_course",
+                            "course": "COMP 4632"
+                        },
+                        "COMP 4641": {
+                            "action": "pass_course",
+                            "course": "COMP 4641"
+                        }
+                    }
+                }
+            }
+        },
         "Minor in Business": {
             "attr": {
                 "type": "minor",
                 "short": "MINOR-BUS",
-                "min_course": 6
+                "min_course": 6,
+                "cred_fulfill": 18
             },
             "action": "and",
             "array": {
@@ -175,7 +272,8 @@
         "BEng in Bioengineering": {
             "attr": {
                 "type": "major",
-                "short": "bien"
+                "short": "BIEN",
+                "cred_fulfill": 77
             },
             "action": "and",
             "array": {
@@ -238,7 +336,7 @@
                                         "HKDSE",
                                         "Biology"
                                     ],
-                                    "level": "3"
+                                    "level": 3
                                 },
                                 "LIFS 1901": {
                                     "action": "pass_course",
@@ -751,7 +849,8 @@
         "BEng in Chemical Engineering": {
             "attr": {
                 "type": "major",
-                "short": "ceng"
+                "short": "CENG",
+                "cred_fulfill": 95
             },
             "action": "and",
             "array": {
@@ -942,17 +1041,45 @@
                         "CENG 4920 OR CENG 4930 OR CENG 4940": {
                             "action": "or",
                             "array": {
-                                "CENG 4920": {
-                                    "action": "pass_course",
-                                    "course": "CENG 4920"
+                                "CENG 4920 (Students 6 taking the Research Option must take CENG 4930)": {
+                                    "action": "and",
+                                    "array": {
+                                        "CENG 4920": {
+                                            "action": "pass_course",
+                                            "course": "CENG 4920"
+                                        },
+                                        "Students with research option": {
+                                            "action": "not",
+                                            "note": [
+                                                {
+                                                    "action": "is_major",
+                                                    "major": "BEng in Chemical Engineering with Research Option"
+                                                }
+                                            ]
+                                        }
+                                    }
                                 },
                                 "CENG 4930": {
                                     "action": "pass_course",
                                     "course": "CENG 4930"
                                 },
                                 "CENG 4940": {
-                                    "action": "pass_course",
-                                    "course": "CENG 4940"
+                                    "action": "and",
+                                    "array": {
+                                        "CENG 4940 (Students 6 taking the Research Option must take CENG 4930)": {
+                                            "action": "pass_course",
+                                            "course": "CENG 4940"
+                                        },
+                                        "Students with research option": {
+                                            "action": "not",
+                                            "note": [
+                                                {
+                                                    "action": "is_major",
+                                                    "major": "BEng in Chemical Engineering with Research Option"
+                                                }
+                                            ]
+                                        }
+                                    }
                                 }
                             }
                         },
@@ -1069,14 +1196,11 @@
         "BEng in Chemical Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "ceng"
+                "short": "CENG",
+                "cred_fulfill": 6
             },
             "action": "and",
             "array": {
-                "CENG 4930": {
-                    "action": "pass_course",
-                    "course": "CENG 4930"
-                },
                 "Elective Course(s)": {
                     "action": "and",
                     "array": {
@@ -1096,12 +1220,16 @@
                                 },
                                 "CENG": {
                                     "action": "pass_certain_level",
-                                    "dept": "CENG",
+                                    "dept": [
+                                        "CENG"
+                                    ],
                                     "level": 5000
                                 },
                                 "BIEN": {
                                     "action": "pass_certain_level",
-                                    "dept": "BIEN",
+                                    "dept": [
+                                        "BIEN"
+                                    ],
                                     "level": 5000
                                 }
                             }
@@ -1113,7 +1241,8 @@
         "BEng in Chemical and Environmental Engineering": {
             "attr": {
                 "type": "major",
-                "short": "ceev"
+                "short": "ceev",
+                "cred_fulfill": 85
             },
             "action": "and",
             "array": {
@@ -1295,17 +1424,45 @@
                         "CENG 4920 OR CENG 4930 OR CENG 4940": {
                             "action": "or",
                             "array": {
-                                "CENG 4920": {
-                                    "action": "pass_course",
-                                    "course": "CENG 4920"
+                                "CENG 4920 (Students 6 taking the Research Option must take CENG 4930)": {
+                                    "action": "and",
+                                    "array": {
+                                        "CENG 4920": {
+                                            "action": "pass_course",
+                                            "course": "CENG 4920"
+                                        },
+                                        "Students with research option": {
+                                            "action": "not",
+                                            "note": [
+                                                {
+                                                    "action": "is_major",
+                                                    "major": "BEng in Chemical and Environmental with Research Option"
+                                                }
+                                            ]
+                                        }
+                                    }
                                 },
                                 "CENG 4930": {
                                     "action": "pass_course",
                                     "course": "CENG 4930"
                                 },
                                 "CENG 4940": {
-                                    "action": "pass_course",
-                                    "course": "CENG 4940"
+                                    "action": "and",
+                                    "array": {
+                                        "CENG 4940 (Students 6 taking the Research Option must take CENG 4930)": {
+                                            "action": "pass_course",
+                                            "course": "CENG 4940"
+                                        },
+                                        "Students with research option": {
+                                            "action": "not",
+                                            "note": [
+                                                {
+                                                    "action": "is_major",
+                                                    "major": "BEng in Chemical Engineering with Research Option"
+                                                }
+                                            ]
+                                        }
+                                    }
                                 }
                             }
                         },
@@ -1432,42 +1589,38 @@
         "BEng in Chemical and Environmental Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "ceev"
+                "short": "CEEV",
+                "cred_fulfill": 6
             },
             "action": "and",
             "array": {
-                "CENG 4930": {
+                "CENG 4980": {
                     "action": "pass_course",
-                    "course": "CENG 4930"
+                    "course": "CENG 4980"
                 },
-                "Elective Course(s)": {
-                    "action": "and",
+                "Research Electives": {
+                    "action": "or",
+                    "attr": {
+                        "min_credit": 3
+                    },
                     "array": {
                         "CENG 4980": {
                             "action": "pass_course",
                             "course": "CENG 4980"
                         },
-                        "Research Electives": {
-                            "action": "or",
-                            "attr": {
-                                "min_credit": 3
-                            },
-                            "array": {
-                                "CENG 4980": {
-                                    "action": "pass_course",
-                                    "course": "CENG 4980"
-                                },
-                                "CENG": {
-                                    "action": "pass_certain_level",
-                                    "dept": "CENG",
-                                    "level": 5000
-                                },
-                                "BIEN": {
-                                    "action": "pass_certain_level",
-                                    "dept": "BIEN",
-                                    "level": 5000
-                                }
-                            }
+                        "CENG": {
+                            "action": "pass_certain_level",
+                            "dept": [
+                                "CENG"
+                            ],
+                            "level": 5000
+                        },
+                        "BIEN": {
+                            "action": "pass_certain_level",
+                            "dept": [
+                                "BIEN"
+                            ],
+                            "level": 5000
                         }
                     }
                 }
@@ -1476,7 +1629,8 @@
         "BEng in Sustainable Energy Engineering": {
             "attr": {
                 "type": "major",
-                "short": "susee"
+                "short": "SUSEE",
+                "cred_fulfill": 91
             },
             "action": "and",
             "array": {
@@ -1964,7 +2118,8 @@
         "BEng in Civil Engineering": {
             "attr": {
                 "type": "major",
-                "short": "civl"
+                "short": "CIVL",
+                "cred_fulfill": 88
             },
             "action": "and",
             "array": {
@@ -2153,9 +2308,23 @@
                         "CIVL 4910 OR CIVL 4920": {
                             "action": "or",
                             "array": {
-                                "CIVL 4910": {
-                                    "action": "pass_course",
-                                    "course": "CIVL 4910"
+                                "CIVL 4910  (Students taking the Research Option must take CIVL 4920)": {
+                                    "action": "and",
+                                    "array": {
+                                        "CIVL 4910": {
+                                            "action": "pass_course",
+                                            "course": "CIVL 4910"
+                                        },
+                                        "Students with Research Option": {
+                                            "action": "not",
+                                            "note": [
+                                                {
+                                                    "action": "is_major",
+                                                    "major": "BEng in Civil Engineering with Research Option"
+                                                }
+                                            ]
+                                        }
+                                    }
                                 },
                                 "CIVL 4920": {
                                     "action": "pass_course",
@@ -2179,49 +2348,36 @@
                 },
                 "Elective(s)": {
                     "action": "or",
-                    "attr": {
-                        "min_credit": 9,
-                        "course": 3
-                    },
                     "array": {
                         "CIVL courses at 4000-level or above except CIVL 4230": {
-                            "action": "and",
-                            "array": {
-                                "CIVL courses at 4000-level or above": {
-                                    "action": "pass_certain_level",
-                                    "dept": "CIVL",
-                                    "level": "4000"
-                                },
-                                "CIVL 4230": {
-                                    "action": "not",
-                                    "array": [
-                                        {
-                                            "action": "pass_course",
-                                            "course": "CIVL 4230"
-                                        }
+                            "action": "pass_certain_level",
+                            "attr": {
+                                "min_credit": 9,
+                                "course": 3,
+                                "excl": {
+                                    "course": [
+                                        "CIVL 4230"
                                     ]
                                 }
-                            }
+                            },
+                            "dept": [
+                                "CIVL"
+                            ],
+                            "level": 4000
                         },
                         "3000-level or above courses offered by the Engineering School or engineering departments other than CIVL": {
-                            "action": "and",
-                            "array": {
-                                "SENG": {
-                                    "action": "pass_certain_level",
-                                    "school": "SENG",
-                                    "level": "3000"
-                                },
-                                "CIVL": {
-                                    "action": "not",
-                                    "array": [
-                                        {
-                                            "action": "pass_certain_level",
-                                            "dept": "CIVL",
-                                            "level": 3000
-                                        }
+                            "action": "pass_certain_level",
+                            "attr": {
+                                "min_credit": 9,
+                                "course": 3,
+                                "excl": {
+                                    "dept": [
+                                        "CIVL"
                                     ]
                                 }
-                            }
+                            },
+                            "school": "SENG",
+                            "level": 3000
                         }
                     }
                 }
@@ -2230,15 +2386,12 @@
         "BEng in Civil Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "civl",
-                "cga": 3.15
+                "short": "CIVL",
+                "cga": 3.15,
+                "cred_fulfill": 4
             },
             "action": "and",
             "array": {
-                "CIVL 4920": {
-                    "action": "pass_course",
-                    "course": "CIVL 4920"
-                },
                 "Required Course(s)": {
                     "action": "or",
                     "array": {
@@ -2261,7 +2414,8 @@
         "BEng in Civil and Environmental Engineering": {
             "attr": {
                 "type": "major",
-                "short": "ciev"
+                "short": "CIEV",
+                "cred_fulfill": 88
             },
             "action": "and",
             "array": {
@@ -2455,9 +2609,23 @@
                         "CIVL 4910 OR CIVL 4920": {
                             "action": "or",
                             "array": {
-                                "CIVL 4910": {
-                                    "action": "pass_course",
-                                    "course": "CIVL 4910"
+                                "CIVL 4910  (Students taking the Research Option must take CIVL 4920)": {
+                                    "action": "and",
+                                    "array": {
+                                        "CIVL 4910": {
+                                            "action": "pass_course",
+                                            "course": "CIVL 4910"
+                                        },
+                                        "Students with Research Option": {
+                                            "action": "not",
+                                            "note": [
+                                                {
+                                                    "action": "is_major",
+                                                    "major": "BEng in Civil and Environmental Engineering with Research Option"
+                                                }
+                                            ]
+                                        }
+                                    }
                                 },
                                 "CIVL 4920": {
                                     "action": "pass_course",
@@ -2557,28 +2725,22 @@
                             "array": {
                                 "CIVL courses at 4000-level or above": {
                                     "action": "pass_certain_level",
-                                    "dept": "CIVL",
-                                    "level": "4000"
+                                    "dept": [
+                                        "CIVL"
+                                    ],
+                                    "level": 4000
                                 },
                                 "3000-level or above courses offered by the Engineering School or engineering departments other than CIVL": {
-                                    "action": "and",
-                                    "array": {
-                                        "SENG": {
-                                            "action": "pass_certain_level",
-                                            "school": "SENG",
-                                            "level": "3000"
-                                        },
-                                        "CIVL": {
-                                            "action": "not",
-                                            "array": [
-                                                {
-                                                    "action": "pass_certain_level",
-                                                    "dept": "CIVL",
-                                                    "level": 3000
-                                                }
+                                    "action": "pass_certain_level",
+                                    "attr": {
+                                        "excl": {
+                                            "dept": [
+                                                "CIVL"
                                             ]
                                         }
-                                    }
+                                    },
+                                    "school": "SENG",
+                                    "level": 3000
                                 }
                             }
                         }
@@ -2589,15 +2751,12 @@
         "BEng in Civil and Environmental Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "ciev",
-                "cga": 3.15
+                "short": "CIEV",
+                "cga": 3.15,
+                "cred_fulfill": 4
             },
             "action": "and",
             "array": {
-                "CIVL 4920": {
-                    "action": "pass_course",
-                    "course": "CIVL 4920"
-                },
                 "Required Course(s)": {
                     "action": "or",
                     "array": {
@@ -2620,7 +2779,8 @@
         "BEng in Computer Engineering": {
             "attr": {
                 "type": "major",
-                "short": "cpeg"
+                "short": "CPEG",
+                "cred_fulfill": 89
             },
             "action": "and",
             "array": {
@@ -2812,17 +2972,45 @@
                                         "CPEG 4901 OR CPEG 4902 OR CPEG 4911 OR CPEG 4912": {
                                             "action": "or",
                                             "array": {
-                                                "CPEG 4901": {
-                                                    "action": "pass_course",
-                                                    "course": "CPEG 4901"
+                                                "CPEG 4901 (Students taking the Research Option must take CPEG 4902 or CPEG 4912)": {
+                                                    "action": "and",
+                                                    "array": {
+                                                        "CPEG 4901": {
+                                                            "action": "pass_course",
+                                                            "course": "CPEG 4901"
+                                                        },
+                                                        "Students with Research Option": {
+                                                            "action": "not",
+                                                            "note": [
+                                                                {
+                                                                    "action": "is_major",
+                                                                    "major": "BEng in Computer Engineering with Research Option"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
                                                 },
                                                 "CPEG 4902": {
                                                     "action": "pass_course",
                                                     "course": "CPEG 4902"
                                                 },
-                                                "CPEG 4911": {
-                                                    "action": "pass_course",
-                                                    "course": "CPEG 4911"
+                                                "CPEG 4911 (Students taking the Research Option must take CPEG 4902 or CPEG 4912)": {
+                                                    "action": "and",
+                                                    "array": {
+                                                        "CPEG 4911": {
+                                                            "action": "pass_course",
+                                                            "course": "CPEG 4911"
+                                                        },
+                                                        "Students with Research Option": {
+                                                            "action": "not",
+                                                            "note": [
+                                                                {
+                                                                    "action": "is_major",
+                                                                    "major": "BEng in Computer Engineering with Research Option"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
                                                 },
                                                 "CPEG 4912": {
                                                     "action": "pass_course",
@@ -3433,13 +3621,17 @@
                             "array": {
                                 "COMP": {
                                     "action": "pass_certain_level",
-                                    "dept": "COMP",
-                                    "level": "2000"
+                                    "dept": [
+                                        "COMP"
+                                    ],
+                                    "level": 2000
                                 },
                                 "ELEC": {
                                     "action": "pass_certain_level",
-                                    "dept": "ELEC",
-                                    "level": "2000"
+                                    "dept": [
+                                        "ELEC"
+                                    ],
+                                    "level": 2000
                                 }
                             }
                         }
@@ -3450,67 +3642,53 @@
         "BEng in Computer Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "cpeg"
+                "short": "CPEG",
+                "cred_fulfill": 5
             },
             "action": "and",
             "array": {
-                "CPEG 4902 OR CPEG 4912": {
+                "Research Electives": {
                     "action": "or",
                     "array": {
-                        "CPEG 4902": {
-                            "action": "pass_course",
-                            "course": "CPEG 4902"
-                        },
-                        "CPEG 4912": {
-                            "action": "pass_course",
-                            "course": "CPEG 4912"
-                        }
-                    }
-                },
-                "Elective Course(s)": {
-                    "action": "and",
-                    "array": {
-                        "Research Electives": {
-                            "action": "or",
+                        "ELEC 5900 AND UROP 1100": {
+                            "action": "and",
                             "array": {
-                                "ELEC 5900 AND UROP 1100": {
-                                    "action": "and",
-                                    "array": {
-                                        "ELEC 5900": {
-                                            "action": "pass_course",
-                                            "course": "ELEC 5900"
-                                        },
-                                        "UROP 1100": {
-                                            "action": "pass_course",
-                                            "course": "UROP 1100"
-                                        }
-                                    }
+                                "ELEC 5900": {
+                                    "action": "pass_course",
+                                    "course": "ELEC 5900"
                                 },
-                                "3-credit COMP 5000-level course": {
-                                    "action": "pass_certain_level",
-                                    "dept": "COMP",
-                                    "level": 5000,
-                                    "attr": {
-                                        "min_credit": 3
-                                    }
+                                "UROP 1100": {
+                                    "action": "pass_course",
+                                    "course": "UROP 1100"
                                 }
                             }
                         },
-                        "CPEG Electives": {
-                            "action": "approval",
-                            "note": "CPEG Electives (1 PG-level course as approved by advisor)"
+                        "3-credit COMP 5000-level course": {
+                            "action": "pass_certain_level",
+                            "dept": [
+                                "COMP"
+                            ],
+                            "level": 5000,
+                            "attr": {
+                                "min_credit": 3
+                            }
                         }
                     }
+                },
+                "CPEG Electives": {
+                    "action": "approval",
+                    "note": "CPEG Electives (1 PG-level course as approved by advisor)"
                 }
             }
         },
         "BEng in Computer Science": {
             "attr": {
                 "type": "major",
-                "short": "comp",
+                "short": "COMP",
                 "excl": [
-                    "cosc"
-                ]
+                    "COSC"
+                ],
+                "cred_fulfill": 81
             },
             "action": "and",
             "array": {
@@ -3625,9 +3803,6 @@
                             }
                         },
                         "Engineering Introduction course": {
-                            "attr": {
-                                "local_double_count": true
-                            },
                             "action": "or",
                             "array": {
                                 "COMP 1021": {
@@ -3853,7 +4028,9 @@
                     "array": {
                         "COMP 2000-level or above Elective": {
                             "action": "pass_certain_level",
-                            "dept": "COMP",
+                            "dept": [
+                                "COMP"
+                            ],
                             "level": 2000,
                             "min_credit": 3
                         },
@@ -4132,11 +4309,12 @@
         "BSc in Computer Science": {
             "attr": {
                 "type": "additional_major",
-                "short": "cosc",
+                "short": "COSC",
                 "excl": [
-                    "comp"
+                    "COMP"
                 ],
-                "cga": 3.7
+                "cga": 3.7,
+                "cred_fulfill": 60
             },
             "action": "and",
             "array": {
@@ -4359,7 +4537,9 @@
                                 },
                                 "COMP 2000-level or above Electives": {
                                     "action": "pass_certain_level",
-                                    "dept": "COMP",
+                                    "dept": [
+                                        "COMP"
+                                    ],
                                     "level": 2000,
                                     "attr": {
                                         "min_credit": 12,
@@ -4373,7 +4553,9 @@
                             "array": {
                                 "COMP 2000-level or above Electives": {
                                     "action": "pass_certain_level",
-                                    "dept": "COMP",
+                                    "dept": [
+                                        "COMP"
+                                    ],
                                     "level": 2000,
                                     "attr": {
                                         "min_credit": 18,
@@ -4389,7 +4571,8 @@
         "BEng in Electronic Engineering": {
             "attr": {
                 "type": "major",
-                "short": "elec"
+                "short": "ELEC",
+                "cred_fulfill": 82
             },
             "action": "and",
             "array": {
@@ -4651,9 +4834,23 @@
                                         "ELEC 4900 OR ELEC 4901": {
                                             "action": "or",
                                             "array": {
-                                                "ELEC 4900": {
-                                                    "action": "pass_course",
-                                                    "course": "ELEC 4900"
+                                                "ELEC 4900 (Students taking the Research Option must take ELEC 4901)": {
+                                                    "action": "and",
+                                                    "array": {
+                                                        "ELEC 4900": {
+                                                            "action": "pass_course",
+                                                            "course": "ELEC 4900"
+                                                        },
+                                                        "Students with Research Option": {
+                                                            "action": "not",
+                                                            "note": [
+                                                                {
+                                                                    "action": "is_major",
+                                                                    "major": "BEng in Electronic Engineering with Research Option"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
                                                 },
                                                 "ELEC 4901": {
                                                     "action": "pass_course",
@@ -4663,9 +4860,23 @@
                                         }
                                     }
                                 },
-                                "ELEC 4910": {
-                                    "action": "pass_course",
-                                    "course": "ELEC 4910"
+                                "ELEC 4910 (Students taking the Research Option must take ELEC 4901)": {
+                                    "action": "and",
+                                    "array": {
+                                        "ELEC 4910": {
+                                            "action": "pass_course",
+                                            "course": "ELEC 4900"
+                                        },
+                                        "Students with Research Option": {
+                                            "action": "not",
+                                            "note": [
+                                                {
+                                                    "action": "is_major",
+                                                    "major": "BEng in Electronic Engineering with Research Option"
+                                                }
+                                            ]
+                                        }
+                                    }
                                 }
                             }
                         },
@@ -4681,35 +4892,35 @@
                             "action": "pass_course",
                             "course": "LANG 4031"
                         }
+                    }
+                },
+                "Elective(s)": {
+                    "action": "and",
+                    "attr": {
+                        "min_credit": 21
                     },
-                    "Elective(s)": {
-                        "action": "and",
-                        "attr": {
-                            "min_credit": 21
-                        },
-                        "array": {
-                            "ELEC 4000-level or above Electives": {
-                                "action": "pass_certain_level",
-                                "dept": "ELEC",
-                                "level": 4000,
-                                "attr": {
-                                    "min_course": 2
+                    "array": {
+                        "ELEC 4000-level or above Electives": {
+                            "action": "pass_certain_level",
+                            "dept": [
+                                "ELEC"
+                            ],
+                            "level": 4000,
+                            "attr": {
+                                "min_course": 2,
+                                "excl": {
+                                    "course": [
+                                        "ELEC 4940"
+                                    ]
                                 }
-                            },
-                            "ELEC 4940": {
-                                "action": "not",
-                                "array": [
-                                    {
-                                        "action": "pass_course",
-                                        "course": "ELEC 4940"
-                                    }
-                                ]
-                            },
-                            "ELEC 3000-level or above Electives": {
-                                "action": "pass_certain_level",
-                                "dept": "ELEC",
-                                "level": 3000
                             }
+                        },
+                        "ELEC 3000-level or above Electives": {
+                            "action": "pass_certain_level",
+                            "dept": [
+                                "ELEC"
+                            ],
+                            "level": 3000
                         }
                     }
                 }
@@ -4718,14 +4929,11 @@
         "BEng in Electronic Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "elec"
+                "short": "ELEC",
+                "cred_fulfill": 9
             },
             "action": "and",
             "array": {
-                "ELEC 4901": {
-                    "action": "pass_course",
-                    "course": "ELEC 4901"
-                },
                 "Required Course(s)": {
                     "action": "pass_course",
                     "course": "ELEC 5900"
@@ -4742,7 +4950,8 @@
         "BEng in Decision Analytics": {
             "attr": {
                 "type": "major",
-                "short": "da"
+                "short": "DA",
+                "cred_fulfill": 70
             },
             "action": "and",
             "array": {
@@ -5078,7 +5287,8 @@
         "BEng in Industrial Engineering and Engineering Management": {
             "attr": {
                 "type": "major",
-                "short": "ieem"
+                "short": "IEEM",
+                "cred_fulfill": 79
             },
             "action": "and",
             "array": {
@@ -5307,9 +5517,23 @@
                                     "action": "pass_course",
                                     "course": "IEDA 4901"
                                 },
-                                "IEDA 4960": {
-                                    "action": "pass_course",
-                                    "course": "IEDA 4960"
+                                "IEDA 4960 (Students taking the Research Option must take IEDA 4901)": {
+                                    "action": "and",
+                                    "array": {
+                                        "IEDA 4960": {
+                                            "action": "pass_course",
+                                            "course": "IEDA 4960"
+                                        },
+                                        "Students with Research Option": {
+                                            "action": "not",
+                                            "note": [
+                                                {
+                                                    "action": "is_major",
+                                                    "major": "BEng in Industrial Engineering with Research Option"
+                                                }
+                                            ]
+                                        }
+                                    }
                                 }
                             }
                         },
@@ -5404,8 +5628,9 @@
         "BEng in Industrial Engineering and Engineering Management with Financial Engineering Option": {
             "attr": {
                 "type": "option",
-                "short": "ieem",
-                "cga": 3
+                "short": "IEEM",
+                "cga": 3,
+                "cred_fulfill": 9
             },
             "action": "and",
             "array": {
@@ -5442,7 +5667,8 @@
         "BEng in Industrial Engineering and Engineering Management with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "ieem"
+                "short": "IEEM",
+                "cred_fulfill": 6
             },
             "action": "and",
             "array": {
@@ -5479,7 +5705,8 @@
         "BSc in Integrative Systems and Design": {
             "attr": {
                 "type": "major",
-                "short": "isdn"
+                "short": "ISDN",
+                "cred_fulfill": 88
             },
             "action": "and",
             "array": {
@@ -6038,7 +6265,8 @@
         "BEng in Aerospace Engineering": {
             "attr": {
                 "type": "major",
-                "short": "ae"
+                "short": "AE",
+                "cred_fulfill": 85
             },
             "action": "and",
             "array": {
@@ -6301,7 +6529,8 @@
         "BEng in Aerospace Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "ae"
+                "short": "AE",
+                "cred_fulfill": 6
             },
             "action": "pass_course",
             "course": "MECH 4990"
@@ -6309,7 +6538,8 @@
         "BEng in Mechanical Engineering": {
             "attr": {
                 "type": "major",
-                "short": "mech"
+                "short": "MECH",
+                "cred_fulfill": 88
             },
             "action": "and",
             "array": {
@@ -6545,8 +6775,9 @@
         "BEng in Mechanical Engineering with Energy Option": {
             "attr": {
                 "type": "option",
-                "short": "mech",
-                "min_course": 3
+                "short": "MECH",
+                "min_course": 3,
+                "cred_fulfill": 9
             },
             "action": "or",
             "array": {
@@ -6599,8 +6830,9 @@
         "BEng in Mechanical Engineering with Engineering Design Option": {
             "attr": {
                 "type": "option",
-                "short": "mech",
-                "min_course": 3
+                "short": "MECH",
+                "min_course": 3,
+                "cred_fulfill": 9
             },
             "action": "or",
             "array": {
@@ -6637,8 +6869,9 @@
         "BEng in Mechanical Engineering with Materials Option": {
             "attr": {
                 "type": "option",
-                "short": "mech",
-                "min_course": 3
+                "short": "MECH",
+                "min_course": 3,
+                "cred_fulfill": 9
             },
             "action": "or",
             "array": {
@@ -6679,7 +6912,8 @@
         "BEng in Mechanical Engineering with Research Option": {
             "attr": {
                 "type": "option",
-                "short": "mech"
+                "short": "MECH",
+                "cred_fulfill": 6
             },
             "action": "pass_course",
             "course": "MECH 4990"
@@ -6687,7 +6921,8 @@
         "BSc in Data Science and Technology": {
             "attr": {
                 "type": "major",
-                "short": "dsct"
+                "short": "DSCT",
+                "cred_fulfill": 68
             },
             "action": "and",
             "array": {
@@ -7215,7 +7450,8 @@
                 "type": "extended_major",
                 "short": "extm-ai",
                 "gpa": 2.15,
-                "single_count": 12
+                "single_count": 12,
+                "cred_fulfill": 22
             },
             "action": "and",
             "array": {
@@ -7495,7 +7731,8 @@
                 "type": "extended_major",
                 "short": "extm_dmca",
                 "gpa": 2.15,
-                "single_count": 12
+                "single_count": 12,
+                "cred_fulfill": 21
             },
             "action": "and",
             "array": {
@@ -7690,7 +7927,9 @@
                                         },
                                         "Any HART courses": {
                                             "action": "pass_certain_level",
-                                            "dept": "HART",
+                                            "dept": [
+                                                "HART"
+                                            ],
                                             "level": 3000
                                         },
                                         "HUMA 3150": {

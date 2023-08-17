@@ -5,327 +5,151 @@ import copy
 import traceback
 
 def main(request_data):
-    return major_checking(request_data)
-
-##############################
-notPassGrade = ["F", "AU", "CR", "I", "PP", "W", "----"]
-seng = ["BIEN", "CENG", "CEEV", "CIVL", "CIEV", "CPEG",
-        "COMP", "COSC", "ELEC", "IEEM", "ISDN", "MECH"]
-
-def major_checking(request_data):
-    #return request_data
-    global userdb
     userdb = request_data["userdb"]
     year = "20"
     year += userdb["profile"]["currentStudies"]["yearOfIntake"][0]
     year += userdb["profile"]["currentStudies"]["yearOfIntake"][1]
     output = {}
+    global user
+    user = copy.deepcopy(userdb)
     for i in request_data["prog"]:
         try:
             year_ = copy.deepcopy(year)
             if i not in globalVariable.major[year]:
                 year_ = "0"
             if globalVariable.major[year_][i]["attr"]["type"] != "option":
-                global user
                 user = copy.deepcopy(userdb)
-            recursion = switch(globalVariable.major[year_][i]["action"], globalVariable.major[year_][i])
-            output[i] = recursion
+            if "specialApprovals" in user["profile"] and "selfDeclearMapping" in user["profile"]["specialApprovals"]:
+                for j in user["profile"]["specialApprovals"]["selfDeclearMapping"]:
+                    for k in user["profile"]["specialApprovals"]["selfDeclearMapping"][j]:
+                        if user["profile"]["specialApprovals"]["selfDeclearMapping"][j][k][0][1] == globalVariable.major[year_][i]["attr"]["short"]:
+                            removeCourse(k)
+            recursion = priority(globalVariable.major[year_][i])
+            output[i] = switch(globalVariable.major[year_][i]["action"], recursion)
         except Exception:
             print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "checking major crashed", traceback.format_exc())          
     return output
-                        
-def semesterSort(course):
-    sem = user["courses"][course]
-    sem = sorted(sem.keys())
-    return sem
 
-def gradeMapping(grade):
-    if grade in notPassGrade:
-        return 0
-    match grade[0]:
-        case "A":
-            gpa = 4
-        case "B":
-            gpa = 3
-        case "C":
-            gpa = 2
-        case "D":
-            gpa = 1
-        case _:
-            return 0.1
-    if len(grade) <= 1:
-        return gpa
-    match grade[1]:
-        case "+":
-            gpa += 0.3
-        case "-":
-            gpa -= 0.3
-    return gpa
+notPassGrade = ["F", "AU", "CR", "I", "PP", "W", "----"]
+passNonLetterGrade = ["DI", "PA", "P", "T"]
+seng = ["BIEN", "CENG", "CEEV", "CIVL", "CIEV", "CPEG",
+        "COMP", "COSC", "ELEC", "IEEM", "ISDN", "MECH"]
 
-def qualiMapping(exam, gradeQ, gradeU):
-    match exam:
-        case "HKDSE":
-            level = ["5**", "5*", "5", "4", "3", "2", "1", "U"]
+def priority(code):
+    if "array" in code:
+        if "attr" in code:
+            if "local_double_count" in code["attr"]:
+                array = {}
+                output = code
+                output["pass"] = False
+                output["respattr"] = {}
 
-        case _:
-            return False
+                check = False
+                if "action" in code:
+                    if code["action"] == "and":
+                        check = True
 
-    for i in level:
-        if i == gradeU:
-            return True
-        if i == gradeQ:
-            return False
-
-def loop(code, output):
-    checkAnd = True
-    checkOr = False
-    alter = []
-    course = []
-    for i in ["approval", "pass_qualification", "pass_course", "and", "or", "spread", "not", "pass_certain_level"]:
-        for j in code["array"]:
-            try:
-                if code["array"][j]["action"] == i:
-                    recursion = switch(i, code["array"][j])
-                    if not recursion["pass"]:
-                        checkAnd = False
-                    else:
-                        checkOr = True
-                    
-                    if "attr" in code:
-                        if "local_double_count" in code["attr"]:
-                            global user
-                            temp = copy.deepcopy(user)
-                            user = copy.deepcopy(userdb)
-                            gpa = 0
-                            course = []
-                            credit = 0
-                            actual_cred = 0
+                courseList = []
+                alter = []
+                for i in code["array"]:
+                    recursion = switch(code["array"][i]["action"], code["array"][i])
+                    if "action" in code:
+                        if code["action"] == "and" and not recursion["pass"]:
+                            check = False
+                        if code["action"] == "or" and recursion["pass"]:
                             check = True
-                            courseUsed = []
-                            if recursion["pass"]:
-                                gpa = recursion["respattr"]["gpa"] * recursion["respattr"]["actual_cred"]
-                                for k in range(len(recursion["respattr"]["courseUsed"])):
-                                    courseUsed.append(recursion["respattr"]["courseUsed"][k])
-                                credit = recursion["respattr"]["credit"]
-                                actual_cred = recursion["respattr"]["actual_cred"]
-                            else:
-                                if recursion["respattr"]["alter"][0][1] in user:
-                                    gpa += recursion["respattr"]["alter"][0][0] *recursion["respattr"]["alter"][0][3]
-                                    courseUsed.append(recursion["respattr"]["alter"][0][1])
-                                    credit += recursion["respattr"]["alter"][0][2]
-                                    actual_cred += recursion["respattr"]["alter"][0][3]
-                            course.append([gpa, courseUsed, credit, actual_cred])
-                            course.sort()
-                            alter = []
-                            if course != []:
-                                output["pass"] = True
-                            if "min_course" in code["attr"] or "min_credit" in code["attr"] or "course" in code["attr"]:
-                                gpa, courseUsed, credit, actual_cred, alter, output = courseRank(code, course, alter, output)
-                            elif code["action"] == "or":
-                                courseUsed = courseUsed.pop(0)
-                                gpaR = 0
-                                courseUsedR = []
-                                creditR = 0
-                                actual_credR = 0
-                            for k in range(len(courseUsed)):
-                                if courseUsed[k][1] not in temp:
-                                    gpaR += courseUsed[k][0] * courseUsed[k][3]
-                                    courseUsedR.append(courseUsed[k][1])
-                                    creditR += courseUsed[k][2]
-                                    actual_credR += courseUsed[k][3]
-                            output = info(gpaR, courseUsedR, creditR, actual_credR, output)
-                            user = copy.deepcopy(temp)
-                            return [], [], checkAnd, checkOr, output
 
-                    if "alter" in recursion["respattr"]:
-                        if recursion["respattr"]["alter"] != []:
-                            if type(recursion["respattr"]["alter"][0]) == list:
-                                for k in range(len(recursion["respattr"]["alter"])):
-                                    alter.append(recursion["respattr"]["alter"][k])
-                            else:
-                                alter.append(recursion["respattr"]["alter"])
-                    if "courseUsed" not in recursion["respattr"]:
-                        continue
-                    localCourse = []
-                    for k in range(len(recursion["respattr"]["courseUsed"])):
-                        localCourse.append(recursion["respattr"]["courseUsed"][k])
+                    if recursion["respattr"]:
+                        if "courseUsed" in recursion["respattr"]:
+                            course = []
+                            for j in range(len(recursion["respattr"]["courseUsed"])):
+                                course.append(recursion["respattr"]["courseUsed"][j])
+                            courseList.append([recursion["respattr"]["gpa"], course, recursion["respattr"]["credit"], recursion["respattr"]["actual_cred"]])
+                        if "alternative" in recursion["respattr"]:
+                            for j in range(len(recursion["respattr"]["alternative"])):
+                                alter.append(recursion["respattr"]["alternative"][j])
+                    array[i] = recursion
 
-                    if "gpa" in recursion["respattr"]:
-                        gpa = recursion["respattr"]["gpa"]
+                output["array"] = array
+                if check:
+                    if "min_credit" in code["attr"] or "min_course" in code["attr"] or "course" in code["attr"]:
+                        gpaSum, courseUsed, credit, actual_cred, alternative, output = courseRank(code["attr"], courseList, [], output)
                     else:
-                        gpa = 0
-                    if "credit" in recursion["respattr"]:
-                        credit = recursion["respattr"]["credit"]
-                    else:
-                        credit = 0
-                    if "actual_cred" in recursion["respattr"]:
-                        actual_cred = recursion["respattr"]["actual_cred"]
-                    else:
-                        actual_cred = 0
-                    course.append([gpa, localCourse, credit, actual_cred])
-            except Exception:
-                print(traceback.format_exc())
-    
-    return course, alter, checkAnd, checkOr, False
-      
-def courseRank(code, course, alter, output):
-    min_credit = 0
-    min_course = 0
-    if "attr" in code:
-        if "min_credit" in code['attr'] and "course" in code["attr"]:
-            gpa, courseUsed, credit, actual_cred, alter, output = exact(code["attr"], course, alter, output)
-            return gpa, courseUsed, credit, actual_cred, alter, output
-        if "min_credit" in code["attr"]:
-            min_credit = code["attr"]["min_credit"]
-        if "min_course" in code["attr"]: 
-            min_course = code["attr"]["min_course"]
-        if "course" in code["attr"]:
-            min_course = code["attr"]["course"]
+                        gpaSum, courseUsed, credit, actual_cred, alternative, output = bestCourse(courseList, [], output)
+                    output = info(gpaSum, courseUsed, credit, actual_cred, output)
 
-    gpa = 0
-    courseUsed = []
-    credit = 0
-    actual_cred = 0
+                    """for i in range(len(alter)):
+                        alternative.append(alter[i])
+                    if alternative != []:
+                        output["respattr"]["alternative"] = alternative"""
+                return output
+            
+        for i in code["array"]:
+            priority(code["array"][i])
+    return code
 
-    course.sort()
-    count = len(course) - 1      
-    while count >= 0:
-        if "attr" in code:
-            if "max_course" in code["attr"]:
-                if len(courseUsed) == code["attr"]["max_course"]:
-                    break
-
-        if credit >= min_credit and len(courseUsed) >= min_course:
-            output["pass"] = True
-            break
-        
-        gpa += course[count][0] * course[count][3]
-        for i in range(len(course[count][1])):
-            courseUsed.append(course[count][1][i])
-        credit += course[count][2]
-        actual_cred += course[count][3]
-        count -= 1
-    
-    alternative = []
-    for i in range(len(alter)):
-        alternative.append(alter[i])
-    count2 = len(alter) - 1
-    while count2 >= 0:
-        if "attr" in code:
-            if "max_course" in code["attr"]:
-                if len(courseUsed) == code["attr"]["max_course"]:
-                    break
-        
-        if credit >= min_credit and len(courseUsed) >= min_course:
-            output["pass"] = True
-            break
-        break  
-    
-    alter = []
-    for i in range(count, -1, -1):
-        alter.append(course[i])
-    for i in range(count2, -1, -1):
-        alter.append(alternative[i])
-    
-    return gpa, courseUsed, credit, actual_cred, alter, output
-
-def info(gpa, courseUsed, credit, actual_cred, output):
-    if actual_cred != 0:
-        output["respattr"]["gpa"] = gpa / actual_cred
-    elif courseUsed != []:
-        output["respattr"]["gpa"] = 0
-
-    if courseUsed != []:
-        output["respattr"]["courseUsed"] = courseUsed
-        output["respattr"]["credit"] = credit
-        output["respattr"]["actual_cred"] = actual_cred
-    return output
-
-def spread(attr, course, output):
-    course.sort(reverse = True)
-    check = True
-    areaInfo = []
-    courseUsed = []
-    alter = []
-    credit = 0
-
-    if "min_course_spread" in attr:
-        rank = attr["min_course_spread"]
-    elif "min_credit_spread" in attr:
-        rank = attr["min_credit_spread"]
-
-    for i in range(len(rank)):
-        for j in range(len(course[i][3])):
-            alter.append(course[i][3][j])
-        if course[i][0] < rank[i]:
-            check = False
-            break
-        if check:
-            areaInfo.append(course[i][4])
-            for j in range(len(course[i][2])):
-                courseUsed.append(course[i][2][j])
-                credit += course[i][2][j][0]
-            for k in range(j, len(course[i][2])):
-                alter.append(course[i][2][k])
-
-    output["respattr"]["areaInfo"] = areaInfo
-    alter.sort(reverse = True)
-
-    if check:
-        min_credit = 1
-        min_course = 1
-        if "min_credit" in attr:
-            min_credit = attr["min_credit"]
-        if "min_course" in attr:
-            min_course = attr["min_course"]
-        if "course" in attr:
-            min_course = attr["course"]
-
-        while len(courseUsed) < min_course:
-            if alter[0][0] == 0:
-                output["pass"] = False
-                break
-            courseUsed.append(alter.pop(0))
-        while credit < min_credit:
-            if alter[0][0] == 0:
-                output["pass"] = False
-                break
-            credit += alter[0][0]
-            courseUsed.append(alter.pop(0))
-        output["pass"] = True
-    else:
-        output["pass"] = False
-
-    output["respattr"]["alter"] = alter
-    gpa = 0
-    courseUsedR = []
-    credit = 0
-    actual_cred = 0
-    for i in range(len(courseUsed)):
-        gpa += courseUsed[i][0] * courseUsed[i][3]
-        for j in range(len(courseUsed[i][1])):
-            courseUsedR.append(courseUsed[i][1][j])
-        credit += courseUsed[i][2]
-        actual_cred += courseUsed[i][3]
-
-    return gpa, courseUsedR, credit, actual_cred, output
-
-def removeCourse(course):
-    for i in range(len(course)):
-        if course[i] in user["courses"]:
-            del user["courses"][course[i]]
-
-def exact(attr, course, alter, output):
-    min_credit = attr["min_credit"]
-    courseNum = attr["course"]
-    suggest = min_credit / courseNum
-
+def courseRank(attr, course, alter, output):
     courseCopy = []
     for i in range(len(course)):
         courseCopy.append(course[i])
-    for i in range(len(alter)):
-        courseCopy.append(alter[i])
+    if alter != []:
+        for i in range(len(alter)):
+            courseCopy.append(alter[i])
     courseCopy.sort(reverse = True)
+
+    min_credit = 0
+    min_course = 0
+    if "min_credit" in attr and "course" in attr:
+        gpa, courseUsed, credit, actual_cred, alter, output = exact(attr, courseCopy, output)
+        return gpa, courseUsed, credit, actual_cred, alter, output
+    if "min_credit" in attr:
+        min_credit = attr["min_credit"]
+    if "min_course" in attr: 
+        min_course = attr["min_course"]
+    if "course" in attr:
+        min_course = attr["course"]
+
+    count = 0
+    gpaSum = 0
+    courseUsed = []
+    credit = 0
+    actual_cred = 0
+    while count < len(courseCopy):
+        if "max_course" in attr:
+            if len(courseUsed) == attr["max_course"]:
+                if credit >= min_credit:
+                    output["pass"] = True
+                else:
+                    output["pass"] = False
+                break
+        
+        if credit >= min_credit and len(courseUsed) >= min_course:
+            output["pass"] = True
+            break
+
+        if courseCopy[count][0] == 0:
+            output["pass"] = False
+            break
+
+        gpaSum += courseCopy[count][0] * course[count][3]
+        for i in range(len(course[count][1])):
+            courseUsed.append(course[count][1][i])
+        credit += courseCopy[count][2]
+        actual_cred += courseCopy[count][3]
+
+        count += 1
+    
+    alternative = []
+    for i in range(count, len(courseCopy)):
+        alternative.append(courseCopy[i])
+    
+    return gpaSum, courseUsed, credit, actual_cred, alternative, output
+
+def exact(attr, courseCopy, output):
+    min_credit = attr["min_credit"]
+    courseNum = attr["course"]
+    suggest = min_credit / courseNum
     
     courseN = []
     gpaN = 0
@@ -364,11 +188,11 @@ def exact(attr, course, alter, output):
             creditW += courseCopy[count][2]
             actual_credW += courseCopy[count][3]
             extra = local - suggest
+        elif courseNum - len(courseW) == 1:
+            count += 1
+            continue
         else:
-            if courseNum - len(courseW) == 1:
-                count += 1
-                continue
-            for i in range(count, len(courseCopy)):
+            for i in range(count + 1, len(courseCopy)):
                 if courseCopy[i][2] + courseCopy[count][2] >= suggest * 2:
                     gpaW += courseCopy[count][0] * courseCopy[count][3] + courseCopy[i][0] * courseCopy[i][3]
                     for j in range(len(courseCopy[count][1])):
@@ -383,7 +207,8 @@ def exact(attr, course, alter, output):
         count += 1
 
     for i in range(count, len(courseCopy)):
-        alterW.append(courseCopy[i])
+        if courseCopy[i][1][0] not in courseW:
+            alterW.append(courseCopy[i])
 
     n = False
     w = False
@@ -424,101 +249,97 @@ def exact(attr, course, alter, output):
         courseUsed = []
         credit = 0
         actual_cred = 0
-        alter = []
+        alter = courseCopy
 
     return gpa, courseUsed, credit, actual_cred, alter, output
 
 def switch(action, code):
     output = code
+    if "attr" in code:
+        if "local_double_count" in code["attr"]:
+            return output
+        
     output["pass"] = False
     output["respattr"] = {}
     match action:
         case "and":
-            try:
-                course, alter, checkAnd, checkOr, copy = loop(code, output)
-                if copy:
-                    return copy
+            course, alter, check = loop(output)
 
-                check2 = True
-                if "attr" in code:
-                    if "min_course" in code["attr"] or "min_credit" in code["attr"] or "course" in code["attr"]:
-                        check2 = False
-                        gpa, courseUsed, credit, actual_cred, alter, output = courseRank(code, course, alter, output)
-                if check2:
-                    gpa = 0
-                    courseUsed = []
-                    credit = 0
-                    actual_cred = 0
-                    for count in range(len(course)):
-                        gpa += course[count][0] * course[count][3]
-                        for i in range(len(course[count][1])):
-                            courseUsed.append(course[count][1][i])
-                        credit += course[count][2]
-                        actual_cred += course[count][3]
+            check2 = True
+            if "attr" in code:
+                if "min_course" in code["attr"] or "min_credit" in code["attr"] or "course" in code["attr"]:
+                    check2 = False
+                    gpaSum, courseUsed, credit, actual_cred, alternative, output = courseRank(code["attr"], course, alter, output)
+            if check2:
+                gpaSum = 0
+                courseUsed = []
+                credit = 0
+                actual_cred = 0
+                for count in range(len(course)):
+                    gpaSum += course[count][0] * course[count][3]
+                    for i in range(len(course[count][1])):
+                        courseUsed.append(course[count][1][i])
+                    credit += course[count][2]
+                    actual_cred += course[count][3]
+                
+                alternative = []
+                for i in range(len(alter)):
+                    alternative.append(alter[i])
 
-                if not checkAnd:
-                    output["pass"] = False
-                else:
-                    output["pass"] = True
-                output = info(gpa, courseUsed, credit, actual_cred, output)
-                if alter != []:
-                    output["respattr"]["alter"] = alter
-                if courseUsed != []:
-                    removeCourse(courseUsed)
-                return output
-
-            except Exception as e:
-                print(e)
+            output["pass"] = check
+            output = info(gpaSum, courseUsed, credit, actual_cred, output)
+            if alternative != []:
+                output["respattr"]["alternative"] = alternative
+            removeCourse(courseUsed)
+            return output
         
         case "or":
-            course, alter, checkAnd, checkOr, copy = loop(code, output)
-            if copy:
-                return copy
-            
-            if checkOr:
+            course, alter, check = loop(output)
+
+            alternative = []
+            if check:
                 check2 = True
                 if "attr" in code:
                     if "min_course" in code["attr"] or "min_credit" in code["attr"] or "course" in code["attr"]:
                         check2 = False
-                        gpa, courseUsed, credit, actual_cred, alter, output = courseRank(code, course, alter, output)
+                        gpaSum, courseUsed, credit, actual_cred, alternative, output = courseRank(code["attr"], course, alter, output)
                 if check2:
-                    output["pass"] = True
-                    courseUsed = []
-                    if course != []:
-                        course.sort()
-                        for i in range(len(course[0][1])):
-                            courseUsed.append(course[0][1][i])
-                        output = info(course[0][0], courseUsed, course[0][2], course[0][3], output)
-                        alter = course.pop(0)
-                if alter != []:
-                    output["respattr"]["alter"] = alter
-                if courseUsed != []:
-                    removeCourse(courseUsed)
+                    gpaSum, courseUsed, credit, actual_cred, alternative, output = bestCourse(course, alter, output)
+
+                output = info(gpaSum, courseUsed, credit, actual_cred, output)
+                removeCourse(courseUsed)
+            else:
+                alternative = alter
+            
+            if alternative != []:
+                output["respattr"]["alternative"] = alternative
             return output
         
         case "not":
-            output["respattr"]["courseUsed"] = []
-            for i in range(len(code["array"])):
-                recursion = switch(code["array"][i]["action"], code["array"][i])
-                if recursion["pass"]:
-                    output["pass"] = False
-                    del recursion["respattr"]["courseUsed"]
-                else:
+            for i in range(len(output["note"])):
+                recursion = switch(output["note"][i]["action"], output["note"][i])
+                if not recursion["pass"]:
                     output["pass"] = True
-                    del recursion["respattr"]["alter"]
+                elif "courseUsed" in recursion["respattr"]:
+                    output["respattr"]["blackList"] = recursion["respattr"]["courseUsed"]
             return output
         
         case "spread":
+            courseAllArea = []
+            crossArea = []
             course = []
             for i in code["attr"]["array"]:
-                areaCourseList, areaAlterList, checkAnd, checkOr, copy = loop(code["attr"]["array"][i], output)
-                if copy:
-                    return copy
+                areaCourseList, areaAlterList, check = loop(code["attr"]["array"][i])
                 
                 areaCourseList.sort()
                 areaCredit = 0
                 areaGPA = 0
                 for j in range(len(areaCourseList)):
+                    for k in range(len(areaCourseList[j][1])):
+                        if areaCourseList[j][1][k] in courseAllArea:
+                            crossArea.append(areaCourseList[j][1][k])
+                        else:
+                            courseAllArea.append(areaCourseList[j][1][k])
                     areaCredit += areaCourseList[j][2]
                     areaGPA += areaCourseList[j][0] * areaCourseList[j][3]
                 course.append([areaCredit, areaGPA, areaCourseList, areaAlterList, i])
@@ -527,33 +348,43 @@ def switch(action, code):
                 for i in range(len(course)):
                     course[i][0] = len(course[i][2])
 
-            gpa, courseUsed, credit, actual_cred, output = spread(code["attr"], course, output)
-            output = info(gpa, courseUsed, credit, actual_cred, output)
-            if courseUsed != []:
-                removeCourse(courseUsed)
+            gpaSum, courseUsed, credit, actual_cred, output = spread(code["attr"], course, crossArea, output)
+            output = info(gpaSum, courseUsed, credit, actual_cred, output)
+            removeCourse(courseUsed)
             return output
             
         case "pass_course":
-            if code["course"] not in user["courses"]:
-                output["respattr"]["alter"] = [0, [code["course"]], "credit"]
-                return output
-            sem = semesterSort(code["course"])
-            grade = user["courses"][code["course"]][sem[len(sem) - 1]]["grade"]
-            gpa = gradeMapping(grade)
-            if gpa == 0:
-                output["respattr"]["alter"] = [0, [code["course"]], "credit"]
-                return output
-            output["pass"] = True
-            if len(sem) > 1:
-                credit = int(user["courses"][code["course"]][sem[len(sem) - 1]]["actual_cred"])
+            credit, output = creditFind(code["course"], output)
+            if "courses" in user:
+                if code["course"] not in user["courses"]:
+                    sub = []
+                    canUse = []
+                    courseCodeSep = code["course"].split()
+                    courseCode = courseCodeSep[0] + courseCodeSep[1]
+                    for i in globalVariable.courseids:
+                        if courseCode == i:
+                            output["respattr"]["alternative"] = [[0, [code["course"]], credit, 0]]
+                            return output
+                        elif courseCode in i:
+                            sub.append(i)
+                    for i in sub:
+                        courseCode = i[:4] + " " + i[4:]
+                        if courseCode in user["courses"]:
+                            gpa, credit, actual_cred, output = courseInfo(courseCode, output)
+                            canUse.append([gpa, [courseCode], credit, actual_cred])
+                    if canUse == []:
+                        output["respattr"]["alternative"] = [[0, [code["course"]], credit, 0]]
+                        return output
+                    else:
+                        canUse.sort(reverse = True)
+                        output = info(canUse[0][0] * canUse[0][3], canUse[0][1], canUse[0][2], canUse[0][3], output)
+                        output["pass"] = True
+                else:               
+                    gpa, credit, actual_cred, output = courseInfo(code["course"], output)
+                    output = info(gpa * actual_cred, [code["course"]], credit, actual_cred, output)
+                    output["pass"] = True
             else:
-                credit = int(user["courses"][code["course"]][sem[0]]["units"])
-            output["respattr"]["gpa"] = gpa
-            output["respattr"]["courseUsed"] = [code["course"]]
-            output["respattr"]["credit"] = credit
-            output["respattr"]["actual_cred"] = credit
-            if gpa == 0.1:
-                output["respattr"]["actual_cred"] = 0
+                output["respattr"]["alternative"] = [[0, [code["course"]], credit, 0]]
             return output
         
         case "pass_certain_level":
@@ -561,56 +392,375 @@ def switch(action, code):
             if "school" in code:
                 match code["school"]:
                     case "SENG":
-                        deptList = seng
+                        for i in seng:
+                            deptList.append(i)
 
                     case _:
+                        output["respattr"]["error"] = "Invalid_school"
                         return output
             
+
             if "dept" in code:
-                deptList.append(code["dept"])
+                for i in code["dept"]:
+                    deptList.append(i)
+
+            exclusion = []  
             if "attr" in code:
                 if "excl" in code["attr"]:
-                    for i in code["attr"]["excl"]:
-                        if i in deptList:
-                            deptList.remove(i)
+                    if "dept" in code["attr"]["excl"]:
+                        for i in code["attr"]["excl"]["dept"]:
+                            if i in deptList:
+                                deptList.remove(i)
+                    elif "course" in code["attr"]["excl"]:
+                        for i in code["attr"]["excl"]["course"]:
+                            exclusion.append(i)
 
             course = []
-            for i in user["courses"]:
-                courseCodeSep = i.split()
-                dept = courseCodeSep[0]
-                if dept not in deptList:
-                    continue
-                level = courseCodeSep[1]
-                if level < code["level"]:
-                    continue
-                sem = semesterSort(i)
-                grade = user["courses"][i][sem[len(sem) - 1]]["grade"]
-                gpa = gradeMapping(grade)
-                if gpa == 0:
-                    continue
-                credit = int(user["courses"][i][sem[len(sem) - 1]]["actual_cred"])
-                if gpa == 0.1:
-                    actual_cred = 0
-                else:
-                    actual_cred = credit
-                course.append([gpa, [i], credit, actual_cred])
             alter = []
+            if "courses" in user:
+                for i in user["courses"]:
+                    if i in exclusion:
+                        continue
+                    courseCodeSep = i.split()
+                    dept = courseCodeSep[0]
+                    if dept not in deptList:
+                        continue
+                    numeric = ""
+                    for j in range(4):
+                        numeric += courseCodeSep[1][j]
+                    level = int(numeric)
+                    if level < code["level"]:
+                        continue
 
-            gpa, courseUsed, credit, actual_cred, alter, output = courseRank(code, course, alter, output)
+                    gpa, credit, actual_cred, output = courseInfo(i, output)
+
+                    if gpa:
+                        course.append([gpa, [i], credit, actual_cred])
+                    else:
+                        alter.append([gpa, [i], credit, actual_cred])
+            else:
+                return output
             
-            output = info(gpa, courseUsed, credit, actual_cred, output)
-            if alter != []:
-                output["respattr"]["alter"] = alter
+            check2 = True
+            if "attr" in code:
+                if "min_course" in code["attr"] or "min_credit" in code["attr"] or "course" in code["attr"]:
+                    check2 = False
+                    gpaSum, courseUsed, credit, actual_cred, alternative, output = courseRank(code["attr"], course, alter, output)
+            if check2:
+                gpaSum, courseUsed, credit, actual_cred, alternative, output = bestCourse(course, alter, output)
+
+            output = info(gpaSum, courseUsed, credit, actual_cred, output)
+            if alternative != []:
+                output["respattr"]["alternative"] = alternative
             return output
         
         case "pass_qualification":
-            if code["quali"][0] not in user["profile"]["pastQuali"] or code["quali"][1] not in user["profile"]["pastQuali"][code["quali"][0]] or not qualiMapping(code["quali"][0], code["level"], user["profile"]["pastQuali"][code["quali"][0]][code["quali"][1]]):
+            if "pastQuali" not in user["profile"] or code["quali"][0] not in user["profile"]["pastQuali"] or code["quali"][1] not in user["profile"]["pastQuali"][code["quali"][0]]:
                 return output
-            output["pass"] = True
+            output = qualiMapping(code["quali"][0], code["level"], user["profile"]["pastQuali"][code["quali"][0]][code["quali"][1]], output)
             return output
         
         case "approval":
-            if "specialApprovals" not in user["profile"] or "selfDeclear" not in user["profile"]["specialApprovals"] or code["note"] not in user["profile"]["specialApprovals"]["selfDeclear"]:
+            if "array" in code:
+                for i in code["array"]:
+                    code["array"][i] = switch(code["array"][i]["action"], code["array"][i])
+            if "specialApprovals" not in user["profile"] or"selfDeclear" not in user["profile"]["specialApprovals"] or code["note"] not in user["profile"]["specialApprovals"]["selfDeclear"]:
                 return output
             output["pass"] = True
             return output
+
+        case "is_major":
+            if "attr" in code:
+                if "major" in code["attr"]:
+                    for i in code["attr"]["major"]:
+                        if "currentStudies" in user:
+                            if "mm" in user["currentStudies"]:
+                                if i in user["currentStudies"]["mm"]:
+                                    output["pass"] = True
+                            else:
+                                output["respattr"]["error"] = "mm_not_found_in_currentStudies"
+                        else:
+                            output["respattr"]["error"] = "currentStudies_not_found_in_userdb"
+            return output
+        
+        case _:
+            output["respattr"]["error"] = "Invalid_action"
+            return output
+
+def creditFind(course, output):
+    courseCodeSep = course.split()
+    code = courseCodeSep[0] + courseCodeSep[1]
+
+    if code in globalVariable.courseids:
+        courseName = globalVariable.courseids[code]["NAME"]
+        courseid = globalVariable.courseids[code]["COURSEID"]
+        locater = courseid.find(courseName) + len(courseName) + 2
+    else:
+        output["respattr"]["error"] = "Course_not_found_in_coursids"
+        return -1, output
+
+    if locater >= len(courseid):
+        return -1, output
+    elif courseid[locater].isnumeric():
+        return int(courseid[locater]), output
+    else:
+        locater += 1
+
+def qualiMapping(exam, gradeQ, gradeU, output):
+    match exam:
+        case "HKDSE":
+            level = ["5**", "5*", "5", "4", "3", "2", "1", "U"]
+
+        case _:
+            output['respattr']["error"] = "Invalid_examinationType"
+            return output
+
+
+    for i in level:
+        if i == gradeU:
+            output["pass"] = True
+            return output
+        if i == gradeQ:
+            return output
+        
+def semesterSort(course, output):
+    if "courses" in user:
+        if course in user["courses"]:
+            sem = user["courses"][course]
+            sem = sorted(sem.keys())
+        else:
+            sem = {}
+            output["respattr"]["error"] = "Course_not_found"
+        return sem, output
+    else:
+        return {}, output
+
+def gradeMapping(grade, output):
+    if grade in notPassGrade:
+        return 0, output
+    if grade in passNonLetterGrade:
+        return 0.1, output
+    match grade[0]:
+        case "A":
+            gpa = 4
+        case "B":
+            gpa = 3
+        case "C":
+            gpa = 2
+        case "D":
+            return 1, output
+        case _:
+            output["respattr"]["error"] = "Invalid_grade_received"
+            return 0, output
+    if len(grade) > 1:
+        match grade[1]:
+            case "+":
+                gpa += 0.3
+            case "-":
+                gpa -= 0.3
+    return gpa, output
+
+def courseInfo(course, output):
+    sem, output = semesterSort(course, output)
+    if sem == {}:
+        return 0, 0, 0, output
+    grade = user["courses"][course][sem[len(sem) - 1]]["grade"]
+    gpa, output = gradeMapping(grade, output)
+
+    if len(sem) > 1:
+        credit = int(user["courses"][course][sem[len(sem) - 1]]["units"])
+    else:
+        credit = int(user["courses"][course][sem[0]]["units"])
+    if gpa == 0.1:
+        actual_cred = 0
+    else:
+        actual_cred = credit
+
+    return gpa, credit, actual_cred, output
+
+def loop(code):
+    blackList = []
+    courseList = []
+    alter = []
+    check = False
+    if "action" in code:
+        if code["action"] == "and":
+            check = True
+
+    for i in ["approval", "not", "is major", "pass_qualification", "pass_course", "and", "or", "spread", "pass_certain_level"]:
+        for j in code["array"]:
+            if code["array"][j]["action"] == i:
+                if "attr" in code:
+                    if "local_double_count" in code["attr"]:
+                        continue
+
+                recursion = switch(i, code["array"][j])
+                if "action" in code:
+                    if code["action"] == "and" and not recursion["pass"]:
+                        check = False
+                    if code["action"] == "or" and recursion["pass"]:
+                        check = True
+
+                if "blackList" in recursion["respattr"]:
+                    blackList.append(recursion["respattr"]["blackList"])
+                    continue
+
+                if recursion["respattr"]:
+                    if "courseUsed" in recursion["respattr"]:
+                        course = []
+                        for k in range(len(recursion["respattr"]["courseUsed"])):
+                            course.append(recursion["respattr"]["courseUsed"][k])
+                        courseList.append([recursion["respattr"]["gpa"], course, recursion["respattr"]["credit"], recursion["respattr"]["actual_cred"]])
+                    
+                    if "alternative" in recursion["respattr"]:
+                        for k in range(len(recursion["respattr"]["alternative"])):
+                            alter.append(recursion["respattr"]["alternative"][k])
+                           
+    return courseList, alter,check
+
+def bestCourse(course, alter, output):
+    gpaSum = 0
+    courseUsed = []
+    alternative = []
+    credit = 0
+    actual_cred = 0
+
+    if course:
+        course.sort(reverse = True)
+        gpaSum = course[0][0] * course[0][3]
+        for i in range(len(course[0][1])):
+            courseUsed.append(course[0][1][i])
+        credit = course[0][2]
+        actual_cred = course[0][3]
+
+        del course[0]
+        for i in range(len(course)):
+            if course[i] != []:
+                alternative.append(course[i])
+        for i in range(len(alter)):
+            if alter != []:
+                alternative.append(alter[i])
+
+        if courseUsed != []:
+            output["pass"] = True
+    return gpaSum, courseUsed, credit, actual_cred, alternative, output
+
+def info(gpaSum, courseUsed, credit, actual_cred, output):
+    if courseUsed != []:
+        if actual_cred:
+            output["respattr"]["gpa"] = gpaSum / actual_cred
+        else:
+            output["respattr"]["gpa"] = 0.1
+        output["respattr"]["courseUsed"] = courseUsed
+        output["respattr"]["credit"] = credit
+        output["respattr"]["actual_cred"] = actual_cred
+
+    return output
+
+def removeCourse(course):
+    if course != []:
+        for i in range(len(course)):
+            if "courses" in user:
+                if course[i] in user["courses"]:
+                    del user["courses"][course[i]]
+    
+def spread(attr, course, crossArea, output):
+    course.sort(reverse = True)
+    alter = []
+    check = True
+    areaInfo = []
+    courseUsed = []
+    crossAreaUsed = []
+    creditArea = 0
+    creditSum = 0
+
+    if "min_course_spread" in attr:
+        rank = attr["min_course_spread"]
+    elif "min_credit_spread" in attr:
+        rank = attr["min_credit_spread"]
+
+    for i in range(len(rank)):
+        for j in range(len(course[i][3])):
+            alter.append(course[i][3][j])
+        if course[i][0] < rank[i]:
+            check = False
+            continue
+        if check:
+            depend = []
+            for j in range(len(course[i][2])):
+                if course[i][2][j] in crossAreaUsed:
+                    continue
+                elif course[i][2][j] in crossArea:
+                    depend.append(course[i][2][j])
+                    continue
+                else:
+                    courseUsed.append(course[i][2][j])
+                creditArea += course[i][2][j][0]
+
+            if "min_course_spread" in attr:
+                for k in range(len(depend)):
+                    if len(courseUsed) < rank[i]:
+                        courseUsed.append(depend[0])
+                        crossAreaUsed.append(depend.pop(0))
+                if len(courseUsed) < rank[i]:
+                    break
+            elif "min_credit_spread" in attr:
+                for k in range(len(depend)):
+                    if creditArea < rank[i]:
+                        creditArea += depend[0][0]
+                        courseUsed.append(depend[0])
+                        crossAreaUsed.append(depend.pop(0))
+                if len(courseUsed) < rank[i]:
+                    break
+    
+            areaInfo.append(course[i][4])
+            for k in range(j, len(course[i][2])):
+                if course[i][2][k] not in alter:
+                    alter.append(course[i][2][k])
+
+    for i in range(len(crossArea)):
+        if crossArea[i] not in crossAreaUsed:
+            alter.append(crossArea[i])
+    alter.sort(reverse = True)
+
+    if check:
+        min_credit = 1
+        min_course = 1
+        if "min_credit" in attr:
+            min_credit = attr["min_credit"]
+        if "min_course" in attr:
+            min_course = attr["min_course"]
+        if "course" in attr:
+            min_course = attr["course"]
+
+        while len(courseUsed) < min_course:
+            if alter[0][1] == 0:
+                output["pass"] = False
+                break
+            creditSum += alter[0][0]
+            courseUsed.append(alter.pop(0))
+        while creditSum < min_credit:
+            if alter[0][1] == 0 or alter != []:
+                output["pass"] = False
+                break
+            creditSum += alter[0][0]
+            courseUsed.append(alter.pop(0))
+        output["pass"] = True
+    else:
+        output["pass"] = False
+
+    gpaSum = 0
+    courseUsedR = []
+    credit = 0
+    actual_cred = 0
+    for i in range(len(courseUsed)):
+        gpaSum += courseUsed[i][0] * courseUsed[i][3]
+        for j in range(len(courseUsed[i][1])):
+            courseUsedR.append(courseUsed[i][1][j])
+        credit += courseUsed[i][2]
+        actual_cred += courseUsed[i][3]
+
+    output["respattr"]["areaInfo"] = areaInfo
+    if alter != []:
+        output["respattr"]["alternative"] = alter
+    return gpaSum, courseUsedR, credit, actual_cred, output

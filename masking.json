@@ -11,10 +11,12 @@
                     "array": [
                         {
                             "action": "not",
-                            "array": [{
-                                "action": "fail_attr",
-                                "target_attr": "CO-REQUISITE"
-                            }]
+                            "array": [
+                                {
+                                    "action": "fail_attr",
+                                    "target_attr": "CO-REQUISITE"
+                                }
+                            ]
                         },
                         {
                             "action": "pass_course",
@@ -78,19 +80,23 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chemistry",
-                        "level": 3
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chemistry",
+                            "level": 3
+                        }
+                    ]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Combined Science - Chemistry",
-                        "level": 3
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Combined Science - Chemistry",
+                            "level": 3
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -100,6 +106,10 @@
                     "action": "pass_certain_level",
                     "dept": "CHEM",
                     "level": "1004"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CORE 1120"
                 }
             ]
         }
@@ -113,87 +123,102 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "and",
-                        "array": [
-                            {   "attr" :{"exact": true},
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Overall": 3
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Reading": 3
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Writing": 3
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Listening": 3
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Speaking": 3
-                            }
-                        ]
-                    }]
+                    "array": [
+                        {
+                            "action": "and",
+                            "array": [
+                                {
+                                    "attr": {
+                                        "exact": true
+                                    },
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Overall": 3
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Reading": 3
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Writing": 3
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Listening": 3
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Speaking": 3
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "attr" :{"exact": true},
-                        "action": "level_DSE",
-                        "subject": "English Language",
-                        "level": 4
-                    }]
+                    "array": [
+                        {
+                            "attr": {
+                                "exact": true
+                            },
+                            "action": "level_DSE",
+                            "subject": "English Language",
+                            "level": 4
+                        }
+                    ]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "and",
-                        "array": [
-                            {
-                                "attr" :{"exact": true},
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Overall": 5
-                            },
-                            {
-                                "action": "not",
-                                "array": [{
-                                    "action": "and",
+                    "array": [
+                        {
+                            "action": "and",
+                            "array": [
+                                {
+                                    "attr": {
+                                        "exact": true
+                                    },
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Overall": 5
+                                },
+                                {
+                                    "action": "not",
                                     "array": [
                                         {
-                                            "action": "level_DSE",
-                                            "subject": "English Language",
-                                            "Reading": 4
-                                        },
-                                        {
-                                            "action": "level_DSE",
-                                            "subject": "English Language",
-                                            "Writing": 4
-                                        },
-                                        {
-                                            "action": "level_DSE",
-                                            "subject": "English Language",
-                                            "Listening": 4
-                                        },
-                                        {
-                                            "action": "level_DSE",
-                                            "subject": "English Language",
-                                            "Speaking": 4
+                                            "action": "and",
+                                            "array": [
+                                                {
+                                                    "action": "level_DSE",
+                                                    "subject": "English Language",
+                                                    "Reading": 4
+                                                },
+                                                {
+                                                    "action": "level_DSE",
+                                                    "subject": "English Language",
+                                                    "Writing": 4
+                                                },
+                                                {
+                                                    "action": "level_DSE",
+                                                    "subject": "English Language",
+                                                    "Listening": 4
+                                                },
+                                                {
+                                                    "action": "level_DSE",
+                                                    "subject": "English Language",
+                                                    "Speaking": 4
+                                                }
+                                            ]
                                         }
                                     ]
-                                }]
-                            }
-                        ]
-                    }]
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -299,10 +324,12 @@
             "array": [
                 {
                     "action": "not",
-                    "array": [{
-                        "action": "is_major",
-                        "major": "QFIN"
-                    }]
+                    "array": [
+                        {
+                            "action": "is_major",
+                            "major": "QFIN"
+                        }
+                    ]
                 },
                 {
                     "action": "pass_course",
@@ -334,11 +361,11 @@
                             "array": [
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1403"
+                                    "course": "LANG 1403"
                                 },
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1404"
+                                    "course": "LANG 1404"
                                 },
                                 {
                                     "action": "pass_course",
@@ -375,19 +402,21 @@
                     "array": [
                         {
                             "action": "not",
-                            "array": [{
-                                "action": "or",
-                                "array": [
-                                    {
-                                        "action": "is_major",
-                                        "major": "DSCT"
-                                    },
-                                    {
-                                        "action": "is_major",
-                                        "major": "DDP"
-                                    }
-                                ]
-                            }]
+                            "array": [
+                                {
+                                    "action": "or",
+                                    "array": [
+                                        {
+                                            "action": "is_major",
+                                            "major": "DSCT"
+                                        },
+                                        {
+                                            "action": "is_major",
+                                            "major": "DDP"
+                                        }
+                                    ]
+                                }
+                            ]
                         },
                         {
                             "action": "pass_course",
@@ -467,10 +496,6 @@
                         {
                             "action": "is_major",
                             "major": "COSC"
-                        },
-                        {
-                            "action": "approval",
-                            "note": " Nil"
                         }
                     ]
                 }
@@ -496,11 +521,11 @@
                             "array": [
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1403"
+                                    "course": "LANG 1403"
                                 },
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1404"
+                                    "course": "LANG 1404"
                                 },
                                 {
                                     "action": "pass_course",
@@ -515,10 +540,12 @@
                     "array": [
                         {
                             "action": "not",
-                            "array": [{
-                                "action": "is_major",
-                                "major": "DDP"
-                            }]
+                            "array": [
+                                {
+                                    "action": "is_major",
+                                    "major": "DDP"
+                                }
+                            ]
                         },
                         {
                             "action": "pass_course",
@@ -577,11 +604,11 @@
                             "array": [
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1403"
+                                    "course": "LANG 1403"
                                 },
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1404"
+                                    "course": "LANG 1404"
                                 },
                                 {
                                     "action": "pass_course",
@@ -596,10 +623,12 @@
                     "array": [
                         {
                             "action": "not",
-                            "array": [{
-                                "action": "is_major",
-                                "major": "DDP"
-                            }]
+                            "array": [
+                                {
+                                    "action": "is_major",
+                                    "major": "DDP"
+                                }
+                            ]
                         },
                         {
                             "action": "pass_course",
@@ -648,10 +677,12 @@
                     "array": [
                         {
                             "action": "not",
-                            "array": [{
-                                "action": "is_major",
-                                "major": "DDP"
-                            }]
+                            "array": [
+                                {
+                                    "action": "is_major",
+                                    "major": "DDP"
+                                }
+                            ]
                         },
                         {
                             "action": "pass_course",
@@ -709,10 +740,12 @@
                     "array": [
                         {
                             "action": "not",
-                            "array": [{
-                                "action": "is_major",
-                                "major": "DSCT"
-                            }]
+                            "array": [
+                                {
+                                    "action": "is_major",
+                                    "major": "DSCT"
+                                }
+                            ]
                         },
                         {
                             "action": "pass_course",
@@ -742,11 +775,11 @@
                             "array": [
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1403"
+                                    "course": "LANG 1403"
                                 },
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1404"
+                                    "course": "LANG 1404"
                                 },
                                 {
                                     "action": "pass_course",
@@ -761,10 +794,12 @@
                     "array": [
                         {
                             "action": "not",
-                            "array": [{
-                                "action": "is_major",
-                                "major": "DDP"
-                            }]
+                            "array": [
+                                {
+                                    "action": "is_major",
+                                    "major": "DDP"
+                                }
+                            ]
                         },
                         {
                             "action": "pass_course",
@@ -813,10 +848,12 @@
                     "array": [
                         {
                             "action": "not",
-                            "array": [{
-                                "action": "is_major",
-                                "major": "DDP"
-                            }]
+                            "array": [
+                                {
+                                    "action": "is_major",
+                                    "major": "DDP"
+                                }
+                            ]
                         },
                         {
                             "action": "pass_course",
@@ -859,16 +896,20 @@
                     "array": [
                         {
                             "action": "not",
-                            "array": [{
-                                "action": "is_major",
-                                "major": "BIBU"
-                            }]
+                            "array": [
+                                {
+                                    "action": "is_major",
+                                    "major": "BIBU"
+                                }
+                            ]
                         },
                         {
                             "action": "not",
                             "array": [
-                                {"action": "is_major",
-                                "major": "SGFN"}
+                                {
+                                    "action": "is_major",
+                                    "major": "SGFN"
+                                }
                             ]
                         }
                     ]
@@ -916,31 +957,33 @@
         },
         "PRE-REQUISITE": {
             "action": "pass_qualifcation",
-            "array": [{
-                "action": "or",
-                "array": [
-                    {
-                        "action": "level_DSE",
-                        "subject": "Physics",
-                        "level": 4
-                    },
-                    {
-                        "action": "level_DSE",
-                        "subject": "Chemistry",
-                        "level": 4
-                    },
-                    {
-                        "action": "level_DSE",
-                        "subject": "Mathematics Extended Part (M1: Calculus and Statistics)",
-                        "level": 4
-                    },
-                    {
-                        "action": "level_DSE",
-                        "subject": "Mathematics Extended Part (M2: Algebra and Calculus)",
-                        "level": 4
-                    }
-                ]
-            }]
+            "array": [
+                {
+                    "action": "or",
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Physics",
+                            "level": 4
+                        },
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chemistry",
+                            "level": 4
+                        },
+                        {
+                            "action": "level_DSE",
+                            "subject": "Mathematics Extended Part (M1: Calculus and Statistics)",
+                            "level": 4
+                        },
+                        {
+                            "action": "level_DSE",
+                            "subject": "Mathematics Extended Part (M2: Algebra and Calculus)",
+                            "level": 4
+                        }
+                    ]
+                }
+            ]
         }
     },
     "ECON4374": {
@@ -1010,33 +1053,6 @@
             ]
         }
     },
-    "IEDA3130": {
-        "attr": {
-            "type": "course"
-        },
-        "PRE-REQUISITE": {
-            "action": "or",
-            "array": [
-                {
-                    "action": "pass_course",
-                    "course": "IEDA 2510"
-                },
-                {
-                    "action": "and",
-                    "array": [
-                        {
-                            "action": "pass_course",
-                            "course": "IEDA 2520"
-                        },
-                        {
-                            "action": "pass_course",
-                            "course": "IEDA 2540"
-                        }
-                    ]
-                }
-            ]
-        }
-    },
     "IEDA3330": {
         "attr": {
             "type": "course"
@@ -1051,10 +1067,6 @@
                 {
                     "action": "pass_course",
                     "course": "ELEC 2600"
-                },
-                {
-                    "action": "pass_course",
-                    "course": "IEDA 2510"
                 },
                 {
                     "action": "and",
@@ -1095,10 +1107,6 @@
         "PRE-REQUISITE": {
             "action": "or",
             "array": [
-                {
-                    "action": "pass_course",
-                    "course": "IEDA 2510"
-                },
                 {
                     "action": "and",
                     "array": [
@@ -1147,11 +1155,11 @@
                             "array": [
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1403"
+                                    "course": "LANG 1403"
                                 },
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1404"
+                                    "course": "LANG 1404"
                                 },
                                 {
                                     "action": "pass_course",
@@ -1166,58 +1174,18 @@
                     "array": [
                         {
                             "action": "not",
-                            "array": [{
-                                "action": "is_major",
-                                "major": "DDP"
-                            }]
+                            "array": [
+                                {
+                                    "action": "is_major",
+                                    "major": "DDP"
+                                }
+                            ]
                         },
                         {
                             "action": "pass_course",
                             "course": "LANG 2030"
                         }
                     ]
-                }
-            ]
-        }
-    },
-    "LIFS1010": {
-        "attr": {
-            "type": "course"
-        },
-        "EXCLUSION": {
-            "action": "or",
-            "array": [
-                {
-                    "action": "pass_course",
-                    "course": "LIFS 1901"
-                },
-                {
-                    "action": "pass_course",
-                    "course": "LIFS 1902"
-                },
-                {
-                    "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Combined Science - Biology",
-                        "level": 3
-                    }]
-                },
-                {
-                    "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Biology",
-                        "level": 3
-                    }]
-                },
-                {
-                    "action": "approval",
-                    "note": "a passing grade in HKCEE Biology"
-                },
-                {
-                    "action": "approval",
-                    "note": "HKAL Biology"
                 }
             ]
         }
@@ -1249,10 +1217,6 @@
                 {
                     "action": "or",
                     "array": [
-                        {
-                            "action": "pass_course",
-                            "course": "IEDA 2510"
-                        },
                         {
                             "action": "and",
                             "array": [
@@ -1303,39 +1267,45 @@
                     "array": [
                         {
                             "action": "pass_qualifcation",
-                            "array": [{
-                                "action": "level_DSE",
-                                "subject": "Physics",
-                                "level": 6
-                            }]
+                            "array": [
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "Physics",
+                                    "level": 6
+                                }
+                            ]
                         },
                         {
                             "action": "pass_qualifcation",
-                            "array": [{
-                                "action": "level_DSE",
-                                "subject": "Combined Science - Physics",
-                                "level": 6
-                            }]
+                            "array": [
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "Combined Science - Physics",
+                                    "level": 6
+                                }
+                            ]
                         }
                     ]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "or",
-                        "array": [
-                            {
-                                "action": "level_DSE",
-                                "subject": "Mathematics Extended Part (M1: Calculus and Statistics)",
-                                "level": 5
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "Mathematics Extended Part (M2: Algebra and Calculus)",
-                                "level": 5
-                            }
-                        ]
-                    }]
+                    "array": [
+                        {
+                            "action": "or",
+                            "array": [
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "Mathematics Extended Part (M1: Calculus and Statistics)",
+                                    "level": 5
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "Mathematics Extended Part (M2: Algebra and Calculus)",
+                                    "level": 5
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         },
@@ -1370,37 +1340,41 @@
                 },
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "and",
-                        "array": [
-                            {
-                                "attr" :{"exact": true},
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Overall": 5
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Reading": 4
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Writing": 4
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Listening": 4
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Speaking": 4
-                            }
-                        ]
-                    }]
+                    "array": [
+                        {
+                            "action": "and",
+                            "array": [
+                                {
+                                    "attr": {
+                                        "exact": true
+                                    },
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Overall": 5
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Reading": 4
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Writing": 4
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Listening": 4
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Speaking": 4
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -1430,37 +1404,41 @@
                 },
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "and",
-                        "array": [
-                            {
-                                "attr" :{"exact": true},
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Overall": 5
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Reading": 4
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Writing": 4
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Listening": 4
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Speaking": 4
-                            }
-                        ]
-                    }]
+                    "array": [
+                        {
+                            "action": "and",
+                            "array": [
+                                {
+                                    "attr": {
+                                        "exact": true
+                                    },
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Overall": 5
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Reading": 4
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Writing": 4
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Listening": 4
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Speaking": 4
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -1490,37 +1468,41 @@
                 },
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "and",
-                        "array": [
-                            {
-                                "attr" :{"exact": true},
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Overall": 5
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Reading": 4
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Writing": 4
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Listening": 4
-                            },
-                            {
-                                "action": "level_DSE",
-                                "subject": "English Language",
-                                "Speaking": 4
-                            }
-                        ]
-                    }]
+                    "array": [
+                        {
+                            "action": "and",
+                            "array": [
+                                {
+                                    "attr": {
+                                        "exact": true
+                                    },
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Overall": 5
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Reading": 4
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Writing": 4
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Listening": 4
+                                },
+                                {
+                                    "action": "level_DSE",
+                                    "subject": "English Language",
+                                    "Speaking": 4
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -1542,19 +1524,23 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Combined Science - Physics",
-                        "level": 3
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Combined Science - Physics",
+                            "level": 3
+                        }
+                    ]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Physics",
-                        "level": 3
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Physics",
+                            "level": 3
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -1611,11 +1597,13 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chinese Language",
-                        "level": 1
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chinese Language",
+                            "level": 1
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -1786,19 +1774,23 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chemistry",
-                        "level": 3
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chemistry",
+                            "level": 3
+                        }
+                    ]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Combined Science - Chemistry",
-                        "level": 3
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Combined Science - Chemistry",
+                            "level": 3
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -1833,11 +1825,13 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Combined Science - Chemistry",
-                        "level": 3
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Combined Science - Chemistry",
+                            "level": 3
+                        }
+                    ]
                 },
                 {
                     "action": "pass_course",
@@ -1850,11 +1844,13 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chemistry",
-                        "level": 3
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chemistry",
+                            "level": 3
+                        }
+                    ]
                 },
                 {
                     "action": "pass_course",
@@ -1876,11 +1872,13 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chinese Language",
-                        "level": 1
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chinese Language",
+                            "level": 1
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -1926,11 +1924,13 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chinese Language",
-                        "level": 1
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chinese Language",
+                            "level": 1
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -1976,11 +1976,13 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chinese Language",
-                        "level": 1
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chinese Language",
+                            "level": 1
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -2026,11 +2028,13 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chinese Language",
-                        "level": 1
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chinese Language",
+                            "level": 1
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -2076,11 +2080,13 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chinese Language",
-                        "level": 1
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chinese Language",
+                            "level": 1
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -2126,11 +2132,13 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chinese Language",
-                        "level": 1
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chinese Language",
+                            "level": 1
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -2176,11 +2184,13 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Chinese Language",
-                        "level": 1
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Chinese Language",
+                            "level": 1
+                        }
+                    ]
                 },
                 {
                     "action": "approval",
@@ -2315,19 +2325,23 @@
             "array": [
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Physics",
-                        "level": 3
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Physics",
+                            "level": 3
+                        }
+                    ]
                 },
                 {
                     "action": "pass_qualifcation",
-                    "array": [{
-                        "action": "level_DSE",
-                        "subject": "Combined Science - Physics",
-                        "level": 3
-                    }]
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Combined Science - Physics",
+                            "level": 3
+                        }
+                    ]
                 }
             ]
         },
@@ -2374,6 +2388,131 @@
         "EXCLUSION": {
             "action": "pass_course",
             "course": "ECON 4364"
+        }
+    },
+    "COMP2012H": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "grade_course",
+                    "course": "COMP 1021",
+                    "grade": "A"
+                },
+                {
+                    "action": "grade_course",
+                    "course": "COMP 1022P",
+                    "grade": "A"
+                },
+                {
+                    "action": "grade_course",
+                    "course": "COMP 1022Q",
+                    "grade": "A"
+                },
+                {
+                    "action": "grade_course",
+                    "course": "ISOM 3230",
+                    "grade": "A"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "COMP 2011"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "COMP 2012"
+                }
+            ]
+        }
+    },
+    "LIFS1010": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1401"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1402"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1403"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1404"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1002"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "LIFS 1901"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LIFS 1902"
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Combined Science - Biology",
+                            "level": 3
+                        }
+                    ]
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Biology",
+                            "level": 3
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "CHEM3010": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_certain_level",
+                    "dept": "CHEM",
+                    "level": "1000"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "MATH 2131"
+                }
+            ]
         }
     }
 }
