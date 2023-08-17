@@ -86,7 +86,8 @@ try:
             return {"status": 200}
         except Exception:
             print(traceback.format_exc())
-            return {"status": 400}
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
         
     @app.route('/!setvar/major', methods = ['POST'])
     def update_major():
@@ -95,7 +96,8 @@ try:
             return {"status": 200}
         except Exception:
             print(traceback.format_exc())
-            return {"status": 400}
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
 
 
     @app.route('/!setvar/majorschoolmapping', methods = ['POST'])
@@ -105,7 +107,8 @@ try:
             return {"status": 200}
         except Exception:
             print(traceback.format_exc())
-            return {"status": 400}
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
     
     @app.route('/!setvar/courses', methods = ['POST'])
     def update_courses():
@@ -114,7 +117,8 @@ try:
             return {"status": 200}
         except Exception:
             print(traceback.format_exc())
-            return {"status": 400}
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
         
     @app.route('/!setvar/courseids', methods = ['POST'])
     def update_courseids():
@@ -123,7 +127,8 @@ try:
             return {"status": 200}
         except Exception:
             print(traceback.format_exc())
-            return {"status": 400}
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
 
     @app.route('/!setvar/coursegroups', methods = ['POST'])
     def update_coursegroups():
@@ -132,7 +137,8 @@ try:
             return {"status": 200}
         except Exception:
             print(traceback.format_exc())
-            return {"status": 400}
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
         
     @app.route('/!setvar/sems', methods = ['POST'])
     def update_sems():
@@ -141,7 +147,8 @@ try:
             return {"status": 200}
         except Exception:
             print(traceback.format_exc())
-            return {"status": 400}
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
         
     @app.route('/!setvar/insems', methods = ['POST'])
     def update_insems():
@@ -153,7 +160,8 @@ try:
             return {"status": 200}
         except Exception:
             print(traceback.format_exc())
-            return {"status": 400}
+            globalVariable.deathDump("uni.gafea.net@7003", "", traceback.format_exc())
+            return {"status": 500}
         
 ############################
 # Data output / Accessor
@@ -164,7 +172,8 @@ try:
             return {"status": 200, "resp": globalVariable.phrased_course}
         except Exception:
             print(traceback.format_exc())
-            return {"status": 404}
+            globalVariable.deathDump("uni.gafea.net@7003", "phrasedcourse crashed", traceback.format_exc())
+            return {"status": 500}
 
     @app.route('/!checking/', methods = ['POST'])
     def checking():
@@ -178,6 +187,7 @@ try:
             return {"status": 200, "resp": mx}
         except Exception:
             print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "checking crashed", traceback.format_exc())
             return {"status": 500}
 
     @app.route('/!recommend-courses/', methods = ['POST'])
@@ -188,6 +198,7 @@ try:
             return {"status": 200, "resp": output_data}
         except Exception:
             print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "recommend-course crashed", traceback.format_exc())
             return {"status": 500}
 
     @app.route('/!recommend-prog/', methods = ['POST'])
@@ -198,6 +209,7 @@ try:
             return {"status": 200, "resp": output_data}
         except Exception:
             print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "recommend-prog crashed", traceback.format_exc())
             return {"status": 500}
     
     @app.route('/!arrange/', methods = ['POST'])
@@ -208,6 +220,7 @@ try:
             return {"status": 200, "resp": output_data}
         except Exception:
             print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "arrange crashed", traceback.format_exc())
             return {"status": 500}
     
     @app.errorhandler(404)
@@ -216,10 +229,11 @@ try:
 
     if __name__ == '__main__':
         requests.get("http://localhost:7002/!pushvar/")
-        app.run(debug=False, port=7003)
+        app.run(debug=True, port=7003)
 
 except ImportError:
     print("File missing or outdated")
 except Exception as Argument:
     print(traceback.format_exc())
+    globalVariable.deathDump("uni.gafea.net@7003", "unrecoverable global crash", traceback.format_exc())
     print(Argument)

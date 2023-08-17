@@ -9,7 +9,7 @@ if (sharedfx.about() != "sharedfx") { throw new Error('bad sharedfx import') }
 const cdnPath = "" + sharedfx.envar.cdn_path + `uni_ai\\`
 
 if (true) {
-    fs.writeFileSync('T:\\out.png', text2png('ISOM 3310', {color: '#ccc', backgroundColor: 'white', font: '80px calibri', lineSpacing: 10, padding: 150}))
+    fs.writeFileSync('T:\\out.png', text2png('ISOM 3310', { color: '#ccc', backgroundColor: 'white', font: '80px calibri', lineSpacing: 10, padding: 150 }))
     return
 }
 
@@ -17,8 +17,8 @@ if (true) {
     fs.readdirSync(cdnPath + "rawpng\\").forEach(file => {
         if (file.endsWith(".png")) {
             sharp(cdnPath + "rawpng\\" + file)
-            .webp()
-            .toFile(cdnPath + "draft\\" + file.split(".")[0] + ".webp")
+                .webp()
+                .toFile(cdnPath + "draft\\" + file.split(".")[0] + ".webp")
         }
     })
     return
@@ -70,13 +70,13 @@ const v1Option = (courseDesc) => {
             "send_images": true,
             "save_images": false,
             "alwayson_scripts": {}
-          }
+        }
     )
 }
 
 let courses = {}, sems = [], todo = [], todoIndex = 0, todoCourse = [], failedCourse = []
 let startDelay = 1000 * 60 * 60 * 0, breakDelay = 1000 * 2, killTime = 1000 * 60 * 60 * 9
-console.log(`[aigen_uni] start delay: ` + Math.round(startDelay/1000) + `s, break between each run: ` + Math.round(breakDelay/1000) + `s, run duration: ` + Math.round(killTime/1000) + `s`)
+console.log(`[aigen_uni] start delay: ` + Math.round(startDelay / 1000) + `s, break between each run: ` + Math.round(breakDelay / 1000) + `s, run duration: ` + Math.round(killTime / 1000) + `s`)
 killTime = killTime + (new Date()).getTime() + startDelay
 
 function getCourses(cb) {
@@ -103,7 +103,7 @@ function run() {
         if (failedCourse.length) console.log("[aigen_uni] failed list: " + JSON.stringify(failedCourse))
         return
     }
-    
+
     let course = todo[todoIndex][0], desc = todo[todoIndex][1]
     console.log("[aigen_uni] aigen: " + course)
     post("http://127.0.0.1:7860/sdapi/v1/txt2img", v1Option('' + desc)).then(r => r.json()).then(r => {
@@ -147,7 +147,7 @@ setTimeout(getCourses, startDelay, () => {
                         if (!fs.existsSync(cdnPath + course + ".png") && !todoCourse.includes(course)) {
                             desc = "(" + coursex.replace(coursex.split(" - ")[0] + " - ", "").split(" (")[0] + ")"
                             desc += ", " + courses[dept][sem][coursex].attr.DESCRIPTION.replaceAll(`"`, '').replaceAll(`(`, '').replaceAll(`)`, '').replaceAll(`,`, '.')
-                            if (typeof courses[dept][sem][coursex].attr[`INTENDED LEARNING OUTCOMES`] != "undefined") {desc += ", " + courses[dept][sem][coursex].attr[`INTENDED LEARNING OUTCOMES`].replaceAll(`"`, '').replaceAll(`(`, '').replaceAll(`)`, '').replaceAll(`,`, '.').replace(`<table style=border:0px;>`,"").replaceAll("<span>","").replaceAll("</span>","").replaceAll("<tbody>","").replaceAll("</tbody>","").replaceAll("</table>","").replaceAll("</tr>","").replaceAll("</td>","").replaceAll("<tr>","").replaceAll("<td>","")}
+                            if (typeof courses[dept][sem][coursex].attr[`INTENDED LEARNING OUTCOMES`] != "undefined") { desc += ", " + courses[dept][sem][coursex].attr[`INTENDED LEARNING OUTCOMES`].replaceAll(`"`, '').replaceAll(`(`, '').replaceAll(`)`, '').replaceAll(`,`, '.').replace(`<table style=border:0px;>`, "").replaceAll("<span>", "").replaceAll("</span>", "").replaceAll("<tbody>", "").replaceAll("</tbody>", "").replaceAll("</table>", "").replaceAll("</tr>", "").replaceAll("</td>", "").replaceAll("<tr>", "").replaceAll("<td>", "") }
                             todo.push([course, desc])
                             todoCourse.push(course)
                         }

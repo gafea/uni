@@ -26,13 +26,27 @@ const deathDump = (domain, msg, e) => {
     let tx = t.toJSON()
     t = t.getTime()
     let p = "" + envar.death_dump_path + domain + "\\"
+    let f = t + ".log"
+    let s1 = `Domain: ` + domain + `\nTime: ` + tx + `\nMessage: ` + msg, s2 = `Domain: ` + domain + `<br>Time: ` + tx + `<br>Message: ` + msg + `<br><br>The log will be saved at ` + p + f
+    if (e && typeof e.message != "undefined") {
+        s1 += `\n\nDetailed error:\n` + e.message + `\n\nRaw error:\n` + JSON.stringify(e)
+        s2 += `<br><br>Detailed error:<br>` + e.message + `<br><br>Raw error:<br>` + JSON.stringify(e)
+    } else {
+        s1 += `\n\nRaw error:\n` + JSON.stringify(e)
+        s2 += `<br><br>Raw error:<br>` + JSON.stringify(e)
+    }
     try {
         if (!fs.existsSync(p)) fs.mkdirSync(p)
-        p += t + ".log"
-        fs.writeFileSync(p, `Domain: ` + domain + `\nTime: ` + tx + `\nMessage: ` + msg + `\n\nDetailed error:\n` + e.message + `\n\n` + JSON.stringify(e))
-    } catch (error) {console.log(error)}
-    console.log(`nodejs crashed :(\n\nDomain: ` + domain + `\nTime: ` + tx + `\nMessage: ` + msg + `\n\nThe log will be saved at ` + p + `\n\nDetailed error:<br>` + e.message)
-    throwMail(envar.mail_adr, "[" + domain + " crashed] " + msg, `Domain: ` + domain + `<br>Time: ` + tx + `<br>Message: ` + msg + `<br><br>The log will be saved at ` + p + `<br><br>Detailed error:<br>` + e.message)
+        p += f
+        fs.writeFileSync(p, s1)
+    } catch (error) { console.log(error) }
+    console.log(`nodejs crashed :(\n\n` + s1)
+    throwMail(envar.mail_adr, "[" + domain + " crashed] " + msg, s2)
+    if (typeof envar.mail_deathDump_CC != "undefined" && Array.isArray(envar.mail_deathDump_CC)) {
+        envar.mail_deathDump_CC.forEach(email => {
+            throwMail(email, "[" + domain + " crashed] " + msg, s2)
+        })
+    }
 }
 
 const returnErr = (res, statusCode = 404, message = "", useJSON = false, AccessControlAllowOrigin = false, rightHTML = "", postMessagefx = "") => {

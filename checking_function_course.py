@@ -8,7 +8,7 @@ version = 1
 ##############################
 import globalVariable
 import copy
-
+import traceback
 targetAttr = ["PRE-REQUISITE", "EXCLUSION", "CO-REQUISITE"]
 
 ##############################
@@ -92,6 +92,7 @@ def main(request_data):
         except:
             check_data[course]["respattr"] = {"error": "generic error"}
             check_data[course]["pass"] = True
+            globalVariable.deathDump("uni.gafea.net@7003", "course checking crashed", traceback.format_exc())
             continue
         
     

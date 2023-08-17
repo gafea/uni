@@ -12,7 +12,12 @@ passNonLetterGrade = ["DI", "PA", "P", "T"]
 def main(request_data):
     global major
     major = copy.deepcopy(globalVariable.major)
-    return recommendProg(request_data)
+    try:
+        return recommendProg(request_data)
+    except Exception:
+        print(traceback.format_exc())
+        globalVariable.deathDump("uni.gafea.net@7003", "recommend-prog crashed", traceback.format_exc())
+        return {"error": "generic error"}
 
 def recommendProg(data):
     getUserInfo(data)
@@ -68,6 +73,7 @@ def recommendProg(data):
         return recommend_prog
     except:
         print(traceback.format_exc())
+        globalVariable.deathDump("uni.gafea.net@7003", "recommend-prog crashed", traceback.format_exc())
 
 def getUserInfo(data):
     userdb = data["userdb"]
@@ -94,14 +100,15 @@ def getUserInfo(data):
 
     gpaSum = 0
     creditSum = 0
-    for i in user["courses"]:
-        sem = semesterSort(i)
-        grade = gradeMapping(user["courses"][i][sem[0]]["grade"])
-        if grade == 0.1:
-            continue
-        creditSum += int(user["courses"][i][sem[0]]["units"])
-        gpaSum += int(user["courses"][i][sem[0]]["units"]) * grade
-    
+    if "courses" in user:
+        for i in user["courses"]:
+            sem = semesterSort(i)
+            grade = gradeMapping(user["courses"][i][sem[0]]["grade"])
+            if grade == 0.1:
+                continue
+            creditSum += int(user["courses"][i][sem[0]]["units"])
+            gpaSum += int(user["courses"][i][sem[0]]["units"]) * grade
+        
     global cga
     if creditSum:
         cga = gpaSum / creditSum
@@ -109,6 +116,8 @@ def getUserInfo(data):
         cga = 0
 
 def checkProg(data):
+    data["fx"] = "checking"
+    del data["prog"]
     minor = []
     option = []
     ext = []
@@ -117,7 +126,7 @@ def checkProg(data):
         if i in user["profile"]["currentStudies"]["mm"]:
             continue
         data["prog"] = [i]
-        output = checking_function_major.main(data)
+        output = copy.deepcopy(checking_function_major.main(data))
         if "credit" in output[i]["respattr"]:
             minor.append([output[i]["respattr"]["credit"] / output[i]["attr"]["cred_fulfill"], output[i]["attr"]["cred_fulfill"], i])
         else:
@@ -131,7 +140,7 @@ def checkProg(data):
                 if j in major[year]:
                     if major[year][j]["attr"]["short"] == major[year][i]["attr"]["short"]:
                         data["prog"] = [i]
-                        output = checking_function_major.main(data)
+                        output = copy.deepcopy(checking_function_major.main(data))
                         if "credit" in output[i]["respattr"]:
                             option.append([output[i]["respattr"]["credit"] / output[i]["attr"]["cred_fulfill"], output[i]["attr"]["cred_fulfill"], i])
                         else:
@@ -141,7 +150,7 @@ def checkProg(data):
                 continue
             else:
                 data["prog"] = i
-                output = checking_function_major.main(data)
+                output = copy.deepcopy(checking_function_major.main(data))
                 if "credit" in output[i]["respattr"]:
                     ext.append([output[i]["respattr"]["credit"] / output[i]["attr"]["cred_fulfill"], output[i]["attr"]["cred_fulfill"], i])
                 else:
@@ -160,7 +169,7 @@ def checkProg(data):
                             break
             if check:
                 data["prog"] = [i]
-                output = checking_function_major.main(data)
+                output = copy.deepcopy(checking_function_major.main(data))
                 if "credit" in output[i]["respattr"]:
                     m.append([output[i]["respattr"]["credit"] / output[i]["attr"]["cred_fulfill"], output[i]["attr"]["cred_fulfill"], i])
                 else:

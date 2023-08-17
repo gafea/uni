@@ -5,14 +5,6 @@ import copy
 import traceback
 
 def main(request_data):
-    return major_checking(request_data)
-
-notPassGrade = ["F", "AU", "CR", "I", "PP", "W", "----"]
-passNonLetterGrade = ["DI", "PA", "P", "T"]
-seng = ["BIEN", "CENG", "CEEV", "CIVL", "CIEV", "CPEG",
-        "COMP", "COSC", "ELEC", "IEEM", "ISDN", "MECH"]
-
-def major_checking(request_data):
     userdb = request_data["userdb"]
     year = "20"
     year += userdb["profile"]["currentStudies"]["yearOfIntake"][0]
@@ -34,10 +26,15 @@ def major_checking(request_data):
                             removeCourse(k)
             recursion = priority(globalVariable.major[year_][i])
             output[i] = switch(globalVariable.major[year_][i]["action"], recursion)
-            
         except Exception:
             print(traceback.format_exc())
+            globalVariable.deathDump("uni.gafea.net@7003", "checking major crashed", traceback.format_exc())          
     return output
+
+notPassGrade = ["F", "AU", "CR", "I", "PP", "W", "----"]
+passNonLetterGrade = ["DI", "PA", "P", "T"]
+seng = ["BIEN", "CENG", "CEEV", "CIVL", "CIEV", "CPEG",
+        "COMP", "COSC", "ELEC", "IEEM", "ISDN", "MECH"]
 
 def priority(code):
     if "array" in code:
@@ -82,10 +79,10 @@ def priority(code):
                         gpaSum, courseUsed, credit, actual_cred, alternative, output = bestCourse(courseList, [], output)
                     output = info(gpaSum, courseUsed, credit, actual_cred, output)
 
-                    for i in range(len(alter)):
+                    """for i in range(len(alter)):
                         alternative.append(alter[i])
                     if alternative != []:
-                        output["respattr"]["alternative"] = alternative
+                        output["respattr"]["alternative"] = alternative"""
                 return output
             
         for i in code["array"]:
@@ -464,6 +461,9 @@ def switch(action, code):
             return output
         
         case "approval":
+            if "array" in code:
+                for i in code["array"]:
+                    code["array"][i] = switch(code["array"][i]["action"], code["array"][i])
             if "specialApprovals" not in user["profile"] or"selfDeclear" not in user["profile"]["specialApprovals"] or code["note"] not in user["profile"]["specialApprovals"]["selfDeclear"]:
                 return output
             output["pass"] = True
@@ -562,6 +562,8 @@ def gradeMapping(grade, output):
 
 def courseInfo(course, output):
     sem, output = semesterSort(course, output)
+    if sem == {}:
+        return 0, 0, 0, output
     grade = user["courses"][course][sem[len(sem) - 1]]["grade"]
     gpa, output = gradeMapping(grade, output)
 
@@ -658,8 +660,9 @@ def info(gpaSum, courseUsed, credit, actual_cred, output):
 def removeCourse(course):
     if course != []:
         for i in range(len(course)):
-            if course[i] in user["courses"]:
-                del user["courses"][course[i]]
+            if "courses" in user:
+                if course[i] in user["courses"]:
+                    del user["courses"][course[i]]
     
 def spread(attr, course, crossArea, output):
     course.sort(reverse = True)
@@ -712,7 +715,8 @@ def spread(attr, course, crossArea, output):
     
             areaInfo.append(course[i][4])
             for k in range(j, len(course[i][2])):
-                alter.append(course[i][2][k])
+                if course[i][2][k] not in alter:
+                    alter.append(course[i][2][k])
 
     for i in range(len(crossArea)):
         if crossArea[i] not in crossAreaUsed:

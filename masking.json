@@ -106,6 +106,10 @@
                     "action": "pass_certain_level",
                     "dept": "CHEM",
                     "level": "1004"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "CORE 1120"
                 }
             ]
         }
@@ -357,11 +361,11 @@
                             "array": [
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1403"
+                                    "course": "LANG 1403"
                                 },
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1404"
+                                    "course": "LANG 1404"
                                 },
                                 {
                                     "action": "pass_course",
@@ -517,11 +521,11 @@
                             "array": [
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1403"
+                                    "course": "LANG 1403"
                                 },
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1404"
+                                    "course": "LANG 1404"
                                 },
                                 {
                                     "action": "pass_course",
@@ -600,11 +604,11 @@
                             "array": [
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1403"
+                                    "course": "LANG 1403"
                                 },
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1404"
+                                    "course": "LANG 1404"
                                 },
                                 {
                                     "action": "pass_course",
@@ -771,11 +775,11 @@
                             "array": [
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1403"
+                                    "course": "LANG 1403"
                                 },
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1404"
+                                    "course": "LANG 1404"
                                 },
                                 {
                                     "action": "pass_course",
@@ -1049,33 +1053,6 @@
             ]
         }
     },
-    "IEDA3130": {
-        "attr": {
-            "type": "course"
-        },
-        "PRE-REQUISITE": {
-            "action": "or",
-            "array": [
-                {
-                    "action": "pass_course",
-                    "course": "IEDA 2510"
-                },
-                {
-                    "action": "and",
-                    "array": [
-                        {
-                            "action": "pass_course",
-                            "course": "IEDA 2520"
-                        },
-                        {
-                            "action": "pass_course",
-                            "course": "IEDA 2540"
-                        }
-                    ]
-                }
-            ]
-        }
-    },
     "IEDA3330": {
         "attr": {
             "type": "course"
@@ -1090,10 +1067,6 @@
                 {
                     "action": "pass_course",
                     "course": "ELEC 2600"
-                },
-                {
-                    "action": "pass_course",
-                    "course": "IEDA 2510"
                 },
                 {
                     "action": "and",
@@ -1134,10 +1107,6 @@
         "PRE-REQUISITE": {
             "action": "or",
             "array": [
-                {
-                    "action": "pass_course",
-                    "course": "IEDA 2510"
-                },
                 {
                     "action": "and",
                     "array": [
@@ -1186,11 +1155,11 @@
                             "array": [
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1403"
+                                    "course": "LANG 1403"
                                 },
                                 {
                                     "action": "pass_course",
-                                    "course": "CORE 1404"
+                                    "course": "LANG 1404"
                                 },
                                 {
                                     "action": "pass_course",
@@ -1217,52 +1186,6 @@
                             "course": "LANG 2030"
                         }
                     ]
-                }
-            ]
-        }
-    },
-    "LIFS1010": {
-        "attr": {
-            "type": "course"
-        },
-        "EXCLUSION": {
-            "action": "or",
-            "array": [
-                {
-                    "action": "pass_course",
-                    "course": "LIFS 1901"
-                },
-                {
-                    "action": "pass_course",
-                    "course": "LIFS 1902"
-                },
-                {
-                    "action": "pass_qualifcation",
-                    "array": [
-                        {
-                            "action": "level_DSE",
-                            "subject": "Combined Science - Biology",
-                            "level": 3
-                        }
-                    ]
-                },
-                {
-                    "action": "pass_qualifcation",
-                    "array": [
-                        {
-                            "action": "level_DSE",
-                            "subject": "Biology",
-                            "level": 3
-                        }
-                    ]
-                },
-                {
-                    "action": "approval",
-                    "note": "a passing grade in HKCEE Biology"
-                },
-                {
-                    "action": "approval",
-                    "note": "HKAL Biology"
                 }
             ]
         }
@@ -1294,10 +1217,6 @@
                 {
                     "action": "or",
                     "array": [
-                        {
-                            "action": "pass_course",
-                            "course": "IEDA 2510"
-                        },
                         {
                             "action": "and",
                             "array": [
@@ -2510,6 +2429,88 @@
                 {
                     "action": "pass_course",
                     "course": "COMP 2012"
+                }
+            ]
+        }
+    },
+    "LIFS1010": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1401"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1402"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1403"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1404"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LANG 1002"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "LIFS 1901"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "LIFS 1902"
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Combined Science - Biology",
+                            "level": 3
+                        }
+                    ]
+                },
+                {
+                    "action": "pass_qualifcation",
+                    "array": [
+                        {
+                            "action": "level_DSE",
+                            "subject": "Biology",
+                            "level": 3
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "CHEM3010": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_certain_level",
+                    "dept": "CHEM",
+                    "level": "1000"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "MATH 2131"
                 }
             ]
         }

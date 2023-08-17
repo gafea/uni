@@ -50,13 +50,13 @@ try {
             pythonseed = sharedfx.rndStr(32)
             setTimeout(exec, 10, "python C:\\webserver\\nodejs\\uni\\webServer.py " + pythonseed, err => {
                 console.log("python error", err)
-                sharedfx.deathDump("uni.gafea.net", "failed to start python server", err)
+                sharedfx.deathDump(servar.domain, "failed to run python server", err)
             })
         } catch (error) {
-            sharedfx.deathDump("uni.gafea.net", "failed to start python server", error)
+            sharedfx.deathDump(servar.domain, "failed to start python server", error)
         }
     }
-    //startPythonServer()
+    startPythonServer()
 
     function pushvar() {
         let target = "", doNotPush = ["insems", "phrasedcourse", "pcg"], pushvarcounter = Object.keys(db).length - doNotPush.length

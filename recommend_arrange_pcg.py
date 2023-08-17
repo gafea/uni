@@ -5,7 +5,7 @@ version = 1
 
 import copy
 import globalVariable
-import checking_function_major
+
 
 PCG = {}
 result = {}
@@ -16,7 +16,15 @@ result = {}
 ##############################
 # Main part
 def main():
-    return FormPCG()
+    course_list = course_listing("descending")
+    FormResult(course_list)
+    course_list = course_listing("ascending")
+    for course in globalVariable.insems:   
+        PCG.update([[course, {}]])
+        PCG[course].update([["PRE-REQUISITE-BY", FormPrereq_by(course, course_list)]])
+        PCG[course].update([["CO-REQUISITE-BY", FormCoreq_by(course, course_list)]])
+        PCG[course].update([["EXCLUSION-BY", FormExclu_by(course, course_list)]])
+    return PCG
 
 def Recur_function(items, array):
     if items["action"] == "pass_course":
@@ -31,29 +39,25 @@ def Recur_function(items, array):
         for item in items["array"]:
             Recur_function(item, array)
   
-def FormPrereq_Coreq(course, course_id):
-    prereq = []
-    coreq = []
+def FormPrereq_Coreq(course, course_id, mode):
+    prereq = {}
+    coreq = {}
+    prereq_list = []
+    coreq_list = []
     if course_id not in globalVariable.phrased_course or course not in globalVariable.phrased_course[course_id]:
         pass
     else:
         if "PRE-REQUISITE" not in globalVariable.phrased_course[course_id][course]:
             pass
         else:
-            Recur_function(globalVariable.phrased_course[course_id][course]["PRE-REQUISITE"], prereq)
-            prereq.insert(0, "Start of PRE-REQUISITE")
+            Recur_function(globalVariable.phrased_course[course_id][course]["PRE-REQUISITE"], prereq_list)
         if "CO-REQUISITE" in globalVariable.phrased_course[course_id][course]:
-            coreq.append("Start of CO-REQUISITE")
-            Recur_function(globalVariable.phrased_course[course_id][course]["CO-REQUISITE"], coreq)
-    prereq.extend(coreq)
+            Recur_function(globalVariable.phrased_course[course_id][course]["CO-REQUISITE"], coreq_list)
+    prereq.update([["PRE-REQUISITE", prereq_list]])
+    coreq.update([["CO-REQUISITE", coreq_list]])
+    if mode == "co":
+        return coreq
     return prereq
-
-def FormCourse(course, course_id):
-    current = {}
-    current.update([["action", "pass_course"]])
-    current.update([["course", course]])
-    current.update([["insem", course_id]])
-    return current
 
 def FormExclu(course, course_id):
     exclu = {}
@@ -72,52 +76,35 @@ def FormResult(course_list):
     for course in globalVariable.insems:
         if course in course_list:
             id = globalVariable.insems[course][len(globalVariable.insems[course])-1]
-            result.update([[course, [FormPrereq_Coreq(course, id), FormCourse(course, id), FormExclu(course, id)]]])
+            result.update([[course, [FormPrereq_Coreq(course, id, ""), FormPrereq_Coreq(course, id, "co"), FormExclu(course, id)]]])
 
 def FormPrereq_by(course, course_list):
     course_prereq = []
-    for pre_course in course_list:
-        for i in result[pre_course][0]:
+    for prereq_course in course_list:
+        for i in result[prereq_course][0]["PRE-REQUISITE"]:
             if i == course:
-                course_prereq.append(pre_course)
-            elif i == "Start of CO-REQUISITE":
-                break
+                course_prereq.append(prereq_course)
+        course_prereq.sort()
     return course_prereq
 
 def FormCoreq_by(course, course_list):
     course_coreq = []
-    for pre_course in course_list:
-        flag = 0
-        for i in result[pre_course][0]:
-            if i == course and flag == 1:
-                course_coreq.append(pre_course)
-            elif i == "Start of CO-REQUISITE":
-                flag = 1
+    for coreq_course in course_list:
+        for i in result[coreq_course][1]["CO-REQUISITE"]:
+            if i == course:
+                course_coreq.append(coreq_course)
+        course_coreq.sort()
     return course_coreq
 
 def FormExclu_by(course, course_list):
     course_exclu = []
-    for pre_course in course_list:
-        for i in result[pre_course][2]["EXCLUSION"]:
+    for exclu_course in course_list:
+        for i in result[exclu_course][2]["EXCLUSION"]:
             if i == course:
-                course_exclu.append(pre_course)
+                course_exclu.append(exclu_course)
         course_exclu.sort()
     return course_exclu
     
-def FormPCG():
-    course_list = course_listing("descending")
-    FormResult(course_list)
-    for course in globalVariable.insems:   
-        PCG.update([[course, {}]])
-        PCG[course].update([["PRE-REQUISITE-BY", FormPrereq_by(course, course_list)]])
-        PCG[course].update([["CO-REQUISITE-BY", FormCoreq_by(course, course_list)]])
-        PCG[course].update([["EXCLUSION-BY", FormExclu_by(course, course_list)]])
-    keys = ["PRE-REQUISITE-BY", "CO-REQUISITE-BY", "EXCLUSION-BY"]
-    for i in PCG:
-        for j in keys:
-            PCG[i][j].sort()
-    return PCG
-
 def sort_descend(a):
     b = []
     for i in range(len(a)):
@@ -152,9 +139,3 @@ def course_listing(mode):
         return sort_descend(i)
     elif mode == "ascending":
         return sort_ascend(i)
-
-
-
-
-
-

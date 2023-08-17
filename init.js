@@ -667,17 +667,19 @@ function render_plan(path) {
                 }
 
                 let draft = ""
-                r.resp.forEach(course => {
-                    draft += generate_course_selbox(course.code, course.name, course.sem, course.units, `
-                    <h5>
-                        ` + course.matches + ` matches
-                    </h5>
-                    <h5 style="opacity:0.85">
-                        ` + course.units + ` unit` + ((course.units == "1") ? '' : 's') + `
-                    </h5>`, true)
+                r.resp.sort((a, b) => a.matches < b.matches).forEach(course => {
+                    if (course.pass && course.units && parseInt(course.sem) > parseInt(allSemsF[0]) - 600) {
+                        draft += generate_course_selbox(course.code.substring(0, 4) + " " + course.code.substring(4), course.name, course.sem, course.units, `
+                        <h5>
+                            ` + ((course.matches == 1) ? '' : ('' + course.matches + ` matches`)) + `
+                        </h5>
+                        <h5 style="opacity:0.85">
+                            ` + course.units + ` unit` + ((course.units == "1") ? '' : 's') + `
+                        </h5>`)
+                    }
                 })
 
-                document.getElementById("courses_recommend").innerHTML = `<div class="flx" style="gap:1em">` + draft + `</div>`
+                document.getElementById("courses_recommend").innerHTML = `<div class="flx">` + draft + `</div>`
 
             }).catch(error => {
                 console.log(error)
@@ -713,57 +715,7 @@ function render_plan(path) {
             let reqx3 = { "fx": "arrange" }
             if (signinlevel < 1) reqx3.userdb = config
             post((signinlevel >= 1) ? "/!acc/userfx/" : "/!guestfx/", reqx3).then(r => r.json()).then(r => {
-                if (signinlevel == 2) {
-                    r.resp = {
-                        "arrange": {
-                            "2310": {
-                                "action": "and",
-                                "array": {
-                                    "COMP 2011": {
-                                        "action": "pass_course",
-                                        "course": "COMP 2011"
-                                    },
-                                    "COMP 2012": {
-                                        "action": "pass_course",
-                                        "course": "COMP 2012"
-                                    },
-                                    "COMP 2013": {
-                                        "action": "pass_course",
-                                        "course": "COMP 2013"
-                                    },
-                                    "COMP 2014": {
-                                        "action": "pass_course",
-                                        "course": "COMP 2014"
-                                    }
-                                }
-                            },
-                            "2330": {
-                                "action": "and",
-                                "array": {
-                                    "COMP 2021": {
-                                        "action": "pass_course",
-                                        "course": "COMP 2021"
-                                    },
-                                    "COMP 2022": {
-                                        "action": "pass_course",
-                                        "course": "COMP 2022"
-                                    },
-                                    "COMP 2023": {
-                                        "action": "pass_course",
-                                        "course": "COMP 2023"
-                                    },
-                                    "COMP 2024": {
-                                        "action": "pass_course",
-                                        "course": "COMP 2024"
-                                    }
-                                }
-                            }
-                        },
-                        "courseids": {
-
-                        }
-                    }
-                } else if (r.status != 200 || (typeof r.resp != "undefined" && typeof r.resp.error != "undefined")) {
+                if (r.status != 200 || (typeof r.resp != "undefined" && typeof r.resp.error != "undefined")) {
                     document.getElementById("arrange_recommend").innerHTML = `failed to contact server`
                     return
                 }
@@ -825,7 +777,7 @@ function render_plan(path) {
                             <div id="mminfo-year-` + mnote + `"></div>
                         </div>
                         <div class="box" style="aspect-ratio:2.25"><canvas id="canvas"></canvas></div><br>
-                        <div id="major_select_cont_out"></div>` 
+                        <div id="major_select_cont_out"></div>`
 
                         generate_graph_from_action(JSON.parse(JSON.stringify(r.resp[majorminorx])), majorminorx + ((yearx != "0") ? " (" + yearx + ")" : ""))
 
@@ -1056,7 +1008,7 @@ function render_me(path) {
         <button onclick="create_new_profile_cb = () => {reboot()}; create_new_profile()">
             Guest Profile
         </button>
-        , this temporary profile ` + ((localStorage) ? "" : " will be wiped when you close or refresh your browser, and " ) + `is not migratable when you sign in later
+        , this temporary profile ` + ((localStorage) ? "" : " will be wiped when you close or refresh your browser, and ") + `is not migratable when you sign in later
         </p2>
         </div>`
         return
@@ -1072,10 +1024,19 @@ function render_me(path) {
             </div>
 
             <div class="edge2edge_page">
-                <h3>Home</h3><br>
-                ` + ((signinlevel < 1) ? `<div class="box">[!] You are using a Guest Profile, this temporary profile ` + ((localStorage) ? "" : " will be wiped when you close or refresh your browser, and " ) + `is not migratable when you sign in later<br><br>
+                <h3>Welcome back!</h3><br>
+                ` + ((signinlevel < 1) ? `<div class="box">[!] You are using a Guest Profile, this temporary profile ` + ((localStorage) ? "" : " will be wiped when you close or refresh your browser, and ") + `is not migratable when you sign in later<br><br>
                     <button onclick="config = {}; signinlevel = 0; if (localStorage) {localStorage.clear()}; reboot(); setTimeout(() => alert('Guest Profile Deleted'), 1)">delete this profile now</button></div><br>` : "") + `
-                <p2>Coming soon!</p2>
+                <div class="flx">
+                    <div class="selbox" onclick="boot('/me/course/', false, 1)" style="flex-grow:1">
+                        <h4>My Courses</h4><br><br>
+                        <div style="text-align:right"><p2 class="acss aobh">View My Courses →</p2></div>
+                    </div>
+                    <div class="selbox" onclick="boot('/me/profile/', false, 1)" style="flex-grow:1">
+                        <h4>My Profile</h4><br><br>
+                        <div style="text-align:right"><p2 class="acss aobh">View My Profile →</p2></div>
+                    </div>
+                </div>
             </div>`
             break
 
@@ -1659,7 +1620,7 @@ function approval_course_selbox(snote, mnote) {
 }
 
 function submit_approval_course(snote, noCourse = false, mnote = "") {
-    document.getElementById('approval_course_selbox_dialog_' + snote ).close()
+    document.getElementById('approval_course_selbox_dialog_' + snote).close()
 
     let mxc = []
     if (typeof config.profile == "undefined" || typeof config.profile.specialApprovals == "undefined" || typeof config.profile.specialApprovals.selfDeclear == "undefined") {
@@ -2197,7 +2158,7 @@ function enroll_course(sem, course, make_switch = false, is_SPO = false, possibl
     let model = document.getElementById("course_enroll_model")
 
     if (make_switch && !(signinlevel > 0)) {
-        if (confirm("You are not signed in. Do you want to create a Guest Profile now?\n\nThis temporary profile " + ((localStorage) ? "" : " will be wiped when you close or refresh your browser, and " ) + "is not migratable when you sign in later.")) {
+        if (confirm("You are not signed in. Do you want to create a Guest Profile now?\n\nThis temporary profile " + ((localStorage) ? "" : " will be wiped when you close or refresh your browser, and ") + "is not migratable when you sign in later.")) {
             document.getElementById("course_enroll_notice").innerHTML = `<div id="profile_new_model"></div>`
             create_new_profile_cb = () => { alert("Guest Profile Created"); enroll_course(sem, course, make_switch, is_SPO, possibleGrades, actual_cred) }
             create_new_profile()

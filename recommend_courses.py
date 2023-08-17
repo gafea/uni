@@ -7,33 +7,49 @@ import globalVariable
 import checking_function_major
 import checking_function_course
 
-def main(request_data):
-    return recommendCourses(request_data)
+notPassGrade = ["F", "AU", "CR", "I", "PP", "W", "----"]
 
-def recommendCourses(data):
+def main(data):
     getUserInfo(data)
-    exclusionList = getExclusion(list(user["courses"].keys()))
+    exclusionList = []
+    if "courses" in user:
+        exclusionList = getExclusion(list(user["courses"].keys()))
     recommend = []
     checkMajorOutput = checkMajor(data)
+    mcgaCourse = []
+    for i in checkMajorOutput:
+        a = forMCGA(checkMajorOutput[i], False)
+        if a["respattr"]["mcgaCourse"] != []:
+            for j in a["respattr"]["mcgaCourse"]:
+                mcgaCourse.append(j)
     for i in checkMajorOutput:
         temp = []
-        for j in range(len(checkMajorOutput[i]["respattr"]["alternative"])):
-            if checkMajorOutput[i]["respattr"]["alternative"][j][0] == 0 and checkMajorOutput[i]["respattr"]["alternative"][j][2] != -1:
-                for k in checkMajorOutput[i]["respattr"]["alternative"][j][1]:
-                    if k not in exclusionList and k not in temp:
-                        temp.append(k)
+        if "alternative" in checkMajorOutput[i]["respattr"]:
+            for j in range(len(checkMajorOutput[i]["respattr"]["alternative"])):
+                if checkMajorOutput[i]["respattr"]["alternative"][j][0] == 0 and checkMajorOutput[i]["respattr"]["alternative"][j][2] != -1:
+                    for k in checkMajorOutput[i]["respattr"]["alternative"][j][1]:
+                        if k not in exclusionList and k not in temp and checkInSem(k) and k not in mcgaCourse:
+                            if k in user["courses"]:
+                                sem = user["courses"][k]
+                                sem = sorted(sem.keys())
+                                if user["courses"][k][sem[len(sem) - 1]]["grade"] not in notPassGrade:
+                                    continue
+                            temp.append(k)
         for j in temp:
+            check = True
             for k in range(len(recommend)):
                 if j == recommend[k][0]:
                     recommend[k][1] += 1
                     recommend[k][2].append(i)
+                    check = False
                     break
-            recommend.append([j, 1, [i]])
+            if check:
+                recommend.append([j, 1, [i]])
     output = []
     for i in range(len(recommend)):
-        o = {}
         courseCodeSep = recommend[i][0].split()
         code = courseCodeSep[0] + courseCodeSep[1]
+        o = {}
         o["code"] = code
         o["matches"] = recommend[i][1]
         o["matched_by"] = recommend[i][2]
@@ -45,7 +61,18 @@ def recommendCourses(data):
         o["sem"] = globalVariable.insems[code][len(globalVariable.insems[code]) - 1]
         o["units"] = int(courseid[locater])
         data["course"] = [code]
-        check = checking_function_course.main(data)
+        if "prog" not in data:
+            data["prog"] = user["profile"]["currentStudies"]["mm"]
+        check = copy.deepcopy(checking_function_course.main(data))
+        if "CO-REQUISITE" in check[code]:
+            if not check[code]["CO-REQUISITE"]["pass"]:
+                continue
+        elif not check[code]["pass"]:
+            continue
+        if "attr" in check:
+            if "error" in check["attr"]:
+                globalVariable.deathDump("uni.gafea.net@7003", "recommend-course crashed when calling checkin_function_courses", "Invalid input by " + code + ".")
+                continue
         o["pass"] = check[code]["pass"]
         output.append(o)
     return output
@@ -57,13 +84,14 @@ def getUserInfo(data):
 
     global creditTaken
     creditTaken = 0
-    course = list(user["courses"].keys())
+    
     if "courses" in user:
+        course = list(user["courses"].keys())
         for i in course:
             if i in user["courses"]:
                 sem = sorted(user["courses"][i].keys())
                 if len(sem) == 1:
-                    creditTaken += int(user["courses"][i][sem[0]]["actual_cred"])
+                    creditTaken += int(user["courses"][i][sem[0]]["units"])
                 else:
                     creditTaken += int(user["courses"][i][sem[len(sem) - 1]]["units"])
 
@@ -101,7 +129,8 @@ def checkMajor(data):
     requestCheckMajor["fx"] = "checking"
     if "prog" not in requestCheckMajor:
         requestCheckMajor["prog"] = user["profile"]["currentStudies"]["mm"]
-    return checking_function_major.main(requestCheckMajor)
+    output = copy.deepcopy(checking_function_major.main(requestCheckMajor))
+    return output
     
 def getExclusion(course):
     excl = []
@@ -116,3 +145,30 @@ def getExclusion(course):
                     code += j[4:]
                     excl.append(code)
     return excl    
+
+def checkInSem(course):
+    courseCodeSep = course.split()
+    code = courseCodeSep[0] + courseCodeSep[1]
+    sem = copy.deepcopy(globalVariable.insems[code])
+    sem.sort(reverse = True)
+    current = datetime.now()
+    if int(sem[0][:2]) < current.year % 2000 - 4:
+        return False
+    return True
+
+def forMCGA(major, passattr):
+    mcgaCourse = []
+    major["respattr"]["mcgaCourse"] = []
+    if "array" in major:
+        for i in major["array"]:
+            recursion = forMCGA(major["array"][i], passattr)
+            if recursion["respattr"]["mcgaCourse"] != []:
+                for j in range(len(recursion["respattr"]["mcgaCourse"])):
+                    major["respattr"]["mcgaCourse"].append(recursion["respattr"]["mcgaCourse"][j])
+    if major["pass"] != passattr:
+        if "alternative" in major["respattr"]:
+            for j in range(len(major["respattr"]["alternative"])):
+                for k in range(len(major["respattr"]["alternative"][j][1])):
+                    mcgaCourse.append(major["respattr"]["alternative"][j][1][k])
+        major["respattr"]["mcgaCourse"] = mcgaCourse
+    return major
