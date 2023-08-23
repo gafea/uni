@@ -178,8 +178,16 @@ def course_pass_course_checking(item, userdb, current_attr):
             course = copy.deepcopy(coursei)
             if course.find(item["course"][:4]+item["course"][5:]) != -1:
                 check_courses_list.append(course[:4] + " " + course[4:])
+                if "PREVIOUS CODE" in globalVariable.courseids[course]:
+                    prevcode = copy.deepcopy(globalVariable.courseids[course]["PREVIOUS CODE"])
+                    if prevcode not in check_courses_list:
+                        check_courses_list.append(prevcode[:4] + " " + prevcode[4:])
     else:        
-        check_courses_list.append(item["course"]) 
+        check_courses_list.append(item["course"])
+        if "PREVIOUS CODE" in globalVariable.courseids[(item["course"][:4]+item["course"][5:])]:
+            prevcode = copy.deepcopy(globalVariable.courseids[(item["course"][:4]+item["course"][5:])]["PREVIOUS CODE"])
+            if prevcode not in check_courses_list:
+                check_courses_list.append(prevcode[:4] + " " + prevcode[4:])
     
     for courses in check_courses_list:
         if courses in userdb["courses"]:
@@ -284,7 +292,11 @@ def course_CGA_checking(item, userdb):
             if userdb["courses"][courses][semester]["grade"] in grade_list:
                 total_grade_point += grade_list[userdb["courses"][courses][semester]["grade"]] * int(userdb["courses"][courses][semester]["units"])
                 total_credits += int(userdb["courses"][courses][semester]["units"])
-    calc_CGA = total_grade_point/(total_credits * 10)
+    if total_credits == 0:
+        calc_CGA = 0
+    else:
+        calc_CGA = total_grade_point/(total_credits * 10)
+        
     if calc_CGA >= float(item["CGA"]):
         item["pass"] = True
     else:

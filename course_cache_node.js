@@ -53,7 +53,7 @@ function lessonToType(lesson) {
 }
 
 sharedfx.getAllFromDir(servar.course_path, true).forEach(sx => {
-    if (sx[0] != "_") {
+    if (sx[0] != "_" && !sx.endsWith(".json")) {
         xcourses[sx] = {}
         sharedfx.getAllFromDir(servar.course_path + path.sep + sx).forEach(s => {
             st = s.split(path.sep).pop()

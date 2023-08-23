@@ -21,9 +21,9 @@ def main():
     course_list = course_listing("ascending")
     for course in globalVariable.insems:   
         PCG.update([[course, {}]])
-        PCG[course].update([["PRE-REQUISITE-BY", FormPrereq_by(course, course_list)]])
-        PCG[course].update([["CO-REQUISITE-BY", FormCoreq_by(course, course_list)]])
-        PCG[course].update([["EXCLUSION-BY", FormExclu_by(course, course_list)]])
+        PCG[course].update([["PRE-REQUISITE-BY", Form_Course_by(course, course_list, "pre")]])
+        PCG[course].update([["CO-REQUISITE-BY", Form_Course_by(course, course_list, "co")]])
+        PCG[course].update([["EXCLUSION-BY", Form_Course_by(course, course_list, "exclu")]])
     return PCG
 
 def Recur_function(items, array):
@@ -39,71 +39,57 @@ def Recur_function(items, array):
         for item in items["array"]:
             Recur_function(item, array)
   
-def FormPrereq_Coreq(course, course_id, mode):
-    prereq = {}
-    coreq = {}
-    prereq_list = []
-    coreq_list = []
+def Form_Course(course, course_id, mode):
+    dict = {}
+    list = []
     if course_id not in globalVariable.phrased_course or course not in globalVariable.phrased_course[course_id]:
-        pass
-    else:
-        if "PRE-REQUISITE" not in globalVariable.phrased_course[course_id][course]:
-            pass
+        if mode == "pre":
+            dict.update([["PRE-REQUISITE", list]])
+        elif mode == "co":
+            dict.update([["CO-REQUISITE", list]])
         else:
-            Recur_function(globalVariable.phrased_course[course_id][course]["PRE-REQUISITE"], prereq_list)
-        if "CO-REQUISITE" in globalVariable.phrased_course[course_id][course]:
-            Recur_function(globalVariable.phrased_course[course_id][course]["CO-REQUISITE"], coreq_list)
-    prereq.update([["PRE-REQUISITE", prereq_list]])
-    coreq.update([["CO-REQUISITE", coreq_list]])
-    if mode == "co":
-        return coreq
-    return prereq
-
-def FormExclu(course, course_id):
-    exclu = {}
-    exclu_list = []
-    if course_id not in globalVariable.phrased_course or course not in globalVariable.phrased_course[course_id]:
-        pass
+            dict.update([["EXCLUSION", list]])
+        return dict
     else:
-        if "EXCLUSION" not in globalVariable.phrased_course[course_id][course]:
-            pass
-        else:   
-            Recur_function(globalVariable.phrased_course[course_id][course]["EXCLUSION"], exclu_list)
-    exclu.update([["EXCLUSION", exclu_list]])
-    return exclu
+        if mode == "pre":
+            if "PRE-REQUISITE" in globalVariable.phrased_course[course_id][course]:
+                Recur_function(globalVariable.phrased_course[course_id][course]["PRE-REQUISITE"], list)
+            dict.update([["PRE-REQUISITE", list]])
+            return dict
+        elif mode == "co":
+            if "CO-REQUISITE" in globalVariable.phrased_course[course_id][course]:
+                Recur_function(globalVariable.phrased_course[course_id][course]["CO-REQUISITE"], list)
+            dict.update([["CO-REQUISITE", list]])
+            return dict
+        else:
+            if "EXCLUSION" in globalVariable.phrased_course[course_id][course]:
+                Recur_function(globalVariable.phrased_course[course_id][course]["EXCLUSION"], list) 
+            dict.update([["EXCLUSION", list]])
+            return dict
 
 def FormResult(course_list):
     for course in globalVariable.insems:
         if course in course_list:
             id = globalVariable.insems[course][len(globalVariable.insems[course])-1]
-            result.update([[course, [FormPrereq_Coreq(course, id, ""), FormPrereq_Coreq(course, id, "co"), FormExclu(course, id)]]])
+            result.update([[course, [Form_Course(course, id, "pre"), Form_Course(course, id, "co"), Form_Course(course, id, "exclu")]]])
 
-def FormPrereq_by(course, course_list):
-    course_prereq = []
+def Form_Course_by(course, course_list, mode):
+    list = []
+    if mode == "pre":
+        key = "PRE-REQUISITE"
+        num = 0
+    elif mode == "co":
+        key = "CO-REQUISITE"
+        num = 1
+    else:
+        key = "EXCLUSION"
+        num = 2
     for prereq_course in course_list:
-        for i in result[prereq_course][0]["PRE-REQUISITE"]:
+        for i in result[prereq_course][num][key]:
             if i == course:
-                course_prereq.append(prereq_course)
-        course_prereq.sort()
-    return course_prereq
-
-def FormCoreq_by(course, course_list):
-    course_coreq = []
-    for coreq_course in course_list:
-        for i in result[coreq_course][1]["CO-REQUISITE"]:
-            if i == course:
-                course_coreq.append(coreq_course)
-        course_coreq.sort()
-    return course_coreq
-
-def FormExclu_by(course, course_list):
-    course_exclu = []
-    for exclu_course in course_list:
-        for i in result[exclu_course][2]["EXCLUSION"]:
-            if i == course:
-                course_exclu.append(exclu_course)
-        course_exclu.sort()
-    return course_exclu
+                list.append(prereq_course)
+        list.sort()
+    return list
     
 def sort_descend(a):
     b = []
