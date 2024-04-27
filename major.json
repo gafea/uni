@@ -44,14 +44,14 @@
                         }
                     }
                 },
-                "COMP 4651":{
+                "COMP 4651": {
                     "action": "pass_course",
                     "course": "COMP 4651"
                 },
                 "Big Data Technology Electives": {
-                    "attr":{
-                        "min_credit" : 9,
-                        "min_course" : 3
+                    "attr": {
+                        "min_credit": 9,
+                        "min_course": 3
                     },
                     "action": "approval",
                     "note": "3 courses from the specified 9 elective list. Students may request to use up to 3 credits of courses listed under http://www.cse.ust.hk/ug/minor/BDT/ to count towards this requirement.",
@@ -262,6 +262,914 @@
                         "MGMT 4210": {
                             "action": "pass_course",
                             "course": "MGMT 4210"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "2021": {
+        "BEng in Computer Science": {
+            "attr": {
+                "type": "major",
+                "short": "COMP",
+                "excl": [
+                    "COSC"
+                ],
+                "cred_fulfill": 81
+            },
+            "action": "and",
+            "array": {
+                "Engineering Fundamental Course(s)": {
+                    "action": "and",
+                    "array": {
+                        "COMP 1021 OR COMP 1022P": {
+                            "action": "or",
+                            "array": {
+                                "COMP 1021": {
+                                    "action": "pass_course",
+                                    "course": "COMP 1021"
+                                },
+                                "COMP 1022P": {
+                                    "action": "pass_course",
+                                    "course": "COMP 1022P"
+                                }
+                            }
+                        },
+                        "CHEM 1008 OR CHEM 1020 OR LIFS 1901 OR PHYS 1101 OR PHYS 1112 OR PHYS 1312": {
+                            "action": "or",
+                            "array": {
+                                "CHEM 1008": {
+                                    "action": "pass_course",
+                                    "course": "CHEM 1008"
+                                },
+                                "CHEM 1020": {
+                                    "action": "pass_course",
+                                    "course": "CHEM 1020"
+                                },
+                                "LIFS 1901": {
+                                    "action": "pass_course",
+                                    "course": "LIFS 1901"
+                                },
+                                "PHYS 1101": {
+                                    "action": "pass_course",
+                                    "course": "PHYS 1101"
+                                },
+                                "PHYS 1112": {
+                                    "action": "pass_course",
+                                    "course": "PHYS 1112"
+                                },
+                                "PHYS 1312": {
+                                    "action": "pass_course",
+                                    "course": "PHYS 1312"
+                                }
+                            }
+                        },
+                        "LANG 2030": {
+                            "action": "pass_course",
+                            "course": "LANG 2030"
+                        },
+                        "[(MATH 1012 OR MATH 1013 OR MATH 1023) AND (MATH 1014 OR MATH 1024)] OR [MATH 1020]": {
+                            "action": "or",
+                            "array": {
+                                "(MATH 1012 OR MATH 1013 OR MATH 1023) AND (MATH 1014 OR MATH 1024)": {
+                                    "action": "and",
+                                    "array": {
+                                        "MATH 1012 OR MATH 1013 OR MATH 1023": {
+                                            "action": "or",
+                                            "array": {
+                                                "MATH 1012": {
+                                                    "action": "pass_course",
+                                                    "course": "MATH 1012"
+                                                },
+                                                "MATH 1013": {
+                                                    "action": "pass_course",
+                                                    "course": "MATH 1013"
+                                                },
+                                                "MATH 1023": {
+                                                    "action": "pass_course",
+                                                    "course": "MATH 1023"
+                                                }
+                                            }
+                                        },
+                                        "MATH 1014 OR MATH 1024": {
+                                            "action": "or",
+                                            "array": {
+                                                "MATH 1014": {
+                                                    "action": "pass_course",
+                                                    "course": "MATH 1014"
+                                                },
+                                                "MATH 1024": {
+                                                    "action": "pass_course",
+                                                    "course": "MATH 1024"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "MATH 1020": {
+                                    "action": "pass_course",
+                                    "course": "MATH 1020"
+                                }
+                            }
+                        },
+                        "MATH 2111 OR MATH 2121 OR MATH 2131": {
+                            "action": "or",
+                            "array": {
+                                "MATH 2111": {
+                                    "action": "pass_course",
+                                    "course": "MATH 2111"
+                                },
+                                "MATH 2121": {
+                                    "action": "pass_course",
+                                    "course": "MATH 2121"
+                                },
+                                "MATH 2131": {
+                                    "action": "pass_course",
+                                    "course": "MATH 2131"
+                                }
+                            }
+                        },
+                        "Engineering Introduction course": {
+                            "action": "or",
+                            "array": {
+                                "COMP 1021": {
+                                    "action": "pass_course",
+                                    "course": "COMP 1021"
+                                },
+                                "BIEN 1010": {
+                                    "action": "pass_course",
+                                    "course": "BIEN 1010"
+                                },
+                                "CENG 1000": {
+                                    "action": "pass_course",
+                                    "course": "CENG 1000"
+                                },
+                                "CENG 1500": {
+                                    "action": "pass_course",
+                                    "course": "CENG 1500"
+                                },
+                                "CENG 1700": {
+                                    "action": "pass_course",
+                                    "course": "CENG 1700"
+                                },
+                                "CIVL 1100": {
+                                    "action": "pass_course",
+                                    "course": "CIVL 1100"
+                                },
+                                "ELEC 1100": {
+                                    "action": "pass_course",
+                                    "course": "ELEC 1100"
+                                },
+                                "ELEC 1200": {
+                                    "action": "pass_course",
+                                    "course": "ELEC 1200"
+                                },
+                                "ENGG 1100": {
+                                    "action": "pass_course",
+                                    "course": "ENGG 1100"
+                                },
+                                "IEDA 2010": {
+                                    "action": "pass_course",
+                                    "course": "IEDA 2010"
+                                },
+                                "ISDN 1001": {
+                                    "action": "pass_course",
+                                    "course": "ISDN 1001"
+                                },
+                                "ISDN 1002": {
+                                    "action": "pass_course",
+                                    "course": "ISDN 1002"
+                                },
+                                "ISDN 1006": {
+                                    "action": "pass_course",
+                                    "course": "ISDN 1006"
+                                },
+                                "MECH 1902": {
+                                    "action": "pass_course",
+                                    "course": "MECH 1902"
+                                },
+                                "MECH 1906": {
+                                    "action": "pass_course",
+                                    "course": "MECH 1906"
+                                },
+                                "MECH 1907": {
+                                    "action": "pass_course",
+                                    "course": "MECH 1907"
+                                }
+                            }
+                        }
+                    }
+                },
+                "Required Course(s)": {
+                    "action": "and",
+                    "array": {
+                        "[COMP 1991 AND (COMP 4981 OR COMP 4981H)] OR [COMP 4910]": {
+                            "action": "or",
+                            "array": {
+                                "COMP 1991 AND (COMP 4981 OR COMP 4981H)": {
+                                    "action": "and",
+                                    "array": {
+                                        "COMP 1991": {
+                                            "action": "pass_course",
+                                            "course": "COMP 1991"
+                                        },
+                                        "COMP 4981 OR COMP 4981H": {
+                                            "action": "or",
+                                            "array": {
+                                                "COMP 4981": {
+                                                    "action": "pass_course",
+                                                    "course": "COMP 4981"
+                                                },
+                                                "COMP 4981H": {
+                                                    "action": "pass_course",
+                                                    "course": "COMP 4981H"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "COMP 4910": {
+                                    "action": "pass_course",
+                                    "course": "COMP 4910"
+                                }
+                            }
+                        },
+                        "(COMP 2011 AND COMP 2012) OR COMP 2012H": {
+                            "action": "or",
+                            "array": {
+                                "COMP 2011 AND COMP 2012": {
+                                    "action": "and",
+                                    "array": {
+                                        "COMP 2011": {
+                                            "action": "pass_course",
+                                            "course": "COMP 2011"
+                                        },
+                                        "COMP 2012": {
+                                            "action": "pass_course",
+                                            "course": "COMP 2012"
+                                        }
+                                    }
+                                },
+                                "COMP 2012H": {
+                                    "action": "pass_course",
+                                    "course": "COMP 2012H"
+                                }
+                            }
+                        },
+                        "COMP 2611": {
+                            "action": "pass_course",
+                            "course": "COMP 2611"
+                        },
+                        "COMP 2711 OR COMP 2711H": {
+                            "action": "or",
+                            "array": {
+                                "COMP 2711": {
+                                    "action": "pass_course",
+                                    "course": "COMP 2711"
+                                },
+                                "COMP 2711H": {
+                                    "action": "pass_course",
+                                    "course": "COMP 2711H"
+                                }
+                            }
+                        },
+                        "COMP 3111 OR COMP 3111H": {
+                            "action": "or",
+                            "array": {
+                                "COMP 3111": {
+                                    "action": "pass_course",
+                                    "course": "COMP 3111"
+                                },
+                                "COMP 3111H": {
+                                    "action": "pass_course",
+                                    "course": "COMP 3111H"
+                                }
+                            }
+                        },
+                        "COMP 3511": {
+                            "action": "pass_course",
+                            "course": "COMP 3511"
+                        },
+                        "COMP 3711 OR COMP 3711H": {
+                            "action": "or",
+                            "array": {
+                                "COMP 3711": {
+                                    "action": "pass_course",
+                                    "course": "COMP 3711"
+                                },
+                                "COMP 3711H": {
+                                    "action": "pass_course",
+                                    "course": "COMP 3711H"
+                                }
+                            }
+                        },
+                        "COMP 4900": {
+                            "action": "pass_course",
+                            "course": "COMP 4900"
+                        },
+                        "ELEC 2600 OR ELEC 2600H OR IEDA 2520 OR IEDA 2540 OR MATH 2411 OR MATH 2421 OR MATH 2431": {
+                            "action": "or",
+                            "array": {
+                                "ELEC 2600": {
+                                    "action": "pass_course",
+                                    "course": "ELEC 2600"
+                                },
+                                "ELEC 2600H": {
+                                    "action": "pass_course",
+                                    "course": "ELEC 2600H"
+                                },
+                                "IEDA 2520": {
+                                    "action": "pass_course",
+                                    "course": "IEDA 2520"
+                                },
+                                "IEDA 2540": {
+                                    "action": "pass_course",
+                                    "course": "IEDA 2540"
+                                },
+                                "MATH 2411": {
+                                    "action": "pass_course",
+                                    "course": "MATH 2411"
+                                },
+                                "MATH 2421": {
+                                    "action": "pass_course",
+                                    "course": "MATH 2421"
+                                },
+                                "MATH 2431": {
+                                    "action": "pass_course",
+                                    "course": "MATH 2431"
+                                }
+                            }
+                        },
+                        "ENGG 2010": {
+                            "action": "pass_course",
+                            "course": "ENGG 2010"
+                        },
+                        "LANG 4030": {
+                            "action": "pass_course",
+                            "course": "LANG 4030"
+                        }
+                    }
+                },
+                "Elective(s)": {
+                    "action": "and",
+                    "array": {
+                        "COMP 2000-level or above Elective": {
+                            "action": "pass_certain_level",
+                            "dept": [
+                                "COMP"
+                            ],
+                            "level": 2000,
+                            "min_credit": 3
+                        },
+                        "COMP Electives": {
+                            "action": "spread",
+                            "attr": {
+                                "min_course_spread": [
+                                    3,
+                                    1,
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "min_credit": 15,
+                                "course": 5,
+                                "array": {
+                                    "Artificial Intelligence / Theory Area": {
+                                        "array": {
+                                            "COMP 3211": {
+                                                "action": "pass_course",
+                                                "course": "COMP 3211"
+                                            },
+                                            "COMP 3721": {
+                                                "action": "pass_course",
+                                                "course": "COMP 3721"
+                                            },
+                                            "COMP 4211": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4211"
+                                            },
+                                            "COMP 4221": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4221"
+                                            },
+                                            "COMP 4222": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4222"
+                                            },
+                                            "COMP 4331": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4331"
+                                            },
+                                            "COMP 4332": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4332"
+                                            },
+                                            "COMP 4421": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4421"
+                                            },
+                                            "COMP 4471": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4471"
+                                            },
+                                            "COMP 5211": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5211"
+                                            },
+                                            "COMP 5212": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5212"
+                                            },
+                                            "COMP 5213": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5213"
+                                            },
+                                            "COMP 5221": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5221"
+                                            },
+                                            "COMP 5223": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5223"
+                                            },
+                                            "COMP 5331": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5331"
+                                            },
+                                            "COMP 5421": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5421"
+                                            },
+                                            "COMP 5711": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5711"
+                                            },
+                                            "COMP 5712": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5712"
+                                            },
+                                            "COMP 5713": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5713"
+                                            }
+                                        }
+                                    },
+                                    "Vision & Graphics / Multimedia Area": {
+                                        "array": {
+                                            "COMP 4411": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4411"
+                                            },
+                                            "COMP 4421": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4421"
+                                            },
+                                            "COMP 4431": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4431"
+                                            },
+                                            "COMP 4441": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4441"
+                                            },
+                                            "COMP 4451": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4451"
+                                            },
+                                            "COMP 4461": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4461"
+                                            },
+                                            "COMP 4462": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4462"
+                                            },
+                                            "COMP 4471": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4471"
+                                            },
+                                            "COMP 5411": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5411"
+                                            },
+                                            "COMP 5421": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5421"
+                                            }
+                                        }
+                                    },
+                                    "Software / Database Area": {
+                                        "array": {
+                                            "COMP 3021": {
+                                                "action": "pass_course",
+                                                "course": "COMP 3021"
+                                            },
+                                            "COMP 3031": {
+                                                "action": "pass_course",
+                                                "course": "COMP 3031"
+                                            },
+                                            "COMP 3311": {
+                                                "action": "pass_course",
+                                                "course": "COMP 3311"
+                                            },
+                                            "COMP 4021": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4021"
+                                            },
+                                            "COMP 4111": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4111"
+                                            },
+                                            "COMP 4311": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4311"
+                                            },
+                                            "COMP 4321": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4321"
+                                            },
+                                            "COMP 4331": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4331"
+                                            },
+                                            "COMP 4332": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4332"
+                                            },
+                                            "COMP 4521": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4521"
+                                            },
+                                            "COMP 4651": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4651"
+                                            },
+                                            "COMP 5111": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5111"
+                                            },
+                                            "COMP 5112": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5112"
+                                            },
+                                            "COMP 5311": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5311"
+                                            },
+                                            "COMP 5331": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5331"
+                                            }
+                                        }
+                                    },
+                                    "Computer Systems / Networking Area": {
+                                        "array": {
+                                            "COMP 3632": {
+                                                "action": "pass_course",
+                                                "course": "COMP 3632"
+                                            },
+                                            "COMP 4511": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4511"
+                                            },
+                                            "COMP 4521": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4521"
+                                            },
+                                            "COMP 4531": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4531"
+                                            },
+                                            "COMP 4611": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4611"
+                                            },
+                                            "COMP 4621": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4621"
+                                            },
+                                            "COMP 4631": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4631"
+                                            },
+                                            "COMP 4632": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4632"
+                                            },
+                                            "COMP 4641": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4641"
+                                            },
+                                            "COMP 4651": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4651"
+                                            },
+                                            "COMP 5621": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5621"
+                                            },
+                                            "COMP 5622": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5622"
+                                            },
+                                            "COMP 5631": {
+                                                "action": "pass_course",
+                                                "course": "COMP 5631"
+                                            }
+                                        }
+                                    },
+                                    "Courses Without Associated Area": {
+                                        "array": {
+                                            "COMP 4911": {
+                                                "action": "pass_course",
+                                                "course": "COMP 4911"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Extended Major Program in Artificial Intelligence": {
+            "attr": {
+                "type": "extended_major",
+                "short": "extm-ai",
+                "gpa": 2.15,
+                "single_count": 12,
+                "cred_fulfill": 22
+            },
+            "action": "and",
+            "array": {
+                "Required Course(s)": {
+                    "action": "and",
+                    "array": {
+                        "EMIA 2010A": {
+                            "action": "pass_course",
+                            "course": "EMIA 2010A"
+                        },
+                        "EMIA 2020": {
+                            "action": "pass_course",
+                            "course": "EMIA 2020"
+                        },
+                        "EMIA 4110 OR COMP 4211 OR MATH 4432": {
+                            "action": "or",
+                            "array": {
+                                "EMIA 4110": {
+                                    "action": "pass_course",
+                                    "course": "EMIA 4110"
+                                },
+                                "COMP 4211": {
+                                    "action": "pass_course",
+                                    "course": "COMP 4211"
+                                },
+                                "MATH 4432": {
+                                    "action": "pass_course",
+                                    "course": "MATH 4432"
+                                }
+                            }
+                        },
+                        "EMIA 4990 OR EMIA 4991": {
+                            "action": "or",
+                            "attr": {
+                                "local_double_count": true
+                            },
+                            "array": {
+                                "EMIA 4990": {
+                                    "action": "pass_course",
+                                    "course": "EMIA 4990"
+                                },
+                                "EMIA 4991": {
+                                    "action": "pass_course",
+                                    "course": "EMIA 4991"
+                                }
+                            }
+                        },
+                        "COMP 2011 OR COMP 2012 OR COMP 2012H": {
+                            "action": "or",
+                            "array": {
+                                "COMP 2011": {
+                                    "action": "pass_course",
+                                    "course": "COMP 2011"
+                                },
+                                "COMP 2012": {
+                                    "action": "pass_course",
+                                    "course": "COMP 2012"
+                                },
+                                "COMP 2012H": {
+                                    "action": "pass_course",
+                                    "course": "COMP 2012H"
+                                }
+                            }
+                        },
+                        "COMP 2211 OR COMP 3211": {
+                            "action": "or",
+                            "array": {
+                                "COMP 2211": {
+                                    "action": "pass_course",
+                                    "course": "COMP 2211"
+                                },
+                                "COMP 3211": {
+                                    "action": "pass_course",
+                                    "course": "COMP 3211"
+                                }
+                            }
+                        }
+                    }
+                },
+                "Elective(s)": {
+                    "action": "and",
+                    "array": {
+                        "Artificial Intelligence Electives": {
+                            "action": "and",
+                            "attr": {
+                                "min_credit": 9
+                            },
+                            "array": {
+                                "EMIA 4990 OR EMIA 4991": {
+                                    "action": "or",
+                                    "array": {
+                                        "EMIA 4990": {
+                                            "action": "pass_course",
+                                            "course": "EMIA 4990"
+                                        },
+                                        "EMIA 4991": {
+                                            "action": "pass_course",
+                                            "course": "EMIA 4991"
+                                        }
+                                    }
+                                },
+                                "Artificial Intelligence Electives": {
+                                    "action": "or",
+                                    "array": {
+                                        "EMIA 3500A": {
+                                            "action": "pass_course",
+                                            "course": "EMIA 3500A"
+                                        },
+                                        "EMIA 4120": {
+                                            "action": "pass_course",
+                                            "course": "EMIA 4120"
+                                        },
+                                        "ACCT 4720": {
+                                            "action": "pass_course",
+                                            "course": "ACCT 4720"
+                                        },
+                                        "BIEN 3300": {
+                                            "action": "pass_course",
+                                            "course": "BIEN 3300"
+                                        },
+                                        "BIEN 3310": {
+                                            "action": "pass_course",
+                                            "course": "BIEN 3310"
+                                        },
+                                        "BIEN 3320": {
+                                            "action": "pass_course",
+                                            "course": "BIEN 3320"
+                                        },
+                                        "CENG 3300": {
+                                            "action": "pass_course",
+                                            "course": "CENG 3300"
+                                        },
+                                        "CIVL 4210": {
+                                            "action": "pass_course",
+                                            "course": "CIVL 4210"
+                                        },
+                                        "CIVL 4220": {
+                                            "action": "pass_course",
+                                            "course": "CIVL 4220"
+                                        },
+                                        "COMP 4221": {
+                                            "action": "pass_course",
+                                            "course": "COMP 4221"
+                                        },
+                                        "COMP 4321": {
+                                            "action": "pass_course",
+                                            "course": "COMP 4321"
+                                        },
+                                        "COMP 4331": {
+                                            "action": "pass_course",
+                                            "course": "COMP 4331"
+                                        },
+                                        "COMP 4332": {
+                                            "action": "pass_course",
+                                            "course": "COMP 4332"
+                                        },
+                                        "COMP 4421 OR ELEC 4130 OR MATH 4336": {
+                                            "action": "or",
+                                            "array": {
+                                                "COMP 4421": {
+                                                    "action": "pass_course",
+                                                    "course": "COMP 4421"
+                                                },
+                                                "ELEC 4130": {
+                                                    "action": "pass_course",
+                                                    "course": "ELEC 4130"
+                                                },
+                                                "MATH 4336": {
+                                                    "action": "pass_course",
+                                                    "course": "MATH 4336"
+                                                }
+                                            }
+                                        },
+                                        "COMP 4451": {
+                                            "action": "pass_course",
+                                            "course": "COMP 4451"
+                                        },
+                                        "COMP 4462 OR DASC 3240": {
+                                            "action": "or",
+                                            "array": {
+                                                "COMP 4462": {
+                                                    "action": "pass_course",
+                                                    "course": "COMP 4462"
+                                                },
+                                                "DASC 3240": {
+                                                    "action": "pass_course",
+                                                    "course": "DASC 3240"
+                                                }
+                                            }
+                                        },
+                                        "COMP 4471": {
+                                            "action": "pass_course",
+                                            "course": "COMP 4471"
+                                        },
+                                        "COMP 4641": {
+                                            "action": "pass_course",
+                                            "course": "COMP 4641"
+                                        },
+                                        "COMP 4901K": {
+                                            "action": "pass_course",
+                                            "course": "COMP 4901K"
+                                        },
+                                        "COMP 4901L": {
+                                            "action": "pass_course",
+                                            "course": "COMP 4901L"
+                                        },
+                                        "DASC 3240": {
+                                            "action": "pass_course",
+                                            "course": "DASC 3240"
+                                        },
+                                        "DASC 3250": {
+                                            "action": "pass_course",
+                                            "course": "DASC 3250"
+                                        },
+                                        "DASC 4400": {
+                                            "action": "pass_course",
+                                            "course": "DASC 4400"
+                                        },
+                                        "ELEC 3810": {
+                                            "action": "pass_course",
+                                            "course": "ELEC 3810"
+                                        },
+                                        "ELEC 4230": {
+                                            "action": "pass_course",
+                                            "course": "ELEC 4230"
+                                        },
+                                        "IEDA 3010": {
+                                            "action": "pass_course",
+                                            "course": "IEDA 3010"
+                                        },
+                                        "IEDA 3560": {
+                                            "action": "pass_course",
+                                            "course": "IEDA 3560"
+                                        },
+                                        "ISOM 3340": {
+                                            "action": "pass_course",
+                                            "course": "ISOM 3340"
+                                        },
+                                        "ISOM 3360": {
+                                            "action": "pass_course",
+                                            "course": "ISOM 3360"
+                                        },
+                                        "ISOM 3390": {
+                                            "action": "pass_course",
+                                            "course": "ISOM 3390"
+                                        },
+                                        "LIFS 4320": {
+                                            "action": "pass_course",
+                                            "course": "LIFS 4320"
+                                        },
+                                        "MATH 3425": {
+                                            "action": "pass_course",
+                                            "course": "MATH 3425"
+                                        },
+                                        "MATH 4335": {
+                                            "action": "pass_course",
+                                            "course": "MATH 4335"
+                                        },
+                                        "PHYS 4058": {
+                                            "action": "pass_course",
+                                            "course": "PHYS 4058"
+                                        },
+                                        "PHYS 4811": {
+                                            "action": "pass_course",
+                                            "course": "PHYS 4811"
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

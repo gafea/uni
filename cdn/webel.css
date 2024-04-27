@@ -10,7 +10,7 @@
     --twtb: rgba(255,255,255,.95);
     --ttwttb: #fff8;
     --bg-def: rgba(239,239,239,.9);
-    --bg-grd-def: radial-gradient(farthest-corner at 50% -2em,rgba(255,255,255,95),rgba(255,255,255,.75),rgba(255,255,255,.2));
+    --bg-grd-def: radial-gradient(50% 50%,rgba(255,255,255,95),rgba(255,255,255,.75));
     --border-def: rgba(255,255,255,.5);
 }
 @supports (backdrop-filter:blur(1em)) or (-webkit-backdrop-filter:blur(1em)) {
@@ -73,7 +73,13 @@ a, .acss{text-decoration:none;color:var(--link-color);background-color:transpare
 #divheadbuffer{height:calc(5vh + 4.5em)}
 img{object-fit:cover;opacity:1;transition-duration:.375s;transition-timing-function:cubic-bezier(.19,1,.22,1)}
 #btn_back{border:none;padding:0.5em;font-size:16px;white-space:pre;max-width:4.25em;overflow:clip}
-dialog{border:none; border-radius: 1em; padding:1.5em; box-shadow: 0 1em 1em rgba(0,0,0,.1); background-color: rgba(255,255,255,0.9); backdrop-filter: blur(1em); -webkit-backdrop-filter: blur(1em)}
+dialog{transition-duration:0.2s; border:none; border-radius: 1em; padding:1.5em; box-shadow: 0 1em 2em rgba(0,0,0,.2); background-color: rgba(255,255,255,0.9); backdrop-filter: blur(1em); -webkit-backdrop-filter: blur(1em)}
+dialog[open] {animation: showdialog 0.2s ease normal;-webkit-animation: showdialog 0.2s ease normal;}
+@keyframes showdialog{from {scale:1.1;opacity:0.5} to {scale:1;opacity:1}} @-webkit-keyframes showdialog{from {scale:1.1;opacity:0.5} to {scale:1;opacity:1}}
+/*
+.content{transform-origin: 50vw 50vh;transition-duration:0.15s;transition-timing-function:ease-in-out}
+.content:has(dialog[open]) {scale: 1;border-radius: 1.5em; overflow: hidden !important;} 
+*/
 
 .smtbtn{white-space:pre;padding:1em;border-radius:1em;font-size:13.25px;margin:3px;text-align:center;transition-duration:.1s;display:inline-block;line-height:normal;user-select:none}
 .smtbtn > span{font-size:1em;color:#3f3c39;transition-duration:.1s;background-position-y:center;background-repeat:no-repeat;background-size:1.75em auto}
@@ -98,7 +104,7 @@ dialog{border:none; border-radius: 1em; padding:1.5em; box-shadow: 0 1em 1em rgb
 .ckimg{object-fit:cover;width:7.5em;height:3em;filter:brightness(50%);-webkit-filter:brightness(50%)}
 .centerwrp{justify-content:center;min-height:100vh}
 .centerwrp-header{margin:0.5em 1em} .centerwrp-header > span{margin:0.5em 1em}
-.postboxwrp{max-width:calc(520px - 0.3em);min-width:30em;margin-bottom:1.5em;border-radius:1.5em;border:0.15em solid var(--border-def);box-shadow:0 0.75em 1.5em rgba(0,0,0,.3);background-color:var(--bg-def)}
+.postboxwrp{max-width:calc(520px - 0.3em);min-width:30em;margin:0.5em 0 1.5em 0;margin:0;border-radius:1.5em;border:0.15em solid var(--border-def);box-shadow:0 0.75em 1.5em rgba(0,0,0,.3);background-color:var(--bg-def)}
 #postbox{width:calc(100% - 4em);border-radius:1.3667em;padding:2em;padding-top:1.5em;background-image:var(--bg-grd-def)}
 #postbox h2 {margin-bottom:0.5em}
 #postbox input[type=text], #postbox input[type=email], #postbox input[type=password] {
@@ -108,6 +114,7 @@ dialog{border:none; border-radius: 1em; padding:1.5em; box-shadow: 0 1em 1em rgb
     margin: 0.25em 0;
     width: calc(100% - 2em);
     outline: none;
+    background-color: rgba(128,128,128,.1);
 }
 
 #d_loading::before {display: block!important;content: "";height: 1em;width: 1em;margin:0.375em;margin-right:0.125em;padding:0.125em;border-radius: 50%;animation: 1.25s linear infinite spinner;animation-play-state: running;animation-play-state: inherit;border: solid 0.25em rgba(128,128,128,.5);border-top-color: #1a73e8!important;will-change: transform;text-align:center;font-size:16px;line-height:16px;font-weight: bold}

@@ -41,12 +41,7 @@ const deathDump = (domain, msg, e) => {
         fs.writeFileSync(p, s1)
     } catch (error) { console.log(error) }
     console.log(`nodejs crashed :(\n\n` + s1)
-    throwMail(envar.mail_adr, "[" + domain + " crashed] " + msg, s2)
-    if (typeof envar.mail_deathDump_CC != "undefined" && Array.isArray(envar.mail_deathDump_CC)) {
-        envar.mail_deathDump_CC.forEach(email => {
-            throwMail(email, "[" + domain + " crashed] " + msg, s2)
-        })
-    }
+    throwMail(envar.mail_adr, "[" + domain + " crashed] " + msg, s2, envar.mail_deathDump_CC)
 }
 
 const returnErr = (res, statusCode = 404, message = "", useJSON = false, AccessControlAllowOrigin = false, rightHTML = "", postMessagefx = "") => {
@@ -95,7 +90,7 @@ const parseCookies = (req) => {
         try {
             c = c.trim()
             cookies[c.split('=')[0]] = c.substring(1 + c.split('=')[0].length, c.length)
-        } catch (err) {}
+        } catch (err) { }
     })
 
     return cookies
@@ -111,12 +106,12 @@ const find7003 = (res, body) => {
     let dir = ""
     if (body.fx === "checking") {
         dir = "!checking/"
-    } else if (body.fx === "recommend/courses") {
-        dir = "!recommend/courses/"
-    } else if (body.fx === "recommend/mm") {
-        dir = "!recommend/mm/"
-    } else if (body.fx === "recommend/arrange") {
-        dir = "!recommend/arrange/"
+    } else if (body.fx === "recommend-courses") {
+        dir = "!recommend-courses/"
+    } else if (body.fx === "recommend-prog") {
+        dir = "!recommend-prog/"
+    } else if (body.fx === "arrange") {
+        dir = "!arrange/"
     } else {
         res.writeHead(404, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
         res.end(JSON.stringify({ status: 404 }))
@@ -205,7 +200,7 @@ async function sha512(message) {
     return bufferToHex(hash).toUpperCase();
 }
 
-async function throwMail(address, title, body) {
+async function throwMail(address, title, body, cc = []) {
     let transporter = require('nodemailer').createTransport({
         service: "iCloud",
         auth: {
@@ -214,13 +209,24 @@ async function throwMail(address, title, body) {
         },
     })
 
-    // send mail with defined transport object
-    let info = await transporter.sendMail({
+    let config = {
         from: '"' + envar.root_domain + '" <' + envar.mail_adr + '>', // sender address
         to: address, // list of receivers
         subject: title, // Subject line
         html: body, // html body
-    })
+    }
+
+    if (cc.length > 0) {
+        let ccstr = ""
+        cc.forEach((item, index) => {
+            ccstr += item
+            if (index != cc.length - 1) ccstr += ", "
+        })
+        config.cc = ccstr
+    }
+
+    // send mail with defined transport object
+    let info = await transporter.sendMail(config)
 
     console.log("sentmail: " + address + " - " + title)
 
@@ -245,8 +251,8 @@ class CSRF {
         this.#gc()
     }
 
-    get csrf_valid_time_ms() { 
-        return this.#csrf_valid_time_ms 
+    get csrf_valid_time_ms() {
+        return this.#csrf_valid_time_ms
     }
 
     generate(key) {

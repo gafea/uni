@@ -342,6 +342,39 @@
             "course": "COMP 1022Q"
         }
     },
+    "COMP3111H": {
+        "attr": {
+            "type": "course"
+        },
+        "PRE-REQUISITE": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "grade_course",
+                    "course": "COMP 2012",
+                    "grade": "A-"
+                },
+                {
+                    "action": "grade_course",
+                    "course": "COMP 2012H",
+                    "grade": "A-"
+                }
+            ]
+        },
+        "EXCLUSION": {
+            "action": "or",
+            "array": [
+                {
+                    "action": "pass_course",
+                    "course": "COMP 3111"
+                },
+                {
+                    "action": "pass_course",
+                    "course": "ISOM 3210"
+                }
+            ]
+        }
+    },
     "LANG4030": {
         "attr": {
             "type": "course"

@@ -54,6 +54,7 @@ input:read-only, input:read-only:hover, input:read-only:focus{background-color:t
 .picbox_inner{color:white;align-items:flex-end;position:relative;background-color: rgba(0,0,0,.7); background: linear-gradient(180deg, rgba(0,0,0,.3) 0%, rgba(0,0,0,.6) 50%, rgba(0,0,0,.75) 100%); padding: 1em; border-radius: 1em}
 .picbox_inner_up{position: absolute; top: 0.675em; right: 0.675em; left: 0.675em}
 .picbox_inner_up > h5:not(.textbox) {margin-right: 0.325em}
+.picbox_inner_down {width:100%;gap:0.5em;flex-wrap:wrap-reverse}
 .picbox_inner_blocked, .picbox_inner_locked, .picbox_inner_success {padding: 0;justify-content: center; align-items: center}
 .picbox_inner_blocked {background: #f885}
 .picbox_inner_locked {background: #ff87}
@@ -90,6 +91,12 @@ input:read-only, input:read-only:hover, input:read-only:focus{background-color:t
 
 .lessonbox{border:0.1em dotted rgba(128,128,128,.5);padding:1em;border-radius:1em;max-width:100%;word-wrap:break-word}
 
+.courses_select_bigchar{justify-content:flex-start;flex-flow: nowrap; align-items:first baseline;width:100%;margin:0}
+.courses_select_deptbtn{padding:0.5em 1em;border-radius:0.75em;transition-duration:0.05s;background:none;text-align:start}
+.courses_select_deptbtn:hover{background:rgba(160,160,160,.25)}
+.courses_select_deptbtn:active{transform:scale(0.95)}
+.courses_select_deptbtn > h4 {margin:0;padding:0}
+
 .chart-container{position: relative; width:100%; height:52.5vh}
 
 .enroll_btn_wrp{gap:0.5em;justify-content:flex-start;align-items:baseline;margin:0 0.25em}
@@ -118,18 +125,19 @@ input:read-only, input:read-only:hover, input:read-only:focus{background-color:t
 }
 
 @media (max-width:1020px) {
+    .course_sel{max-width:calc(100% - 1em)}
+    .chart-container{width:100%; height:55vh}
+    .uniroomtime{display:none}
+    .uniroomgrid{display:block}
+}
+
+@media (max-width:700px) {
     .LR_Right, #iL1{margin-left:0;margin-right:0} .LR_Left, #iR1, .LR_Right, #iL1{width:100%}
     .LR_Left, #iR1{position:initial;height:auto;padding:0}
-    .chart-container{width:100%; height:55vh}
     .course_sel, .picbox_inner{min-height:8em}
     .course_sel{max-width:unset}
     .LR_Left{max-height:unset}
     .LR_Left_Content{width:100%}
-}
-
-@media (max-width:750px) {
-    .uniroomtime{display:none}
-    .uniroomgrid{display:block}
     .chart-container{width:100%; height:70vh}
 }
 

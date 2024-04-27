@@ -61,9 +61,9 @@ window.addEventListener('message', function (e) { //for getting account cToken u
         if (r.status === 200 || r.status === 203) {
             document.getElementById("OverlayContent").innerHTML = `<center style="padding:4.25em">`.concat(((r.status === 200) ? `✅ success!` : `✅ pass`)).concat(`</center>`)
             setTimeout(() => {
+                setTimeout(() => {setOverlayStatus('hide', false, 'overlay')}, 1000)
                 reboot()
             }, 150)
-            setOverlayStatus('hide', false)
         } else if (r.status === 400 && r.msg === 'reply-check-failed') { //fuck safari
             document.getElementById("OverlayContent").innerHTML = `<center style="padding:4.25em;display:block;width:max-content"><a target="_parent" class="aobh" href="https://me.gafea.net/_update_cToken">click here to sign back in to your account</a></center>`
             checkSafariToken()
@@ -415,7 +415,7 @@ function boot(path, noHistory, bootID = -1) {
 
     //check if boot is already running, prevent accidental double-clicking and overwriting
     if (isBootRunning) {
-        console.log('[boot] boot aready running! current process: '.concat(prev_boot_call).concat(', ').concat(path).concat(' will be skipped loading.'));
+        console.log('[boot] boot already running! current process: '.concat(prev_boot_call).concat(', ').concat(path).concat(' will be skipped loading.'));
         return false; //stop running boot
     }
 

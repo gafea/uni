@@ -310,7 +310,7 @@ function exe(path) {
 }
 
 const exe_courses = (path) => wait_allSems(render_courses, path, "Courses - uni")
-const exe_people = (path) => wait_allSems(render_people, path, "Instructors - uni")
+const exe_people = (path) => wait_allSems(render_people, path, "People - uni")
 const exe_room = (path) => wait_allSems(render_room, path, "Rooms - uni")
 const exe_me = (path) => wait_allSems(render_me, path, "Me - uni")
 const exe_search = (path) => wait_allSems(render_search, path, "Search - uni")
@@ -330,20 +330,32 @@ const courseCode_to_fullName = (code) => {
         return courseCodeNamedb[code]
 }
 
-function generate_course_selbox(courseCode = "COMP 3511", courseName = "Operating Systems", sem = "2230", units = "3", picbox_inner_up_html = "", noSpecialOverlay = false, onclickfx = "") { //this only support courses
+const hotnessEmoji = {"-2": "🧊", "-1": "❄️", "0": "", "1": "🔥", "2": "❤️‍🔥"}
+function generate_course_selbox(courseCode = "COMP 3511", courseName = "Operating Systems", sem = "2230", units = "3", picbox_inner_up_html = "", noSpecialOverlay = false, onclickfx = "", hotnessinfo = {hotness: 0}) { //this only support courses
     let code = courseCode.replaceAll(" ", ""), url = "" + resourceNETpath + `uni_ai/` + code + `.webp`, deptName = courseCode_to_fullName(courseCode.split(" ")[0])
 
     if (courseCode == "COMP 3511") url = `https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`
 
     return `<button id="` + code + `" aria-label="Course selection button. ` + courseCode.replace(new RegExp(`.{${1}}`, 'g'), '$&' + " ") + ", " + courseName + `. A` + ((deptName[0] == "A" || deptName[0] == "E" || deptName[0] == "I" || deptName[0] == "O" || deptName[0] == "U") ? "n " : " ") + deptName + ` course, offered in ` + ustTimeToString(sem, true).replace("-", " to ") + `. Double click for details." class="course_sel selbox picbox" 
     onclick="` + ((onclickfx) ? onclickfx(courseCode, courseName, sem, units) : (`boot('/course/` + sem + "/" + courseCode.split(' ')[0] + "/" + code + `/', false, 2)`)) + `">
-        <img src="` + url + `" loading="lazy" fetchpriority="low" onerror="this.onerror=null;this.src=emptyimg">    
+        <img referrerpolicy="no-referrer" src="` + url + `" loading="lazy" fetchpriority="low" onerror="this.onerror=null;this.src=emptyimg">    
         <div class="picbox_inner flx">
             <div class="picbox_inner_up flx">
                 ` + picbox_inner_up_html + `
             </div>
-            <div><h4>` + courseCode + `</h4><h5>` + courseName + `</h5></div>
-        </div>` + ((noSpecialOverlay) ? "" : ((typeof config.courses != "undefined" && typeof config.courses[courseCode] != "undefined") ? (`
+            <div class="picbox_inner_down flx">
+                <div>
+                    <h4>` + courseCode + `</h4>
+                    <h5>` + courseName + `</h5>
+                </div>
+                <div>
+                    <h5 style="opacity:0.85">
+                        ` + (hotnessinfo.hotness ? hotnessEmoji[hotnessinfo.hotness] : ((typeof hotnessinfo.avgEnrollPercent != "undefined" && hotnessinfo.avgEnrollPercent !== null) ? "👤" : "")) + `
+                        ` + ((typeof hotnessinfo.avgEnrollPercent != "undefined" && hotnessinfo.avgEnrollPercent !== null) ? ("" + (hotnessinfo.hotness ? " " : "") + (+(hotnessinfo.avgEnrollPercent).toFixed(1)) + `%`) : "") + `
+                    </h5>
+                </div>
+            </div>
+        </div>` + ((noSpecialOverlay) ? "" : ((typeof config.courses != "undefined" && typeof config.courses[courseCode] != "undefined" && config.courses[courseCode][Object.keys(config.courses[courseCode]).sort().reverse()[0]].grade != "AU") ? (`
         <div class="picbox_inner_success picbox_inner flx"><h4>✅ Taken</h4></div>
         `) : ((typeof config._ != "undefined" && typeof config._[code] != "undefined" && !config._[code].pass) ? (`
         ` + (((typeof config._[code].EXCLUSION != "undefined" && config._[code].EXCLUSION.pass) || (typeof config._[code].respattr != "undefined" && typeof config._[code].respattr.PrevAltrCrash != "undefined" && config._[code].respattr.PrevAltrCrash)) ? (`
@@ -924,7 +936,7 @@ function add_course(back = false, course = {}) {
     document.getElementById("add_course_model").innerHTML = `<dialog id="add_course_dialog">
     <form id="add_course_dialog_form" action="javascript:void(0)" onsubmit="return false">
         <div class="flx" style="gap:1em;flex-wrap: wrap-reverse;">
-            <h4>Add Course</h4>
+            <h4 id="add_course_title">Add Course</h4>
             <button value="cancel" formmethod="dialog" class="closebtn" onclick="document.getElementById('add_course_dialog').close()"><img src="` + resourceNETpath + `image/circle-cross.png" title="Close"></button>
         </div><br>
 
@@ -950,28 +962,46 @@ function add_course(back = false, course = {}) {
         <style>@media (min-width:800px) {dialog #search_result {max-height:35em}}</style>
         <div id="search_result" style="width:45em;max-width:100%;min-height:17.5em;overflow:scroll">`+ startSearchingHTML + `</div>`
         buttonDiv.innerHTML = ``
+
     } else if (Object.keys(course).length) {
-        console.log(course)
+        let newConfig = JSON.parse(JSON.stringify(config)), rawCourse = JSON.parse(JSON.stringify(course))
+        if (typeof newConfig.courses === "undefined") newConfig.courses = {}
+        if (typeof newConfig.courses[course.code] === "undefined") newConfig.courses[course.code] = {}
+
+        if (typeof newConfig.courses != "undefined" && typeof newConfig.courses[course.code] != "undefined" && Object.keys(newConfig.courses[course.code]).includes(course.sem)) {
+            course = mergeExisting(newConfig.courses[course.code][course.sem], course)
+            course.existsinconfig = true
+            document.getElementById("add_course_title").innerText = "Edit Course"
+        }
+
+        if (typeof course.actual_cred == "undefined") course.actual_cred = course.units
+
         contentDiv.innerHTML = `
-                    Course: <input readonly name="code" type="text" value="` + course.code + `"><br>
-                    Name: <input readonly name="name" type="text" value="` + course.name + `"><br>
-                    Semester: <select id="course_update_sem" name="sem">` + generate_year_of_intake_select(course.sem, true) + `</select><br>
-                    Grade: <select name="grade">` + generate_grade_selection("----", []) + `</select><br>
-                    <br><h4>Extra</h4><br>
-                    <input type="checkbox" id="is_SPO" name="is_SPO" value="yes"> <label for="is_SPO"> [SPO] Self-Paced Online Learning</label><br>
-                    Actual credit: <input name="actual_cred" type="number" min="0" value="` + course.units + `"><br>
-                    Total credit: <input name="units" type="number" min="0" value="` + course.units + `"><br>
-                    <div class="box" style="display:none">
-                        <p2>Lec: </p2><br>
-                        <p2>Lab: </p2><br>
-                        <p2>Tut: </p2><br>
-                        <p2>Rsh: </p2><br>
-                    </div>
-                    <br>`
-        buttonDiv.innerHTML = `
-                    <br>
-                    <button id="security_dialog_confirmBtn" onclick="submitCourseUpdate(false, () => {reboot(true)})">Add</button>
-                    `
+            Course: <input readonly name="code" type="text" value="` + course.code + `"><br>
+            Name: <input readonly name="name" type="text" value="` + course.name + `"><br>
+            Semester: <select id="course_update_sem" name="sem">` + generate_year_of_intake_select(course.sem, true) + `</select><br>
+            Grade: <select name="grade">` + generate_grade_selection((course.existsinconfig ? course.grade : "----"), []) + `</select><br>
+            <br><h4>Extra</h4><br>
+            <input type="checkbox" id="is_SPO" name="is_SPO" value="Yes" ` + (course.is_SPO ? "checked" : "") + `> <label for="is_SPO"> [SPO] Self-Paced Online Learning</label><br>
+            Actual credit: <input name="actual_cred" type="number" min="0" value="` + course.actual_cred + `"><br>
+            Total credit: <input name="units" type="number" min="0" value="` + course.units + `"><br>
+            <div class="box" style="display:none">
+                <p2>Lec: </p2><br>
+                <p2>Lab: </p2><br>
+                <p2>Tut: </p2><br>
+                <p2>Rsh: </p2><br>
+            </div>
+            <br>`
+
+        document.getElementById("course_update_sem").onchange = () => { rawCourse.sem = document.getElementById("course_update_sem").value; add_course(false, rawCourse) }
+
+        buttonDiv.innerHTML = ((course.existsinconfig ? `
+            <button id="security_dialog_confirmBtn" onclick="submitCourseUpdate(true)">Remove</button>
+            <button id="security_dialog_confirmBtn" onclick="submitCourseUpdate(false)">Save</button>
+            ` : `
+            <br>
+            <button id="security_dialog_confirmBtn" onclick="submitCourseUpdate(false)">Add</button>
+        `))
     }
 
     document.getElementById("add_course_dialog").showModal()
@@ -2094,7 +2124,7 @@ function generate_grade_selection(selection = "----", possibleGrades = []) {
     return ((possibleGrades.length) ? ("" + loop(["----"], selection) + `<optgroup label="Grades">` + loop(possibleGrades, selection) + `</optgroup><optgroup>` + loop(["AU", "I", "T", "W"], selection)) + `</optgroup>` : ("" + loop(["----"], selection) + `<optgroup label="Toward GPA">` + loop(["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"], selection) + `</optgroup><optgroup label="Not for GPA">` + loop(["P", "PP", "T", "AU", "W", "CR", "DI", "DN", "I", "PA", "PS"].sort(), selection) + `</optgroup>`))
 }
 
-function submitCourseUpdate(remove = false, cb = "") {
+function submitCourseUpdate(remove = false, cb = false) {
 
     if (document.getElementById('course_update_dialog')) document.getElementById('course_update_dialog').close()
     if (document.getElementById('add_course_dialog')) document.getElementById('add_course_dialog').close()
@@ -2107,31 +2137,24 @@ function submitCourseUpdate(remove = false, cb = "") {
     if (remove) {
         delete newConfig.courses[formData.code][formData.sem]
         if (Object.keys(newConfig.courses[formData.code]).length === 0) delete newConfig.courses[formData.code]
-        update_config("courses", newConfig.courses, (err) => {
-            if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); return }
-            setLoadingStatus('success', false)
-            update_enroll_course_gui(formData.currentsem, formData.code)
-            return
-        })
-        return
-    }
+    } else {
+        if (typeof newConfig.courses === "undefined") newConfig.courses = {}
+        if (typeof newConfig.courses[formData.code] === "undefined") newConfig.courses[formData.code] = {}
+        if (typeof newConfig.courses[formData.code][formData.sem] === "undefined") newConfig.courses[formData.code][formData.sem] = {}
+        newConfig.courses[formData.code][formData.sem] = { grade: formData.grade, units: formData.units, name: formData.name, actual_cred: formData.actual_cred }
 
-    //console.log(formData)
-    if (typeof newConfig.courses === "undefined") newConfig.courses = {}
-    if (typeof newConfig.courses[formData.code] === "undefined") newConfig.courses[formData.code] = {}
-    if (typeof newConfig.courses[formData.code][formData.sem] === "undefined") newConfig.courses[formData.code][formData.sem] = {}
-    newConfig.courses[formData.code][formData.sem] = { grade: formData.grade, units: formData.units, name: formData.name, actual_cred: formData.actual_cred }
-
-    if (!!(typeof formData.is_SPO !== "undefined" && formData.is_SPO)) {
-        newConfig.courses[formData.code][formData.sem].is_SPO = true
-    } else if (typeof newConfig.courses[formData.code][formData.sem].is_SPO !== "undefined") {
-        delete newConfig.courses[formData.code][formData.sem].is_SPO
+        if (!!(typeof formData.is_SPO !== "undefined" && formData.is_SPO)) {
+            newConfig.courses[formData.code][formData.sem].is_SPO = true
+        } else if (typeof newConfig.courses[formData.code][formData.sem].is_SPO !== "undefined") {
+            delete newConfig.courses[formData.code][formData.sem].is_SPO
+        }
     }
 
     update_config("courses", newConfig.courses, (err) => {
         if (err) { setLoadingStatus('error', false, "change failed, please try again", err.message); if (cb) cb(); return }
         setLoadingStatus('success', false)
         update_enroll_course_gui(formData.currentsem, formData.code)
+        reboot(true)
         if (cb) cb()
     })
 
@@ -2345,6 +2368,61 @@ function render_courses_specific(path, insideCoursePage = false) {
             <div id="course_enroll_notice"></div>
         </div>`
 
+        if (true) {
+            let listofColors = ["red", "orange", "#cc6", "#cc6", "#cc6", "#9c6", "#9c6", "#9c6", "#44e044", "#44e044", "#44e044"]
+            let listofGrades = ["F", "D", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"]
+
+            function ustspacedb_scorerender(score) {
+                let index = Math.max(0, Math.round(((score - 1) / 4) * listofGrades.length) - 1)
+                if (score <= 1.5) {
+                    index = 0
+                } else if (score < 2.5) {
+                    index = 1
+                } else if (score <= 2.83) {
+                    index = 2
+                } else if (score <= 3.17) {
+                    index = 3
+                } else if (score < 3.5) {
+                    index = 4
+                } else if (score <= 3.83) {
+                    index = 5
+                } else if (score <= 4.17) {
+                    index = 6
+                } else if (score < 4.5) {
+                    index = 7
+                } else if (score <= 4.75) {
+                    index = 8
+                } else if (score <= 4.9) {
+                    index = 9
+                } else if (score <= 5) {
+                    index = 10
+                }
+                return `<div class="ustspacedb_score" style="background-color:` + listofColors[index] + `"><p1><b>` + listofGrades[index] + `</b></p1></div>`
+            }
+
+            if (typeof r.resp[course].ustspacedb != "undefined" && r.resp[course].ustspacedb.review_count) html_draft += `
+            <div class="box" id="ustspacedb">
+                <h4>📝 ustspace Rating</h4>
+                <div class="flx" style="gap: 1em; justify-content: space-around; text-align:center; background-color:#88888808; margin: 1em 0; padding: 1em; border-radius: 1em">
+                    <div>
+                        <p2>Content</p2><br><p2>` + ustspacedb_scorerender(r.resp[course].ustspacedb.rating_content) + `</p2>
+                    </div>
+                    <div>
+                        <p2>Teaching</p2><br><p2>` + ustspacedb_scorerender(r.resp[course].ustspacedb.rating_teaching) + `</p2>
+                    </div>
+                    <div>
+                        <p2>Grading</p2><br><p2>` + ustspacedb_scorerender(r.resp[course].ustspacedb.rating_grading) + `</p2>
+                    </div>
+                    <div>
+                        <p2>Workload</p2><br><p2>` + ustspacedb_scorerender(r.resp[course].ustspacedb.rating_workload) + `</p2>
+                    </div>
+                </div>
+                <style>.ustspacedb_score{margin:0.25em;padding:0.5em;border-radius:0.5em;color:white;min-width:2em}</style>
+                <p2>Number of reviews: <b>` + r.resp[course].ustspacedb.review_count + `</b><br>
+                Date of capture: <b>June 20, 2023</b></p2>
+            </div>`
+        }
+
         let attrHTML = renderCourseAttr(((typeof r.resp[course].phrasedattr != "undefined") ? { ...r.resp[course].attr, ...r.resp[course].phrasedattr } : r.resp[course].attr), course, r.resp[course].attr)
         if (attrHTML) html_draft += `<div class="box" id="course-attrs"><h4>📚 Course Attributes</h4>` + attrHTML + `</div>`
         html_draft += `</div>`
@@ -2369,7 +2447,7 @@ function render_courses_specific(path, insideCoursePage = false) {
             html_draft += `</div></div>`
         }
 
-        if (parseInt(path.split("/")[0]) >= 2230) html_draft += `<div class="box"><div id="charts"><h4>📈 Enrollment History</h4></div></div>`
+        if (parseInt(path.split("/")[0]) >= 2230) html_draft += `<div class="box" id="charts"><h4>📈 Enrollment History</h4></div>`
 
         let htmls = { lec: [], lab: [], tut: [], rsh: [], otr: [] }
 
@@ -2388,13 +2466,18 @@ function render_courses_specific(path, insideCoursePage = false) {
                 delete attrs["Date & Time"]
                 delete attrs["Room"]
                 delete attrs["Instructor"]
+                delete attrs["TA/IA/GTA"]
                 //
 
                 htmlsd += JSON.stringify(attrs) + `<br>` // TODO: do not relay on this info as it is cached, use the one from /!diff/ instead
 
                 let resp = {}
                 Object.keys(r.resp[course].section[sectionName]).forEach(time => {
-                    resp[time] = { Room: r.resp[course].section[sectionName][time].Room, Instructor: r.resp[course].section[sectionName][time].Instructor }
+                    let rt = {}
+                    if (typeof r.resp[course].section[sectionName][time].Room != "undefined") rt.Room = r.resp[course].section[sectionName][time].Room
+                    if (typeof r.resp[course].section[sectionName][time].Instructor != "undefined") rt.Instructor = r.resp[course].section[sectionName][time].Instructor
+                    if (typeof r.resp[course].section[sectionName][time]["TA/IA/GTA"] != "undefined") rt["TA/IA/GTA"] = r.resp[course].section[sectionName][time]["TA/IA/GTA"]
+                    resp[time] = rt
                 })
                 htmlsd += `` + renderTimetableGrid(resp, "courseDetail", path.split("/")[0]) + `</div>`
 
@@ -2423,7 +2506,11 @@ function render_courses_specific(path, insideCoursePage = false) {
 
         if (parseInt(path.split("/")[0]) >= 2230) {
             fetch("/!diff/" + path.split('/')[2].toUpperCase() + "/" + ((path.split("/")[0] != allSemsF[0]) ? ("" + path.split("/")[0] + "/") : "")).then(r => r.json()).then(rChart => {
-                if (rChart.status != 200) { document.getElementById("charts").innerHTML = "failed to contact server or script crashed"; return }
+                if (rChart.status != 200) { 
+                    document.getElementById("charts").innerHTML = "failed to contact server or script crashed"
+                    document.getElementById("charts").style.display = "none"
+                    return
+                }
 
                 setTimeout(() => {
 
@@ -2449,6 +2536,7 @@ function render_courses_specific(path, insideCoursePage = false) {
             }).catch(error => {
                 console.log(error)
                 document.getElementById("charts").innerHTML = "failed to contact server or script crashed"
+                document.getElementById("charts").style.display = "none"
             })
         }
 
@@ -2471,7 +2559,7 @@ function render_courses_specific(path, insideCoursePage = false) {
         }
 
         #courses_detail_content .box {margin: 0.5em 0}
-        @media (max-width:1020px) {#courses_select_left{display:none}}
+        @media (max-width:700px) {#courses_select_left{display:none}}
         </style>`
         setTimeout(() => { document.getElementById("course_detail_topbar_specialStyles").innerHTML += "<style>#btn_back{transition-duration:0.1s!important}</style>" }, 500)
         setTimeout(enroll_course, 50, path.split("/")[0], course)
@@ -2514,7 +2602,16 @@ function render_courses_details(path, scrollIntoView = false, isGroup = false) {
             if ((studprog === "ug" && parseInt(course[5]) > 0 && parseInt(course[5]) < 5) || (studprog === "pg" && parseInt(course[5]) >= 5)) {
                 if (listMode === "card") {
                     let courseParts = courseStringToParts(course)
-                    html_draft += generate_course_selbox(courseParts.code, courseParts.name, path.split('/')[0], courseParts.units.split(" ")[0], "" + ((typeof config.courses != "undefined" && typeof config.courses[course.split(" - ")[0]] != "undefined" && typeof config.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (`<style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + config.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : "<h5></h5>") + ((typeof r.resp[course].attr._cancelled != "undefined" && r.resp[course].attr._cancelled) ? `<div class="textbox"><h5>❌ Cancelled</h5></div>` : (`<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"])) + "</h5>"))
+                    html_draft += generate_course_selbox(
+                        courseParts.code,
+                        courseParts.name,
+                        path.split('/')[0],
+                        courseParts.units.split(" ")[0],
+                        "" + ((typeof config.courses != "undefined" && typeof config.courses[course.split(" - ")[0]] != "undefined" && typeof config.courses[course.split(" - ")[0]][path.split("/")[0]] != "undefined") ? (`<style>#` + course.split(" ")[0] + course.split(" ")[1] + `{border:0.25em solid #fffc;margin:0.25em}</style><h5 class="textbox" style="background:#fffc;color:#333">` + config.courses[course.split(" - ")[0]][path.split("/")[0]].grade + `</h5>`) : "<h5></h5>") + ((typeof r.resp[course].attr._cancelled != "undefined" && r.resp[course].attr._cancelled) ? `<div class="textbox"><h5>❌ Cancelled</h5></div>` : (`<h5 style="opacity:0.85">` + ((typeof r.resp[course].attr["VECTOR"] === "undefined") ? course.substring(course.lastIndexOf(" (") + 2, course.length).split(")")[0] : r.resp[course].attr["VECTOR"])) + "</h5>"),
+                        false,
+                        "",
+                        (typeof r.resp[course].hot != "undefined" ? r.resp[course].hot : {hotness: 0})
+                    )
                 } else {
                     html_draft += `<div style="margin:1em 0.5em"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `" class="selbox" onclick="boot('/course/` + path.split('/')[0] + "/" + course.split(" ")[0] + "/" + course.split(" ")[0] + course.split(" ")[1] + `/', false, 2)">
                     <div>
@@ -2528,7 +2625,7 @@ function render_courses_details(path, scrollIntoView = false, isGroup = false) {
             }
         })
 
-        if (listMode === "card") html_draft += `</div><div style="padding:0.5em 1em"><p3>The above pictures were generated using AI for illustration purposes only. It does not represent the actual course contents and/or learning outcomes.</p3></div>`
+        if (listMode === "card") html_draft += `</div><div style="padding:0.5em 1em"><p3>❤️‍🔥: Quotas are full for all sections<br>🔥: Enrollment Percentage >= 85%<br>❄️: Enrollment Percentage <= 30%<br>🧊: Enrollment Percentage <= 10%<br><hr>The above pictures were generated using AI for illustration purposes only. It does not represent the actual course contents and/or learning outcomes.</p3></div>`
         html.innerHTML = html_draft
 
         if (scrollIntoView) { if ((Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) <= 520)) { document.getElementById("courses_select_right").scrollIntoView() } else { document.body.scrollIntoView() } }
@@ -2663,17 +2760,49 @@ function render_courses(pathF) {
 
         let coursex = ((path.split("/").length > 2 && path.split("/")[2]) ? decodeURI(path) : "" + semx + "/" + deptx + "/")
 
-        html_draft += `<div id="myDropdown" class="flx"><input type="text" style="position:sticky;top:0.5em" placeholder="Filter..." id="myInput" onkeyup="filterFunction()">`
+        //let desktopHTML = `<div id="myDropdown" class="flx no_mobile"><!--<input type="text" style="position:sticky;top:0.5em" placeholder="Filter..." id="myInput" onkeyup="filterFunction()">-->`
+        let mobileHTML = `<select class="only_mobile" name="deptid" id="deptid" title="Select Target" onchange="scrollIntoView = true, doNotCheckUGPG = false; boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/' + document.getElementById('deptid').value + '/', false, 2)">`
+        let newHTML = `<div><div>`
+
+        let prevdept = ""
         depts.forEach(dept => {
-            html_draft += `<button title="` + courseCode_to_fullName(dept) + `" onclick="scrollIntoView = true, doNotCheckUGPG = false; boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/` + dept + `/', false, 2)"`
+
+            if (prevdept.charAt(0) != dept.charAt(0)) {
+                if (!isGroup) {
+                    if (prevdept) mobileHTML += `</optgroup>`
+                    mobileHTML += `<optgroup label="` + dept.charAt(0) + `">`
+                }
+                newHTML += `</div></div><div class="flx courses_select_bigchar no_mobile">` + (isGroup ? "" : `<div class="flx" style="min-width:1.75em;justify-content:center;opacity:.4;position:sticky;top:0"><h4>` + dept.charAt(0) + `</h4></div>`) + `<div class="flx" style="justify-content:flex-start;gap:0.25em">`
+            }
+
+            //desktopHTML += `<button title="` + courseCode_to_fullName(dept) + `" onclick="scrollIntoView = true, doNotCheckUGPG = false; boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/` + dept + `/', false, 2)"`
+            mobileHTML += `<option value="` + dept + `"` + ((courseCode_to_fullName(dept) != dept) ? (` label="` + dept + ` - ` + courseCode_to_fullName(dept) + `"`) : ``)
+            newHTML += `<button class="courses_select_deptbtn" title="` + courseCode_to_fullName(dept) + `" onclick="scrollIntoView = true, doNotCheckUGPG = false; boot('/` + (isGroup ? "group" : "course") + `/' + document.getElementById('timeid').value + '/` + dept + `/', false, 2)"`
+
             if (dept == deptx) {
                 document.title = "" + deptx + " - " + ustTimeToString(semx, true) + " - uni"
                 history.replaceState(null, window.title, "/" + (isGroup ? "group" : "course") + "/" + semx + "/" + deptx + "/")
-                html_draft += ` style="background:rgba(255,255,0,.4)"`
+
+                //desktopHTML += ` style="background:rgba(255,255,0,.4)"`
+                mobileHTML += " selected"
+                newHTML += ` style="background:rgba(160,160,160,.25)"`
             }
-            html_draft += `>` + dept + `</button>`
+
+            //desktopHTML += `>` + dept + `</button>`
+            mobileHTML += `>` + dept + `</option>`
+            newHTML += isGroup ? (`><p2><b>• ` + dept + `</b></p2></button>`) : (`><h4>` + dept + `</h4></button>`)
+
+            prevdept = dept
+
         })
-        html_draft += `</div>`
+
+        //desktopHTML += `</div>`
+        if (prevdept) mobileHTML += `</optgroup>`
+        mobileHTML += `</select>`
+        newHTML += `</div></div>`
+
+        //html_draft += desktopHTML + mobileHTML
+        html_draft += mobileHTML + newHTML
 
         html.innerHTML = html_draft
 
@@ -2699,7 +2828,7 @@ function render_UGPG_switch() {
 }
 
 function render_people(path) {
-    document.getElementById("courses_select_left_top").innerHTML = `<h2>Instructors</h2>`
+    document.getElementById("courses_select_left_top").innerHTML = `<h2>People</h2>`
 
     let html_draft = ""
     let target_people = decodeURI(path.split("/")[0])
@@ -2974,6 +3103,7 @@ function render_room(path) {
 const chartOptions = (timeRange) => {
     let options = {
         maintainAspectRatio: false,
+        tension: 0.05,
         interaction: {
             intersect: false,
             mode: 'nearest',
@@ -3236,17 +3366,35 @@ function renderTimetableGrid(resp, type, target_time = 0) {
             } else if (type === "courseDetail") {
                 html_draft += `<div style="margin:0.75em 0.5em 0.75em 0.25em;padding:0.25em 0.5em 0.25em 0.75em;border-left:0.25em solid #ff888888">
                 <h4>` + lesson.date.substring(0, 25) + `</h4><h5>` + lesson.date.slice(25) + `</h5>
-                <p2>Room: ` + lesson.Room + `<br><i>Instructor: `
-                if (Array.isArray(lesson.Instructor)) {
-                    let tmparr = []
-                    lesson.Instructor.forEach((inst) => {
-                        tmparr.push(`<button onclick="boot('/people/` + inst + `/` + target_time + `/', false, 2)">` + inst + "</button>")
-                    })
-                    html_draft += tmparr.join(" ")
-                } else {
-                    html_draft += JSON.stringify(lesson.Instructor)
+                <p2>Room: ` + lesson.Room
+
+                if (typeof lesson.Instructor != "undefined" && lesson.Instructor) {
+                    html_draft += `<br>Instructor: `
+                    if (Array.isArray(lesson.Instructor)) {
+                        let tmparr = []
+                        lesson.Instructor.forEach((inst) => {
+                            tmparr.push(`<button onclick="boot('/people/` + inst + `/` + target_time + `/', false, 2)">` + inst + "</button>")
+                        })
+                        html_draft += tmparr.join(" ")
+                    } else {
+                        html_draft += JSON.stringify(lesson.Instructor)
+                    }
                 }
-                html_draft += `</i></p2></div>`
+
+                if (typeof lesson["TA/IA/GTA"] != "undefined" && lesson["TA/IA/GTA"]) {
+                    html_draft += `<br>TA/IA/GTA: `
+                    if (Array.isArray(lesson["TA/IA/GTA"])) {
+                        let tmparr = []
+                        lesson[["TA/IA/GTA"]].forEach((inst) => {
+                            tmparr.push(`<button onclick="boot('/people/` + inst + `/` + target_time + `/', false, 2)">` + inst + "</button>")
+                        })
+                        html_draft += tmparr.join(" ")
+                    } else {
+                        html_draft += JSON.stringify(lesson["TA/IA/GTA"])
+                    }
+                }
+
+                html_draft += `</p2></div>`
             }
         })
         html_draft += `</div></div>`
@@ -3322,17 +3470,31 @@ function renderTimetableGrid(resp, type, target_time = 0) {
                 } else if (type === "people") {
                     html_draft += lesson.course.split(" - ")[0] + ` - ` + lesson.section + `<br><i>` + lesson.course.replace(lesson.course.split(" - ")[0] + " - ", "").slice(0, -9) + `</i><small><br>` + lesson.room + `</small>`
                 } else if (type === "courseDetail") {
-                    html_draft += `Room: ` + lesson.Room + `<br><i>Instructor: `
-                    if (Array.isArray(lesson.Instructor)) {
-                        let tmparr = []
-                        lesson.Instructor.forEach((inst) => {
-                            tmparr.push(`<button onclick="boot('/people/` + inst + `/` + target_time + `/', false, 2)">` + inst + "</button>")
-                        })
-                        html_draft += tmparr.join(" ")
-                    } else {
-                        html_draft += JSON.stringify(lesson.Instructor)
+                    html_draft += `Room: ` + lesson.Room
+                    if (typeof lesson.Instructor != "undefined" && lesson.Instructor) {
+                        html_draft += `<br>Instructor: `
+                        if (Array.isArray(lesson.Instructor)) {
+                            let tmparr = []
+                            lesson.Instructor.forEach((inst) => {
+                                tmparr.push(`<button onclick="boot('/people/` + inst + `/` + target_time + `/', false, 2)">` + inst + "</button>")
+                            })
+                            html_draft += tmparr.join(" ")
+                        } else {
+                            html_draft += JSON.stringify(lesson.Instructor)
+                        }
                     }
-                    html_draft += `</i>`
+                    if (typeof lesson["TA/IA/GTA"] != "undefined" && lesson["TA/IA/GTA"]) {
+                        html_draft += `<br>TA/IA/GTA: `
+                        if (Array.isArray(lesson["TA/IA/GTA"])) {
+                            let tmparr = []
+                            lesson[["TA/IA/GTA"]].forEach((inst) => {
+                                tmparr.push(`<button onclick="boot('/people/` + inst + `/` + target_time + `/', false, 2)">` + inst + "</button>")
+                            })
+                            html_draft += tmparr.join(" ")
+                        } else {
+                            html_draft += JSON.stringify(lesson["TA/IA/GTA"])
+                        }
+                    }
                 }
                 html_draft += `</p2></div></div>`
             })

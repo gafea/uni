@@ -50,7 +50,7 @@ try {
             pythonseed = sharedfx.rndStr(32)
             setTimeout(exec, 10, "python C:\\webserver\\nodejs\\uni\\webServer.py " + pythonseed, err => {
                 console.log("python error", err)
-                sharedfx.deathDump(servar.domain, "failed to run python server", err)
+                sharedfx.deathDump(servar.domain, "python server crashed", err)
             })
         } catch (error) {
             sharedfx.deathDump(servar.domain, "failed to start python server", error)
@@ -97,33 +97,55 @@ try {
         }, 500)
     }
 
+    function course_fetch_interval() {
+        let t = (new Date())
+        return (19 - (t.getMinutes() % 20)) * 60 * 1000 + (59 - t.getSeconds()) * 1000 + (999 - t.getMilliseconds()) + 1000
+    }
+
     //courses_fetch, including course_cache
-    function courses_fetch(recur = false) {
+    function courses_fetch(recur = false, noDiff = false, noCache = false, sem = 0) {
+
+        let startTime = "2024-05-03T08:00:00.000+08:00", endTime = "2024-07-21T12:00:00.000+08:00"
 
         if (recur) {
-            let tu = (new Date())
-            if ((new Date).getTime() < new Date('2023-08-25T00:00:00.000+08:00').getTime()) { //the time before recur fetching starts
-                setTimeout(courses_fetch, (19 - (tu.getMinutes() % 20)) * 60 * 1000 + (59 - tu.getSeconds()) * 1000 + (999 - tu.getMilliseconds()) + 500, true)
-                return
-            } else if ((new Date).getTime() > new Date('2023-09-15T23:50:00.000+08:00').getTime()) { //the time when recur stops
+            if (!sem) {
+                sem = db.sems[0]
+            }
+
+            if ((new Date).getTime() > new Date(endTime).getTime()) {
                 console.log("[" + servar.domain + "] fetching killtime reached, stopping loop...")
+                return
+            }
+
+            setTimeout(courses_fetch, course_fetch_interval(), true, noDiff, noCache, sem)
+
+            if ((new Date).getTime() < new Date(startTime).getTime()) {
                 return
             }
         }
 
         console.log("[" + servar.domain + "] starting fetching...")
 
-        setTimeout(exec, 100, (servar.deployed) ? 'node uni\\course_fetch_node.js' : 'node course_fetch_node.js', err => { })
+        setTimeout(exec, 100, `node ` + ((servar.deployed) ? `uni\\` : ``) + `course_fetch_node.js` + ((noDiff) ? ` noDiff` : ``) + ((noCache) ? ` noCache` : ``) + ((sem) ? (` sem=` + sem) : ``), err => { })
 
     }
-    let t = (new Date())
-    setTimeout(courses_fetch, (19 - (t.getMinutes() % 20)) * 60 * 1000 + (59 - t.getSeconds()) * 1000 + (999 - t.getMilliseconds()) + 500, true)
+    setTimeout(courses_fetch, course_fetch_interval(), true)
+    setInterval(() => {
+        if (db.sems.length) {
+            for (let i = 3; i > -1; i--) {
+                if (db.sems.length > i-1 && db.sems[i]) {
+                    setTimeout( () => courses_fetch(false, true, !i, db.sems[i]), (3-i) * 15000)
+                }
+            }
+        }
+    }, 1000 * 60 * 60 * 24 * 3)
 
     //course_cache
     let cctm = (new Date())
     function course_cache(firstBoot = false) {
 
         console.log("[" + servar.domain + "] starting cacheing...")
+
 
         cctm = (new Date())
         setTimeout(exec, 100, "node " + ((servar.deployed) ? 'uni\\' : "") + "course_cache_node.js" + ((firstBoot) ? " firstBoot" : ""), err => { })
@@ -528,6 +550,7 @@ try {
                     Object.keys(db.coursegroups[semx][deptx]).forEach(courseFullName => {
                         if (courseFullName != "_attr") {
                             resp[courseFullName] = { attr: db.coursegroups[semx][deptx][courseFullName]["attr"] }
+                            if (typeof db.coursegroups[semx][deptx][courseFullName]["hot"] != "undefined") resp[courseFullName]["hot"] = db.coursegroups[semx][deptx][courseFullName]["hot"]
                         }
                     })
 
@@ -595,6 +618,7 @@ try {
                         Object.keys(db.courses[deptx][semx]).forEach(courseFullName => {
                             if (courseFullName != "_attr") {
                                 resp[courseFullName] = { attr: db.courses[deptx][semx][courseFullName]["attr"] }
+                                if (typeof db.courses[deptx][semx][courseFullName]["hot"] != "undefined") resp[courseFullName]["hot"] = db.courses[deptx][semx][courseFullName]["hot"]
                                 Object.keys(extraattrs).forEach(k => {
                                     resp[courseFullName].attr[k] = extraattrs[k].join(", ")
                                 })
@@ -650,6 +674,10 @@ try {
                             })
                         }
                     })
+
+                    if (false && servar.deployed && fs.existsSync(".\\uni\\ustspacedb\\" + courseCode + ".json")) {
+                        rx["ustspacedb"] = JSON.parse(fs.readFileSync(".\\uni\\ustspacedb\\" + courseCode + ".json", "utf-8"))
+                    }
 
                     res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8', 'Server': 'joutou' })
                     res.end(JSON.stringify({ status: 200, resp: { [courseNameFound]: rx } }))
@@ -790,6 +818,13 @@ try {
                     sharedfx.returnErr(res, 200, "", true)
                     setTimeout(() => {
                         courses_fetch()
+                    }, 10)
+                    return
+
+                } else if (req.url === '/!course_fetch_nodiff/') {
+                    sharedfx.returnErr(res, 200, "", true)
+                    setTimeout(() => {
+                        courses_fetch(false, true)
                     }, 10)
                     return
 
