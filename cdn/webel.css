@@ -90,7 +90,8 @@ dialog[open] {animation: showdialog 0.2s ease normal;-webkit-animation: showdial
 .edge2edge_page{padding:2em calc( 5% + 5em );padding:2em max(calc(env(safe-area-inset-right) + 5%), calc(5% + 5em)) 2em max(calc(env(safe-area-inset-left) + 5%), calc(5% + 5em))}
 .edge2edge_wide{padding:0.75em;padding:0.75em max(calc(env(safe-area-inset-right) + 0.75em), 0.75em) 0.75em max(calc(env(safe-area-inset-left) + 0.75em), 0.75em)}
 .card{padding:2em calc( 5% + 5em );padding:2em max(calc(env(safe-area-inset-right) + 5%), calc(5% + 5em)) 2em max(calc(env(safe-area-inset-left) + 5%), calc(5% + 5em))}
-.box, .selbox{background-color:white;padding:1em;margin:0.5em;border-radius:1em}
+.box, .selbox, .innerpaddingbox{background-color:white;padding:1em;margin:0.5em;border-radius:1em}
+.innerpaddingbox{overflow:hidden;padding:0} .innerpaddingbox > * {padding:1em}
 .selbox{cursor:pointer;transition-duration: 0.15s;box-shadow: 0 0.5em 1em rgba(0,0,0,.05)}
 .selbox:hover{box-shadow: 0 1em 2em rgba(0,0,0,.15)}
 .picbox{background-repeat: no-repeat; background-position: center center; background-size: cover; object-fit: cover;}
@@ -304,7 +305,7 @@ input:disabled ~ .checkmark, input:disabled ~ .checkmark:hover{cursor:default!im
 body, head, html{background-color:#0f0c09;color:#eeeeee}
 dialog{color:#eeeeee} dialog::backdrop {background-color: rgba(0, 0, 0, 0.5)}
 a, .acss{color:#3993ff} a:hover, .acss:hover{color:#5bb5ff}
-.box, .selbox{background-color: #1f1c19}
+.box, .selbox, .innerpaddingbox{background-color: #1f1c19}
 .boxcolor-red{background-color: #f8c2}
 .boxcolor-yellow{background-color: #ff82}
 .boxcolor-green{border-color: #8fc9; background-color: #8fc2}

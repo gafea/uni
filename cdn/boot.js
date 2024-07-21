@@ -162,7 +162,7 @@ function renderBottomBarUserInfo() {
             document.getElementById("ckusrinfo").innerHTML = `<p2>:( server error</p2><br><br>`
         } else if (bottomBarUserInfo.status != 200) {
             if (bottomBarUserInfo.cTokenOnly) { refresh_cToken() }
-            document.getElementById("ckusrinfo").innerHTML = `<a href="https://me.gafea.net" target="_blank" tabindex="0"><button>sign in</button></a><br><br><br>`
+            document.getElementById("ckusrinfo").innerHTML = `<a href="https://me.gafea.net" tabindex="0"><button>sign in</button></a><br><br><br>`
         } else {
             document.getElementById("ckusrinfo").innerHTML = `<div class="flx" style="justify-content:center">
             <div class="usericon"><a href="https://me.gafea.net" target="_blank" tabindex="0"><img alt="" src="https://me.gafea.net/getpp/" draggable="false"></a></div>

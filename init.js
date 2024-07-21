@@ -114,8 +114,8 @@ function init(path) {
                         <div class="LR_Left_Content">
                             <div class="box flx" style="justify-content:center;gap:0.5em;margin:0.5em 0">
                                 <button onclick="boot('/course/', false, 2)">course</button>
-                                <button onclick="peoplex='';boot('/people/', false, 2)">people</button>
                                 <button onclick="roomx='LTA';boot('/room/', false, 2)">room</button>
+                                <button onclick="peoplex='';boot('/people/', false, 2)">people</button>
                             </div>
                             <div id="courses_select_left_top"></div>
                             <div class="flx" style="justify-content:center;gap:0.5em;margin:0.5em 0;border-top:0.15em dotted rgba(128,128,128,.2);padding-top:0.75em" id="courses_select_left_optionBox"></div>
@@ -336,7 +336,7 @@ function generate_course_selbox(courseCode = "COMP 3511", courseName = "Operatin
 
     if (courseCode == "COMP 3511") url = `https://ia601705.us.archive.org/16/items/windows-xp-bliss-wallpaper/windows-xp-bliss-4k-lu-1920x1080.jpg`
 
-    return `<button id="` + code + `" aria-label="Course selection button. ` + courseCode.replace(new RegExp(`.{${1}}`, 'g'), '$&' + " ") + ", " + courseName + `. A` + ((deptName[0] == "A" || deptName[0] == "E" || deptName[0] == "I" || deptName[0] == "O" || deptName[0] == "U") ? "n " : " ") + deptName + ` course, offered in ` + ustTimeToString(sem, true).replace("-", " to ") + `. Double click for details." class="course_sel selbox picbox" 
+    let resp = `<button id="` + code + `" aria-label="Course selection button. ` + courseCode.replace(new RegExp(`.{${1}}`, 'g'), '$&' + " ") + ", " + courseName + `. A` + ((deptName[0] == "A" || deptName[0] == "E" || deptName[0] == "I" || deptName[0] == "O" || deptName[0] == "U") ? "n " : " ") + deptName + ` course, offered in ` + ustTimeToString(sem, true).replace("-", " to ") + `. Double click for details." class="course_sel selbox picbox" 
     onclick="` + ((onclickfx) ? onclickfx(courseCode, courseName, sem, units) : (`boot('/course/` + sem + "/" + courseCode.split(' ')[0] + "/" + code + `/', false, 2)`)) + `">
         <img referrerpolicy="no-referrer" src="` + url + `" loading="lazy" fetchpriority="low" onerror="this.onerror=null;this.src=emptyimg">    
         <div class="picbox_inner flx">
@@ -355,15 +355,46 @@ function generate_course_selbox(courseCode = "COMP 3511", courseName = "Operatin
                     </h5>
                 </div>
             </div>
-        </div>` + ((noSpecialOverlay) ? "" : ((typeof config.courses != "undefined" && typeof config.courses[courseCode] != "undefined" && config.courses[courseCode][Object.keys(config.courses[courseCode]).sort().reverse()[0]].grade != "AU") ? (`
-        <div class="picbox_inner_success picbox_inner flx"><h4>✅ Taken</h4></div>
-        `) : ((typeof config._ != "undefined" && typeof config._[code] != "undefined" && !config._[code].pass) ? (`
-        ` + (((typeof config._[code].EXCLUSION != "undefined" && config._[code].EXCLUSION.pass) || (typeof config._[code].respattr != "undefined" && typeof config._[code].respattr.PrevAltrCrash != "undefined" && config._[code].respattr.PrevAltrCrash)) ? (`
-        <div class="picbox_inner_blocked picbox_inner flx"><h4>❌ Blocked</h4></div>
-        `) : (`
-        <div class="picbox_inner_locked picbox_inner flx"><h4>🔒 Locked</h4></div>
-        `))) : ``))) + `
-    </button>`
+        </div>`
+        
+    if (!noSpecialOverlay) {
+        switch (courseStatus(courseCode)) {
+            case 1:
+                resp += `<div class="picbox_inner_success picbox_inner flx"><h4>✅ Taken</h4></div>`
+                break;
+
+            case 2:
+                resp += `<div class="picbox_inner_blocked picbox_inner flx"><h4>❌ Blocked</h4></div>`
+                break;
+
+            case 3:
+                resp += `<div class="picbox_inner_locked picbox_inner flx"><h4>🔒 Locked</h4></div>`
+                break;
+        
+            default:
+                break;
+        }
+    }
+
+    resp += `</button>`
+
+    return resp
+}
+
+function courseStatus(courseCode) {
+    let code = courseCode.replaceAll(" ", "")
+
+    if (typeof config.courses != "undefined" && typeof config.courses[courseCode] != "undefined" && !Object.keys(config.courses[courseCode]).every(semx => config.courses[courseCode][semx].grade == "AU")) {
+        return 1 //taken
+    } else if (typeof config._ != "undefined" && typeof config._[code] != "undefined" && !config._[code].pass) {
+        if ((typeof config._[code].EXCLUSION != "undefined" && config._[code].EXCLUSION.pass) || (typeof config._[code].respattr != "undefined" && typeof config._[code].respattr.PrevAltrCrash != "undefined" && config._[code].respattr.PrevAltrCrash)) {
+            return 2 //blocked
+        } else {
+            return 3 //locked
+        }
+    } else {
+        return 0 //available
+    }
 }
 
 function courseStringToParts(course) {
@@ -2163,16 +2194,34 @@ function submitCourseUpdate(remove = false, cb = false) {
 function update_enroll_course_gui(sem, code) {
     try {
         let btn = document.getElementById("course_enroll_btn")
-        let newConfig = JSON.parse(JSON.stringify(config))
-        if (typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).includes(sem)) {
-            btn.innerText = "✅ Enrolled (grade: " + newConfig.courses[code][sem].grade + ")"
-            document.getElementById("course_enroll_notice").innerHTML = ""
-        } else {
-            btn.innerText = "Enroll"
-            document.getElementById("course_enroll_notice").innerHTML = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[code] != "undefined" && Object.keys(newConfig.courses[code]).length) ? (`<p4>Last enrolled at ` + ustTimeToString(Object.keys(newConfig.courses[code]).sort().reverse()[0]) + `</p4>`) : "")
-        }
-    } catch (error) {
+        let enrollhistorylist = document.getElementById("course_tipbar_enrollhistorylist")
+        let notice = document.getElementById("course_enroll_notice")
 
+        enrollhistorylist.innerHTML = ""
+        notice.innerHTML = ""
+        btn.innerText = "Enroll"
+
+        if (typeof config.courses != "undefined" && typeof config.courses[code] != "undefined" && Object.keys(config.courses[code]).length) {
+            //if (Object.keys(config.courses[code]).length)notice.innerHTML = `<p4>Last enrolled at ` + ustTimeToString(Object.keys(config.courses[code]).sort().reverse()[0]) + `</p4>`
+            if (Object.keys(config.courses[code]).includes(sem)) btn.innerText = "✅ Enrolled (grade: " + config.courses[code][sem].grade + ")"
+            Object.keys(config.courses[code]).sort().forEach(sem => {
+                enrollhistorylist.innerHTML += `<div 
+                class="flx innerpaddingbox"
+                style="margin:0;border-radius:0.25em;cursor:pointer;user-select:none;` + ((document.getElementById("timeidx").value == sem) ? `border:0.2em solid #8fcc;` : "margin:0.2em") + `" 
+                onclick="` + ((document.getElementById("timeidx").value != sem) ? `boot('/course/` + sem + `/` + code.substring(0,4) + `/` + code.replaceAll(" ", "") + `/` + `', false, 2)` : `document.getElementById('course_enroll_btn').click()`) + `"
+                >
+                    <div style="padding:0.25em 0.5em;background:linear-gradient(180deg, #8880 0%, #8882 100%)">
+                        <p2>` + ustTimeToString(sem, false) + `</p2>
+                    </div>
+                    <div style="padding:0.25em 0.5em;background:linear-gradient(180deg, #8884 0%, #8886 100%)"><b>
+                        <p2>` + config.courses[code][sem].grade + `</p2>
+                    </b></div>
+                </div>`
+            })
+        }
+
+    } catch (error) {
+        console.log(error)
     }
 }
 
@@ -2348,10 +2397,12 @@ function render_courses_specific(path, insideCoursePage = false) {
         draft += `</optgroup></select>`
 
         html_draft += `<div class="edge2edge_page"><div style="page-break-inside:avoid" id="` + course.split(" ")[0] + course.split(" ")[1] + `">
-            <div class="box"><div class="flx"><h4>` + course + `</h4></div><p2>` + r.resp[course].attr.DESCRIPTION + `</p2>
-            <br><br>
-            <div id="course_enroll_model"></div>
-            <div class="flx" style="gap:0.5em">
+        <div id="course_enroll_model"></div>    
+        <div class="innerpaddingbox">
+            <div>
+                <div class="flx"><h4>` + course + `</h4></div><p2>` + r.resp[course].attr.DESCRIPTION + `</p2><br>
+            </div>
+            <div class="flx" style="padding-top:0;gap:0.5em">
                 <div class="flx" style="justify-content:flex-start;gap:0.5em">
                     <p4>Also offered in: </p4>
                     <div id="alsoOfferedIn">` + draft + `</div>
@@ -2361,7 +2412,32 @@ function render_courses_specific(path, insideCoursePage = false) {
                     <a target="_blank" class="aobh" href="http://petergao.net/ustpastpaper/index.php?course=` + course.split(" ")[0] + course.split(" ")[1] + `">try check petergao</a>
                 </div>
             </div>
-        </div>`
+            `
+        switch (courseStatus(course.split(" ")[0] + " " + course.split(" ")[1])) {
+            case 1:
+                html_draft += `<div class="flx" style="background-color:#8fc3;gap:1em">
+                            <p2>✅ ` + ((Object.keys(config.courses[course.split(" ")[0] + " " + course.split(" ")[1]]).sort().reverse()[0] == allSems[0]) ? `You're taking this course.` : `You've taken this course.`) + `</p2>
+                            <div id="course_tipbar_enrollhistorylist" class="flx" style="min-height:calc(1rem + 0.9em);gap:0.75em;justify-content:flex-start"></div>
+                        </div>`
+                break;
+
+            case 2:
+                html_draft += `<div style="background-color:#f001">
+                            <p2>❌ You're not allowed to enroll in this course due to exclusion rules.</p2>
+                        </div>`
+                break;
+
+            case 3:
+                html_draft += `<div style="background-color:#ff43">
+                            <p2>🔒 You'll need to take other courses first before enrolling in this one.</p2>
+                        </div>`
+                break;
+        
+            default:
+                break;
+        }
+
+        html_draft += `</div>`
 
         document.getElementById('topbar_buttons_wrp').innerHTML = `<div class="enroll_btn_wrp flx">
             <button id="course_enroll_btn" ` + ((true || signinlevel > 0) ? "" : `style="display:none" `) + `onclick="enroll_course(` + '`' + path.split("/")[0] + '`,`' + course + '`' + `, true, ` + is_SPO + `, ` + JSON.stringify(possibleGrades).replaceAll('"', "'") + `, ` + JSON.stringify(actual_cred).replaceAll('"', "'") + `)">Enroll</button>
@@ -2558,7 +2634,7 @@ function render_courses_specific(path, insideCoursePage = false) {
             border-radius: 0;
         }
 
-        #courses_detail_content .box {margin: 0.5em 0}
+        #courses_detail_content .box, #courses_detail_content .innerpaddingbox {margin: 0.5em 0}
         @media (max-width:700px) {#courses_select_left{display:none}}
         </style>`
         setTimeout(() => { document.getElementById("course_detail_topbar_specialStyles").innerHTML += "<style>#btn_back{transition-duration:0.1s!important}</style>" }, 500)
@@ -3179,7 +3255,7 @@ const chartOptions = (timeRange) => {
 const renderCourseAttr = (attrs, course, orgattrs = {}) => {
     let html_draft = ``
     Object.keys(attrs).forEach(attr => {
-        if (attr != "DESCRIPTION" && !attr.startsWith("_")) {
+        if (!(["DESCRIPTION", "respattr", "pass"].some(a => a == attr)) && !attr.startsWith("_")) {
             if (attr === "INTENDED LEARNING OUTCOMES") { html_draft += `</div><div>` }
             html_draft += `<div id="` + attr.replaceAll(" ", "_").replaceAll('"', "'") + `" style="border-radius:1em;background-color:#88888808;box-shadow:inset 0 0 0 1px #8882">
             <div style="padding:0.5em 1em 0.4em 1em;border-bottom:0.1em dotted #888"><p4>`
@@ -3237,6 +3313,7 @@ const renderCourseAttr = (attrs, course, orgattrs = {}) => {
                     break
 
                 case "respattr":
+                case "pass":
                     break
 
                 default:

@@ -161,6 +161,8 @@ try {
         let lastQuery = query.pop(); if (lastQuery) { query.push(lastQuery) } else { query.push(query.pop() + " ") }; lastQuery = ""
         let courseFoundIn = {}
 
+        if (query.length > 25) query = query.slice(0, 25)
+
         query.forEach(q => {
             resultsPending.peoples = resultsPending.peoples.filter(people => people.normalize().toLowerCase().includes(q))
             resultsPending.rooms = resultsPending.rooms.filter(room => room.normalize().toLowerCase().includes(q))

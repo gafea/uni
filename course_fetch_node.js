@@ -62,7 +62,7 @@ try {
         })
     }
 
-    let latestSem = "2210"
+    let latestSem = "2340"
     let latestCourses = []
     let downloadRemain = 0
     let retryNum = 0
@@ -140,7 +140,7 @@ try {
 
                         latestCourses = []
 
-                        Array.from(dom.window.document.getElementById('navigator').children[2].children).forEach(courseName => {
+                        Array.from(dom.window.document.getElementById('subjectItems').children).forEach(courseName => {
                             latestCourses.push(courseName.textContent)
                         })
 
@@ -243,9 +243,12 @@ try {
 
                     Array.from(dom.window.document.getElementById('classes').children).forEach(course => {
 
-                        courseMeta = { attr: {}, section: {} }
-
                         if (typeof course.getElementsByClassName("courseinfo") == "undefined" || typeof course.getElementsByClassName("courseinfo")[0] == "undefined") return
+                        if (typeof course.getElementsByClassName("courseinfo")[0].getElementsByClassName("courseattrContainer") == "undefined" || typeof course.getElementsByClassName("courseinfo")[0].getElementsByClassName("courseattrContainer")[0] == "undefined") return
+                        if (typeof course.getElementsByClassName("courseinfo")[0].getElementsByClassName("courseattrContainer")[0].getElementsByClassName("subject") == "undefined" || typeof course.getElementsByClassName("courseinfo")[0].getElementsByClassName("courseattrContainer")[0].getElementsByClassName("subject")[0] == "undefined") return
+
+                        courseSubjectName = course.getElementsByClassName("courseinfo")[0].getElementsByClassName("courseattrContainer")[0].getElementsByClassName("subject")[0].textContent
+                        courseMeta = { attr: {}, section: {} }
 
                         if (course.getElementsByClassName("courseinfo")[0].getElementsByClassName("matching").length > 0) {
                             courseMeta["attr"]["MATCHING"] = course.getElementsByClassName("courseinfo")[0].getElementsByClassName("matching")[0].textContent
@@ -271,82 +274,77 @@ try {
 
                                 } else {
 
-                                    if (section.classList[0] == "newsect" && Object.keys(sectlist).length) {
-                                        tempx[first_section_name] = sectlist
+                                    if (section.classList.contains("newsect")) {
+                                        if (first_section_name) tempx[first_section_name] = JSON.parse(JSON.stringify(sectlist))
                                         sectlist = {}
+                                        first_section_name = section.children[0].textContent.trim()
+                                    } else if (!section.classList.contains("otherRow")) {
+                                        return
                                     }
 
                                     Array.from(section.children).forEach((name, i) => {
-                                        if (name.textContent.trim()) {
-                                            if (section.classList[0] == "newsect") {
-                                                first_section_name = section.children[0].textContent.trim()
-                                                if (typeof sectlist[section.children[1].textContent.trim()] === "undefined") sectlist[section.children[1].textContent.trim()] = {}
-                                                sectlist[section.children[1].textContent.trim()][txindex[i]] = name.textContent.trim()
-                                            } else {
-                                                if (typeof sectlist[section.children[0].textContent.trim()] === "undefined") sectlist[section.children[0].textContent.trim()] = {}
-                                                sectlist[section.children[0].textContent.trim()][txindex[i + 1]] = name.textContent.trim()
-                                            }
+                                        if (i && name.textContent.trim()) {
+
+                                            if (typeof sectlist[section.children[1].textContent.trim()] === "undefined") sectlist[section.children[1].textContent.trim()] = {}
+                                            sectlist[section.children[1].textContent.trim()][txindex[i]] = name.textContent.trim()
+
                                         }
                                     })
+
                                 }
 
                             })
 
-                        }
+                            tempx[first_section_name] = JSON.parse(JSON.stringify(sectlist))
 
-                        tempx[first_section_name] = JSON.parse(JSON.stringify(sectlist))
-                        sectlist = {}
+                        }
 
                         courseMeta["section"] = JSON.parse(JSON.stringify(tempx))
 
                         if (!bootFlag.noDiff) {
                             let timeNow = (new Date)
-                            let courseCode = "UNDF0000"
-                            if (typeof course.getElementsByTagName("h2") != "undefined" && typeof course.getElementsByTagName("h2")[0] != "undefined" && typeof course.getElementsByTagName("h2")[0].textContent != "undefined") {
-                                courseCode = course.getElementsByTagName("h2")[0].textContent.split(" - ")[0].replace(" ", "")
+                            let courseCode = courseSubjectName.split(" - ")[0].replace(" ", "")
 
+                            let diffFilePath = "" + item.split("\\").pop().slice(0, 4) + "\\" + courseCode + ".json"
+                            if (!fs.existsSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")
+                            if (!fs.existsSync(course_temp_path + "_mdiff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_mdiff\\" + item.split("\\").pop().slice(0, 4) + "\\")
 
-                                let diffFilePath = "" + item.split("\\").pop().slice(0, 4) + "\\" + courseCode + ".json"
-                                if (!fs.existsSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_diff\\" + item.split("\\").pop().slice(0, 4) + "\\")
-                                if (!fs.existsSync(course_temp_path + "_mdiff\\" + item.split("\\").pop().slice(0, 4) + "\\")) fs.mkdirSync(course_temp_path + "_mdiff\\" + item.split("\\").pop().slice(0, 4) + "\\")
+                            let diff = {}, mdiff = {}, lessonDetails = {}
+                            if (fs.existsSync(course_path + "_diff\\" + diffFilePath)) diff = JSON.parse(fs.readFileSync(course_path + "_diff\\" + diffFilePath, "utf-8"))
+                            if (fs.existsSync(course_path + "_mdiff\\" + diffFilePath)) mdiff = JSON.parse(fs.readFileSync(course_path + "_mdiff\\" + diffFilePath, "utf-8"))
+                            let omdiff = JSON.stringify(mdiff)
 
-                                let diff = {}, mdiff = {}, lessonDetails = {}
-                                if (fs.existsSync(course_path + "_diff\\" + diffFilePath)) diff = JSON.parse(fs.readFileSync(course_path + "_diff\\" + diffFilePath, "utf-8"))
-                                if (fs.existsSync(course_path + "_mdiff\\" + diffFilePath)) mdiff = JSON.parse(fs.readFileSync(course_path + "_mdiff\\" + diffFilePath, "utf-8"))
-                                let omdiff = JSON.stringify(mdiff)
-
-                                if (typeof currentDiffIndex[item.split("\\").pop().slice(0, 4)] != "undefined" && typeof currentDiffIndex[item.split("\\").pop().slice(0, 4)][courseCode] != "undefined") {
-                                    delete currentDiffIndex[item.split("\\").pop().slice(0, 4)][courseCode]
-                                    if (!Object.keys(currentDiffIndex[item.split("\\").pop().slice(0, 4)])) {
-                                        delete currentDiffIndex[item.split("\\").pop().slice(0, 4)]
-                                    }
+                            if (typeof currentDiffIndex[item.split("\\").pop().slice(0, 4)] != "undefined" && typeof currentDiffIndex[item.split("\\").pop().slice(0, 4)][courseCode] != "undefined") {
+                                delete currentDiffIndex[item.split("\\").pop().slice(0, 4)][courseCode]
+                                if (!Object.keys(currentDiffIndex[item.split("\\").pop().slice(0, 4)])) {
+                                    delete currentDiffIndex[item.split("\\").pop().slice(0, 4)]
                                 }
-
-                                Object.keys(tempx).forEach(lesson => {
-                                    lessonDetails = tempx[lesson][Object.keys(tempx[lesson])[0]]
-
-                                    if (typeof diff[lesson] === "undefined") diff[lesson] = {}
-                                    diff[lesson][timeNow.getTime()] = Number((((parseInt(lessonDetails.Enrol) + parseInt(lessonDetails.Wait)) / parseInt(lessonDetails.Quota.split("Quota/Enrol/Avail")[0])) * 100).toFixed(2))
-
-                                    if (typeof mdiff[lesson] === "undefined") mdiff[lesson] = {}
-                                    Object.keys(mdiff[lesson]).forEach(attr => {
-                                        if (!Object.values(mdiff[lesson][attr].slice(-1)[0]).slice(-1)[0] && typeof lessonDetails[attr] === "undefined") mdiff[lesson][attr].push({ [timeNow.getTime()]: "" })
-                                    })
-                                    Object.keys(lessonDetails).forEach(attr => {
-                                        if (typeof mdiff[lesson][attr] === "undefined" || Object.values(mdiff[lesson][attr].slice(-1)[0]).slice(-1)[0] != lessonDetails[attr]) {
-                                            if (typeof mdiff[lesson][attr] === "undefined") mdiff[lesson][attr] = []
-                                            mdiff[lesson][attr].push({ [timeNow.getTime()]: lessonDetails[attr] })
-                                        }
-                                    })
-                                })
-                                fs.writeFileSync(course_temp_path + "_diff\\" + diffFilePath, JSON.stringify(diff))
-                                if (JSON.stringify(mdiff) != omdiff) fs.writeFileSync(course_temp_path + "_mdiff\\" + diffFilePath, JSON.stringify(mdiff))
                             }
+
+                            Object.keys(tempx).forEach(lesson => {
+                                lessonDetails = tempx[lesson][Object.keys(tempx[lesson])[0]]
+
+                                if (typeof diff[lesson] === "undefined") diff[lesson] = {}
+                                diff[lesson][timeNow.getTime()] = Number((((parseInt(lessonDetails.Enrol) + parseInt(lessonDetails.Wait)) / parseInt(lessonDetails.Quota.split("Quota/Enrol/Avail")[0])) * 100).toFixed(2))
+
+                                if (typeof mdiff[lesson] === "undefined") mdiff[lesson] = {}
+                                Object.keys(mdiff[lesson]).forEach(attr => {
+                                    if (!Object.values(mdiff[lesson][attr].slice(-1)[0]).slice(-1)[0] && typeof lessonDetails[attr] === "undefined") mdiff[lesson][attr].push({ [timeNow.getTime()]: "" })
+                                })
+                                Object.keys(lessonDetails).forEach(attr => {
+                                    if (typeof mdiff[lesson][attr] === "undefined" || Object.values(mdiff[lesson][attr].slice(-1)[0]).slice(-1)[0] != lessonDetails[attr]) {
+                                        if (typeof mdiff[lesson][attr] === "undefined") mdiff[lesson][attr] = []
+                                        mdiff[lesson][attr].push({ [timeNow.getTime()]: lessonDetails[attr] })
+                                    }
+                                })
+                            })
+                            fs.writeFileSync(course_temp_path + "_diff\\" + diffFilePath, JSON.stringify(diff))
+                            if (JSON.stringify(mdiff) != omdiff) fs.writeFileSync(course_temp_path + "_mdiff\\" + diffFilePath, JSON.stringify(mdiff))
                         }
 
                         tempx = {}
 
-                        if (typeof course.getElementsByTagName("h2") != "undefined" && typeof course.getElementsByTagName("h2")[0] != "undefined" && typeof course.getElementsByTagName("h2")[0].textContent != "undefined") domJSON[course.getElementsByTagName("h2")[0].textContent] = JSON.parse(JSON.stringify(courseMeta))
+                        domJSON[courseSubjectName] = JSON.parse(JSON.stringify(courseMeta))
                         courseMeta = {}
                     })
 
@@ -391,10 +389,10 @@ try {
 
     getLatestCourseSet(servar.course_path, servar.course_temp_path, tm, ntm => {
 
-        let cb = () => {console.log('[courses_fetch] fetching done, total used ' + ((new Date()).getTime() - tm) + 'ms')}
+        let cb = () => { console.log('[courses_fetch] fetching done, total used ' + ((new Date()).getTime() - tm) + 'ms') }
 
-        if (bootFlag.noCache) {cb(); return}
-        
+        if (bootFlag.noCache) { cb(); return }
+
         fetch("http://127.0.0.1:7002/!course_cache/").then(r => r.json()).then(r => cb())
 
     })
