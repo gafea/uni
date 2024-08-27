@@ -35,7 +35,7 @@ try {
 
     let c = []
 
-    function download(url, dest, cb) {
+    function download(url, dest, cb, retryednum = 0) {
         https.get(url, response => {
             if (response.statusCode == 301 || response.statusCode == 302 || response.statusCode == 307 || response.statusCode == 308) {
                 body = []
@@ -56,9 +56,15 @@ try {
             }
         }).on('error', function (err) {
             fs.unlink(dest, () => { })
-            if (cb) cb(err.message)
-            failcb()
-            return -1
+            console.log(err)
+            
+            if (retryednum < 5) {
+                console.log("*** retrying... " + retryednum)
+                setTimeout(download, 5000, url, dest, cb, retryednum + 1)
+            } else {
+                console.log("*** gaved up... " + retryednum)
+                if (cb) cb()
+            }
         })
     }
 
@@ -67,12 +73,12 @@ try {
     let downloadRemain = 0
     let retryNum = 0
 
-    function failcb() {
-        console.log("*** failed to get latest sem info, got " + response.statusCode)
-        if (retryNum < 3) {
+    function failcb(response, course_path, course_temp_path, tm, cb) {
+        if (response) console.log("*** failed to get latest sem info, got " + response.statusCode)
+        if (retryNum < 10) {
             retryNum += 1
             console.log("*** retrying...")
-            setTimeout(getLatestCourseSet, 2000, course_path, course_temp_path, tm, cb)
+            setTimeout(getLatestCourseSet, 5000, course_path, course_temp_path, tm, cb)
         } else {
             console.log("*** gaved up...")
         }
@@ -82,7 +88,7 @@ try {
         let stm = (new Date()).getTime()
         https.get("https://w5.ab.ust.hk/wcq/cgi-bin/", response => {
             if (!(response.statusCode == 301 || response.statusCode == 302 || response.statusCode == 307 || response.statusCode == 308)) {
-                failcb()
+                failcb(response, course_path, course_temp_path, tm, cb)
                 return -1
             }
 
@@ -99,14 +105,7 @@ try {
 
             https.get("https://w5.ab.ust.hk/wcq/cgi-bin/" + latestSem + "/", r => {
                 if (r.statusCode != 200) {
-                    console.log("*** failed to get latest sem info, got " + r.statusCode)
-                    if (retryNum < 3) {
-                        retryNum += 1
-                        console.log("*** retrying...")
-                        setTimeout(getLatestCourseSet, 2000, course_path, course_temp_path, tm, cb)
-                    } else {
-                        console.log("*** gaved up...")
-                    }
+                    failcb(r, course_path, course_temp_path, tm, cb)
                     return -1
                 }
 
@@ -173,11 +172,10 @@ try {
                                     })
                                 } catch (error) {
                                     console.log(error)
-                                    console.log("[courses_fetch] fatal error: unable to parse HTML, re-downloading...")
-                                    setTimeout(getLatestCourseSet, 5000, course_path, course_temp_path, tm, cb)
+                                    failcb(false, course_path, course_temp_path, tm, cb)
                                 }
                             }
-                        }, 100)
+                        }, 500)
 
                     })
                 })
@@ -185,16 +183,16 @@ try {
             }).on('error', err => {
                 fs.unlink(dest, () => { })
                 console.log(err.message)
-                console.log("[courses_fetch] fatal error: unable to download index HTML, re-downloading...")
-                setTimeout(getLatestCourseSet, 5000, course_path, course_temp_path, tm, cb)
+                failcb(false, course_path, course_temp_path, tm, cb)
+                return -1
             })
 
             response.destroy()
 
         }).on('error', err => {
             console.log(err.message)
-            console.log("[courses_fetch] fatal error: unable to download index HTML, re-downloading...")
-            setTimeout(getLatestCourseSet, 5000, course_path, course_temp_path, tm, cb)
+            failcb(false, course_path, course_temp_path, tm, cb)
+            return -1
         })
     }
 
