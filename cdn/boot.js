@@ -54,6 +54,7 @@ function checkSafariToken() {
         setTimeout(() => { checkSafariToken() }, 5000)
     })
 }
+
 var pending_cToken_refresh = false
 window.addEventListener('message', function (e) { //for getting account cToken update and refresh browser
     const r = JSON.parse(e.data)
@@ -61,10 +62,11 @@ window.addEventListener('message', function (e) { //for getting account cToken u
         if (r.status === 200 || r.status === 203) {
             document.getElementById("OverlayContent").innerHTML = `<center style="padding:4.25em">`.concat(((r.status === 200) ? `✅ success!` : `✅ pass`)).concat(`</center>`)
             setTimeout(() => {
-                setTimeout(() => {setOverlayStatus('hide', false, 'overlay')}, 1000)
-                reboot()
+                //setTimeout(() => {setOverlayStatus('hide', false, 'overlay')}, 1000)
+                //reboot()
+                window.location.reload()
             }, 150)
-        } else if (r.status === 400 && r.msg === 'reply-check-failed') { //fuck safari
+        } else if (r.status === 400 && r.msg === 'reply-check-failed') { //wow safari
             document.getElementById("OverlayContent").innerHTML = `<center style="padding:4.25em;display:block;width:max-content"><a target="_parent" class="aobh" href="https://me.gafea.net/_update_cToken">click here to sign back in to your account</a></center>`
             checkSafariToken()
         } else {
@@ -76,6 +78,7 @@ window.addEventListener('message', function (e) { //for getting account cToken u
         window.location.reload()
     }
 })
+
 const setOverlayStatus = (type, noDelay = true, elem = "overlay") => {
     if (elem == "overlay") {
         element = document.getElementById("OverlayWrp")
@@ -136,11 +139,11 @@ const refresh_cToken = () => {
     document.getElementById("OverlayContent").innerHTML = `<iframe src="https://me.gafea.net/_update_cToken" style="border:none;width:20em;height:10em;margin:0" name="authFrame" scrolling="no" frameborder="0" margin="0"></iframe>`
 }
 
-function renderBottomBar(loc, hideUser = false, icon = "") {
+function renderBottomBar(loc = "", hideUser = false, icon = "") {
     if (!navigator.cookieEnabled) hideUser = true
     if (!hideUser) setTimeout(() => renderBottomBarUserInfo(), 200)
-    document.getElementById("bottomBar").innerHTML = `<div class="bottom_wrp flx"><a href="/" style="height:52px"><img class="ckimg" src="` + (icon ? ("" + icon + `" style="filter:unset`): ("" + resourceNETpath + "image/ck.svg")) + `" draggable="false" alt="Home"></a>` + renderBottomBarButtons(bottombarbuttons, loc) + `<div class="ckimg"><div class="flx ckusrico"><button type="button" tabindex="1001" class="ckusrbtn">
-    <a href="" tabindex="0"><img alt="" src="https://me.gafea.net/getpp/" draggable="false"></a>
+    document.getElementById("bottomBar").innerHTML = `<div class="bottom_wrp flx"><a href="/" style="height:52px"><img class="ckimg" src="` + (icon ? ("" + icon + `" style="filter:unset`): ("" + resourceNETpath + "image/ck.svg")) + `" draggable="false" alt="Home"></a>` + ((loc && typeof bottombarbuttons != "undefined" && bottombarbuttons) ? renderBottomBarButtons(bottombarbuttons, loc) : "") + `<div class="ckimg"><div class="flx ckusrico"><button type="button" tabindex="1001" class="ckusrbtn">
+    <a href="" tabindex="0"><img alt="" src="https://me.gafea.net/getpp/" draggable="false" onerror="this.onerror=null;this.src='` + resourceNETpath + `image/PPPlaceholder.png'"></a>
     <div class="ckusrwrp">
     
         <div id="ckusrinfo"` + ((hideUser) ? ' style="display:none!important"' : '') + `></div>

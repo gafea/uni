@@ -2,6 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const http = require('http')
 const https = require('https')
+const { readdir, stat } = require('fs/promises')
+const { join } = require('path')
 const { exec } = require("child_process")
 const post = (url, data) => fetch(url, { method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: data })
 
@@ -44,6 +46,7 @@ try {
     db.phrasedcourse = {}
     db.majorschoolmapping = {}
     db.pcg = {}
+    db.size = 0
 
     function startPythonServer() {
         try {
@@ -102,39 +105,42 @@ try {
         return (19 - (t.getMinutes() % 20)) * 60 * 1000 + (59 - t.getSeconds()) * 1000 + (999 - t.getMilliseconds()) + 1000
     }
 
+    let autofetcher = {
+        2420: { startTime: "2025-01-09T00:00:00.000+08:00", endTime: "2025-01-09T08:00:00.000+08:00" },
+        2430: { startTime: "2025-01-21T08:00:00.000+08:00", endTime: "2025-02-16T08:00:00.000+08:00" },
+        2440: { startTime: "2025-05-02T08:00:00.000+08:00", endTime: "2025-07-19T08:00:00.000+08:00" },
+    }
+    let course_fetch_lastcalled = 0, course_cache_lastcalled = 0
+    let course_fetch_ongoing = 0, course_cache_ongoing = 0
+
     //courses_fetch, including course_cache
-    function courses_fetch(recur = false, noDiff = false, noCache = false, sem = 0) {
-
-        let startTime = "2024-05-03T08:00:00.000+08:00", endTime = "2024-07-21T12:00:00.000+08:00"
-
-        if (recur) {
-            if (!sem) {
-                sem = db.sems[0]
-            }
-
-            if ((new Date).getTime() > new Date(endTime).getTime()) {
-                console.log("[" + servar.domain + "] fetching killtime reached, stopping loop...")
-                return
-            }
-
-            setTimeout(courses_fetch, course_fetch_interval(), true, noDiff, noCache, sem)
-
-            if ((new Date).getTime() < new Date(startTime).getTime()) {
-                return
-            }
-        }
-
+    function courses_fetch(noDiff = false, noCache = false, sem = db.sems[0]) {
+        course_fetch_ongoing = 1
         console.log("[" + servar.domain + "] starting fetching...")
 
-        setTimeout(exec, 100, `node ` + ((servar.deployed) ? `uni\\` : ``) + `course_fetch_node.js` + ((noDiff) ? ` noDiff` : ``) + ((noCache) ? ` noCache` : ``) + ((sem) ? (` sem=` + sem) : ``), err => { })
-
+        setTimeout(exec, 50, `node ` + ((servar.deployed) ? `uni\\` : ``) + `course_fetch_node.js` + ((noDiff) ? ` noDiff` : ``) + ((noCache) ? ` noCache` : ``) + ((sem) ? (` sem=` + sem) : ``), err => { })
+        course_fetch_lastcalled = (new Date()).getTime() + 50
     }
-    setTimeout(courses_fetch, course_fetch_interval(), true)
+    function course_fetch_looper(sem) {
+        if ((new Date).getTime() > new Date(autofetcher[sem].endTime).getTime()) {
+            console.log("[" + servar.domain + "] fetching " + sem + " killtime reached, stopping loop...")
+            return
+        }
+
+        if ((new Date).getTime() > new Date(startTime).getTime()) {
+            setTimeout(courses_fetch, 50, false, false, sem)
+        }
+
+        setTimeout(course_fetch_looper, course_fetch_interval(), sem)
+    }
+    autofetcher.keys().forEach(sem => {
+        setTimeout(course_fetch_looper, course_fetch_interval(), sem)
+    })
     setInterval(() => {
         if (db.sems.length) {
             for (let i = 3; i > -1; i--) {
-                if (db.sems.length > i-1 && db.sems[i]) {
-                    setTimeout( () => courses_fetch(false, true, !i, db.sems[i]), (3-i) * 15000)
+                if (db.sems.length > i - 1 && db.sems[i]) {
+                    setTimeout(() => courses_fetch(true, !i, db.sems[i]), (3 - i) * 15000)
                 }
             }
         }
@@ -144,11 +150,12 @@ try {
     let cctm = (new Date())
     function course_cache(firstBoot = false) {
 
+        course_cache_ongoing = 1
         console.log("[" + servar.domain + "] starting cacheing...")
 
-
         cctm = (new Date())
-        setTimeout(exec, 100, "node " + ((servar.deployed) ? 'uni\\' : "") + "course_cache_node.js" + ((firstBoot) ? " firstBoot" : ""), err => { })
+        setTimeout(exec, 50, "node " + ((servar.deployed) ? 'uni\\' : "") + "course_cache_node.js" + ((firstBoot) ? " firstBoot" : ""), err => { })
+        course_cache_lastcalled = (new Date()).getTime() + 50
 
     }
     course_cache(true)
@@ -773,8 +780,11 @@ try {
             })
         } catch (error) { console.log(error); res.writeHead(500, { 'Content-Type': 'application/json', 'Server': 'joutou' }); res.end(JSON.stringify({ status: 500 })) }
     })
+    let server_start_time = new Date().getTime()
     server.listen(servar.port)
     console.log("[" + servar.domain + "] Server Started / " + servar.port)
+
+    let db_cache_size = 0, db_cache_date = 0
 
     //internal api server
     const serverAPI = http.createServer((req, res) => {
@@ -802,7 +812,51 @@ try {
 
 
             if (req.url.startsWith('/!')) {
-                if (req.url === '/!course_cache/') {
+                if (req.url === '/!info/') {
+                    let output = {
+                        domain: servar.domain,
+                        port: servar.port,
+                        deployed: servar.deployed,
+                        course_path: servar.course_path,
+                        course_temp_path: servar.course_temp_path,
+                        server_time: new Date().getTime(),
+                        server_start_time: server_start_time,
+                        db_cache_size: db_cache_size,
+                        db_cache_date: db_cache_date,
+                        db_disk_size: db.size,
+                        db_update_date: 0,
+                        course_cache_ongoing: course_cache_ongoing,
+                        course_cache_lastcalled: course_cache_lastcalled,
+                        course_fetch_ongoing: course_fetch_ongoing,
+                        course_fetch_lastcalled: course_fetch_lastcalled,
+                        autofetcher: JSON.stringify(autofetcher),
+                    }
+                    try {
+                        let semxx = "0"
+                        if (db.sems.length) {
+                            semxx = db.sems[0]
+                        } else {
+                            fs.readdirSync(servar.course_path + "_allcourses\\").forEach(file => {
+                                if (file.endsWith(".json") && parseInt(file.split(".")[0]) > parseInt(semxx)) semxx = file.split(".")[0]
+                            })
+                        }
+                        output.db_update_date = fs.statSync("" + servar.course_path + "_allcourses\\" + semxx + ".json").mtime.getTime()
+                    } catch (error) {
+                        console.log(error)
+                    }
+                    res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
+                    // dirSize(servar.course_path).then(size => {
+                    //     output["db_disk_size"] = size
+                    // }).catch(err => {
+                    //     console.log(err)
+                    // }).finally(() => {
+                    res.end(JSON.stringify({
+                        status: 200,
+                        resp: output
+                    }))
+                    //})
+
+                } else if (req.url === '/!course_cache/') {
                     res.writeHead(200, { 'Content-Type': 'application/json', 'Server': 'joutou' })
                     res.end(JSON.stringify({ status: 200 }))
                     setTimeout(() => {
@@ -826,7 +880,7 @@ try {
                 } else if (req.url === '/!course_fetch_nodiff/') {
                     sharedfx.returnErr(res, 200, "", true)
                     setTimeout(() => {
-                        courses_fetch(false, true)
+                        courses_fetch(true)
                     }, 10)
                     return
 
@@ -863,18 +917,38 @@ try {
                     setTimeout(startPythonServer, 10)
                     return
 
+                } else if (req.url == '/!setflag/') {
+                    if (bodytxt) {
+                        let r = JSON.parse(bodytxt)
+                        Object.keys(r).forEach(key => {
+                            if (key == "course_fetch_ongoing") {
+                                course_fetch_ongoing = r[key]
+                            } else if (key == "course_cache_ongoing") {
+                                course_cache_ongoing = r[key]
+                            }
+                        })
+                        console.log("[" + servar.domain + "] flags updated")
+                    }
+                    sharedfx.returnErr(res, 200, "", true)
+
                 } else if (req.url === '/!setvar/') {
                     if (bodytxt) {
                         let r = JSON.parse(bodytxt)
                         Object.keys(db).forEach(key => {
-                            if (typeof r[key.toUpperCase()] != "undefined") db[key] = r[key.toUpperCase()]
-                            if (typeof r[key] != "undefined") db[key] = r[key]
+                            if (typeof r[key.toUpperCase()] != "undefined") {
+                                db[key] = r[key.toUpperCase()]
+                                db_cache_date = new Date().getTime()
+                            } else if (typeof r[key] != "undefined") {
+                                db[key] = r[key]
+                                db_cache_date = new Date().getTime()
+                            }
                         })
                         console.log(Object.keys(r))
                         console.log("[" + servar.domain + "] cacheing variables updated")
                         if (Object.keys(r).includes("insems")) setTimeout(() => { pushvar() }, 10)
                     }
                     sharedfx.returnErr(res, 200, "", true)
+                    setTimeout(() => { db_cache_size = Buffer.byteLength(JSON.stringify(db)) }, 10)
 
                 } else if (req.url.toLowerCase().startsWith('/!getvar/')) {
                     if (typeof db[req.url.substring(9)] != "undefined") {
@@ -897,6 +971,14 @@ try {
             } else if (req.url.toLowerCase() === '/favicon.ico') {
                 res.writeHead(200, { 'Content-Type': 'image/x-icon', 'Server': 'joutou', 'Cache-Control': 'max-age=604800' })
                 res.end(sharedfx.envar.favicon)
+
+            } else if (!req.url || req.url === '/') {
+                res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8', 'Server': 'joutou' })
+                res.end(sharedfx.envar.indexHTML.replace("%script%", "").replace("%gscript%", "").replaceAll(sharedfx.envar.cdnNETpath, "http://localhost/cdn/").replaceAll("https://" + sharedfx.envar.root_domain, "http://localhost").replace("http://localhost/favicon.ico", "/favicon.ico").replaceAll(sharedfx.envar.root_domain, "localhost").replaceAll("localhost", "gafea.net"))
+
+            } else if (req.url.toLowerCase() === '/init.js') {
+                res.writeHead(200, { 'Content-Type': 'application/javascript', 'Server': 'joutou', 'Cache-Control': 'max-age=7200' })
+                fs.readFile('' + __dirname + "/init7002.js", 'utf8', (err, data) => { (err) ? res.end("") : res.end(data) })
 
             } else {
                 res.writeHead(404, { 'Content-Type': 'application/json', 'Server': 'joutou' })

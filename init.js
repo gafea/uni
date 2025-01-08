@@ -2169,9 +2169,9 @@ function submitCourseUpdate(remove = false, cb = false) {
         delete newConfig.courses[formData.code][formData.sem]
         if (Object.keys(newConfig.courses[formData.code]).length === 0) delete newConfig.courses[formData.code]
     } else {
-        if (typeof newConfig.courses === "undefined") newConfig.courses = {}
-        if (typeof newConfig.courses[formData.code] === "undefined") newConfig.courses[formData.code] = {}
-        if (typeof newConfig.courses[formData.code][formData.sem] === "undefined") newConfig.courses[formData.code][formData.sem] = {}
+        if (typeof newConfig.courses != "object") newConfig.courses = {}
+        if (typeof newConfig.courses[formData.code] != "object") newConfig.courses[formData.code] = {}
+        if (typeof newConfig.courses[formData.code][formData.sem] != "object") newConfig.courses[formData.code][formData.sem] = {}
         newConfig.courses[formData.code][formData.sem] = { grade: formData.grade, units: formData.units, name: formData.name, actual_cred: formData.actual_cred }
 
         if (!!(typeof formData.is_SPO !== "undefined" && formData.is_SPO)) {
@@ -2240,8 +2240,8 @@ function enroll_course(sem, course, make_switch = false, is_SPO = false, possibl
     let newConfig = JSON.parse(JSON.stringify(config))
     let courseParts = courseStringToParts(course)
     //console.log(courseParts)
-    if (typeof newConfig.courses === "undefined") newConfig.courses = {}
-    if (typeof newConfig.courses[courseParts.code] === "undefined") newConfig.courses[courseParts.code] = {}
+    if (typeof newConfig.courses != "object") newConfig.courses = {}
+    if (typeof newConfig.courses[courseParts.code] != "object") newConfig.courses[courseParts.code] = {}
     if (make_switch) {
         //TODO: make this less ugly and a unified way of calling "add new course" dialog
         let unit = ((typeof newConfig.courses != "undefined" && typeof newConfig.courses[courseParts.code] != "undefined" && typeof newConfig.courses[courseParts.code][sem] != "undefined" && typeof newConfig.courses[courseParts.code][sem].units != "undefined") ? newConfig.courses[courseParts.code][sem].units : courseParts.units.split(" ")[0])

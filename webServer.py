@@ -229,7 +229,7 @@ try:
 
     if __name__ == '__main__':
         requests.get("http://localhost:7002/!pushvar/")
-        app.run(debug=True, port=7003)
+        app.run(port=7003)
 
 except ImportError:
     print("File missing or outdated")

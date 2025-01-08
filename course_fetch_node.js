@@ -52,6 +52,7 @@ try {
                     })
                 } catch (error) {
                     console.log(error)
+                    post("http://127.0.0.1:7002/!setflag/", JSON.stringify({course_fetch_ongoing:2}))
                 }
             }
         }).on('error', function (err) {
@@ -63,6 +64,7 @@ try {
                 setTimeout(download, 5000, url, dest, cb, retryednum + 1)
             } else {
                 console.log("*** gaved up... " + retryednum)
+                post("http://127.0.0.1:7002/!setflag/", JSON.stringify({course_fetch_ongoing:2}))
                 if (cb) cb()
             }
         })
@@ -81,6 +83,7 @@ try {
             setTimeout(getLatestCourseSet, 5000, course_path, course_temp_path, tm, cb)
         } else {
             console.log("*** gaved up...")
+            post("http://127.0.0.1:7002/!setflag/", JSON.stringify({course_fetch_ongoing:2}))
         }
     }
 
@@ -388,6 +391,7 @@ try {
     getLatestCourseSet(servar.course_path, servar.course_temp_path, tm, ntm => {
 
         let cb = () => { console.log('[courses_fetch] fetching done, total used ' + ((new Date()).getTime() - tm) + 'ms') }
+        post("http://127.0.0.1:7002/!setflag/", JSON.stringify({course_fetch_ongoing:0}))
 
         if (bootFlag.noCache) { cb(); return }
 
@@ -397,4 +401,5 @@ try {
 
 } catch (error) {
     sharedfx.deathDump("course_fetch_node", "Unrecoverable global crash", error)
+    post("http://127.0.0.1:7002/!setflag/", JSON.stringify({course_fetch_ongoing:2}))
 }

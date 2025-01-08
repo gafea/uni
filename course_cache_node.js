@@ -1,6 +1,8 @@
 const fs = require('fs')
 const path = require('path')
 const https = require('https')
+const { readdir, stat } = require('fs/promises')
+const { join } = require('path')
 const { exec } = require("child_process")
 const post = (url, data) => fetch(url, { method: "POST", headers: { 'Content-Type': 'application/json' }, body: data })
 
@@ -136,7 +138,7 @@ try {
                     Object.keys(lesson["section"]).forEach(sectionKey => {
                         Object.keys(lesson["section"][sectionKey]).forEach(dateKey => {
                             date = lesson["section"][sectionKey][dateKey]
-                            roomName = date["Room"].split(" (")[0].split(", Lift ")[0].replace("Lecture Theater ", "LT").replace("Rm ", "Rm")
+                            roomName = date["Room"].split(" (")[0].split(", Lift ")[0].replace("Lecture Theater ", "LT").replace("Rm ", "Rm").replaceAll("/", "")
 
                             if (typeof date["Quota"] != "undefined" && date["Quota"] !== "0") {
                                 totalQuota[lessonToType(sectionKey)] += parseInt(date["Quota"].split("Quota/Enrol/Avail")[0])
@@ -258,159 +260,185 @@ try {
     pkgx["courseids"] = xcourseids
     pkgx["coursegroups"] = xcoursegroups
 
-    post("http://127.0.0.1:7002/!setvar/", JSON.stringify(pkgx)).then(r => r.json()).then(r => {
-        console.log('[courses_cache] early cacheing to nodejs server done')
+    const dirSize = async dir => {
+        const files = await readdir(dir, { withFileTypes: true });
 
-        pkgx = {}
+        const paths = files.map(async file => {
+            const path = join(dir, file.name);
 
-        let atm2 = (new Date())
-        let cacheData = {}
+            if (file.isDirectory()) return await dirSize(path);
 
-        let timeArray = [], startT = 0, endT = 0
-        Object.keys(xdiffs).forEach(courseCode => {
-            let diffFilePath = servar.course_path + "_diff\\" + xsems[0] + "\\" + courseCode + ".json"
-            if (fs.existsSync(diffFilePath)) {
-                cacheData[courseCode] = JSON.parse(fs.readFileSync(diffFilePath, "utf-8"))
-                Object.keys(cacheData[courseCode]).forEach(lesson => {
-                    Object.keys(cacheData[courseCode][lesson]).forEach(dataPointTime => {
-                        let newDataPointTime = dataPointTime - dataPointTime % (20 * 60 * 1000)
-                        if (!timeArray.includes(newDataPointTime)) timeArray.push(newDataPointTime)
-                    })
-                })
+            if (file.isFile()) {
+                const { size } = await stat(path);
+
+                return size;
             }
-        })
-        timeArray.sort(); startT = timeArray[0]; endT = timeArray[timeArray.length - 1] + 19 * 60 * 1000; timeArray = [];
-        let timeU = startT; do { timeArray.push(timeU); timeU += 20 * 60 * 1000 } while (endT >= timeU);
 
-        Object.keys(xdiffs).forEach(courseCode => {
-            if (typeof cacheData[courseCode] != "undefined") {
-                let data = cacheData[courseCode]
+            return 0;
+        });
 
-                Object.keys(data).forEach(lesson => {
-                    Object.keys(data[lesson]).forEach(dataPointTime => {
-                        let newDataPointTime = dataPointTime - dataPointTime % (20 * 60 * 1000)
-                        data[lesson][newDataPointTime] = data[lesson][dataPointTime]
-                        delete data[lesson][dataPointTime]
-                    })
-                })
+        return (await Promise.all(paths)).flat(Infinity).reduce((i, size) => i + size, 0);
+    }
 
-                xdiffs[courseCode] = []
-                //xdiffs[courseCode] = { lec: [], lab: [], tut: [], rsh: [], otr: [] }
-
-                let datasets = {}
-                Object.keys(data).forEach(key => {
-                    let keys = Object.keys(data[key])
-                    keys.sort()
-
-                    let time = startT, value = data[key][keys[0]], keys_pos = -1, newDB = []
-                    do {
-                        if (keys[keys_pos + 1] < time + 20 * 60 * 1000) {
-                            keys_pos++
-                            value = data[key][keys[keys_pos]]
-                        } else {
-                            value = null
-                        }
-                        newDB.push(value)
-                        time += 20 * 60 * 1000
-                    } while (keys_pos < keys.length && endT >= time)
-
-                    if (typeof datasets[lessonToType(key)] == "undefined") datasets[lessonToType(key)] = {}
-                    datasets[lessonToType(key)][key] = newDB
-                });
-
-                let maxLessonNum = 1;
-                ["lec", "lab", "tut", "rsh", "otr"].forEach((lessonType, index) => {
-                    if (typeof datasets[lessonType] != "undefined" && Object.keys(datasets[lessonType]).length) {
-                        let maxThisLessonNum = 0
-                        Object.keys(datasets[lessonType]).forEach(lesson => {
-
-                            let thisLessonNum = lesson.split(" ")[0].replace(/^\D+|\D+$/g, "")
-                            if (!thisLessonNum) thisLessonNum = "1"
-                            thisLessonNum = parseInt(thisLessonNum)
-                            //console.log(lesson, thisLessonNum)
-                            if (maxThisLessonNum < thisLessonNum) maxThisLessonNum = thisLessonNum
-
-                        })
-                        //console.log(lessonType, maxThisLessonNum)
-                        if (maxLessonNum < maxThisLessonNum) maxLessonNum = maxThisLessonNum
-                    }
-                });
-                //console.log(courseCode, maxLessonNum);
-
-                ["lec", "lab", "tut", "rsh", "otr"].forEach((lessonType, index) => {
-                    let pS = ["rect", "triangle", "circle", "rectRot", "crossRot"][index]
-                    let pR = [5, 5, 4, 5, 5][index]
-                    let pHR = [8, 8, 7, 8, 8][index]
-                    let pCB = ["90", "60", "60", "90", "30"][index]
-                    let pBD = [[], [3, 3], [8, 8], [], []][index]
-                    if (typeof datasets[lessonType] != "undefined" && Object.keys(datasets[lessonType]).length) {
-                        Object.keys(datasets[lessonType]).forEach(lesson => {
-
-                            let thisLessonNum = lesson.split(" ")[0].replace(/^\D+|\D+$/g, "")
-                            if (!thisLessonNum) thisLessonNum = "1"
-                            thisLessonNum = parseInt(thisLessonNum)
-
-                            //console.log("#" + sharedfx.zeroPad((Math.round(thisLessonNum / maxLessonNum * 256) - 1).toString(16), 2) + "0000")
-
-                            //xdiffs[courseCode][lessonType].push({label: lesson, data: datasets[lessonType][lesson], pointStyle: px})
-                            xdiffs[courseCode].push({ label: lesson, data: datasets[lessonType][lesson], pointStyle: pS, pointRadius: 0, pointHoverRadius: pHR, borderDash: pBD, borderColor: "hsl(" + ((60 - Math.round((thisLessonNum - 1) * 100 / maxLessonNum)) / 100) + "turn, " + pCB + "%, 60%)", backgroundColor: "hsl(" + ((60 - Math.round((thisLessonNum - 1) * 100 / maxLessonNum)) / 100) + "turn, " + pCB + "%, 85%)" })
-
-                        })
-                    } else { delete xdiffs[courseCode][lessonType] }
-                })
-
-            } else { delete xdiffs[courseCode] }
-
-        })
-        xdiffs["_times"] = timeArray
-
-        let willmodifyextraattr = false
-        if (false) {
-            if (firstBoot) {
-                willmodifyextraattr = true
-                let kcourseids = Object.keys(xcourseids).sort().reverse()
-                kcourseids.reverse().forEach(courseid => {
-                    let xcourseName = ""
-                    for (const fullCourseName of Object.keys(xcourses[courseid.substring(0, 4)][xcourseids[courseid].SEM])) {
-                        if (fullCourseName.startsWith(courseid.substring(0, 4) + " " + courseid.substring(4) + " - ")) {
-                            xcourseName = fullCourseName
-                            break
-                        }
-                    }
-                    let rx = JSON.parse(JSON.stringify(xcourses[courseid.substring(0, 4)][xcourseids[courseid].SEM][xcourseName])), condiA = false, condiB = false
-                    kcourseids.forEach(xcourseid => {
-                        ["PRE-REQUISITE", "EXCLUSION"].forEach(a => {
-                            if (typeof rx.attr[a] != "undefined") {
-                                condiA = rx.attr[a].includes(xcourseid.substring(0, 4) + " " + xcourseid.substring(4))
-                                //TODO: think about how to handle cases like ( exclude CORE1403 -> exclude CORE1403A & CORE1403S & CORE1403I ) with current looping approach
-                                //current bug: ( exclude CORE1403I will be treated as exclude CORE1403A & CORE1403S & CORE1403I when CORE1403 does not exist )
-                                //condiB = (condiA) ? true : (!kcourseids.includes(xcourseid.substring(0, 8)) && rx.attr[a].includes(xcourseid.substring(0, 4) + " " + xcourseid.substring(4, 8)))
-                                if (courseid != xcourseid && (condiA || condiB)) {
-                                    if (typeof xextraattr[xcourseid] === "undefined") xextraattr[xcourseid] = {}
-                                    if (typeof xextraattr[xcourseid]["" + a + "-BY"] === "undefined") xextraattr[xcourseid]["" + a + "-BY"] = []
-                                    xextraattr[xcourseid]["" + a + "-BY"].push(courseid.substring(0, 4) + " " + courseid.substring(4))
-                                    if (condiA) rx.attr[a] = rx.attr[a].replaceAll(xcourseid.substring(0, 4) + " " + xcourseid.substring(4), " . ")
-                                }
-                            }
-                        })
-                    })
-                })
-            }
-        }
-
-        pkgx["insems"] = xinsems
-        pkgx["diffs"] = xdiffs
-        if (willmodifyextraattr) pkgx["extraattr"] = xextraattr
+    dirSize(servar.course_path).then(size => { pkgx["size"] = size }).catch(err => { console.log(err) }).finally(() => {
 
         post("http://127.0.0.1:7002/!setvar/", JSON.stringify(pkgx)).then(r => r.json()).then(r => {
-            console.log('[courses_cache] cacheing to nodejs server done, used ' + ((new Date()).getTime() - cctm.getTime()) + 'ms')
+            console.log('[courses_cache] early cacheing to nodejs server done')
 
-            if (!no7z && servar.course_backup_path) {
-                setTimeout(exec, 100, `"C:\\Program Files\\7-Zip\\7z.exe" a ` + servar.course_backup_path + ` "` + servar.course_path + `*"`, err => { })
+            pkgx = {}
+
+            let atm2 = (new Date())
+            let cacheData = {}
+
+            let timeArray = [], startT = 0, endT = 0
+            Object.keys(xdiffs).forEach(courseCode => {
+                let diffFilePath = servar.course_path + "_diff\\" + xsems[0] + "\\" + courseCode + ".json"
+                if (fs.existsSync(diffFilePath)) {
+                    cacheData[courseCode] = JSON.parse(fs.readFileSync(diffFilePath, "utf-8"))
+                    Object.keys(cacheData[courseCode]).forEach(lesson => {
+                        Object.keys(cacheData[courseCode][lesson]).forEach(dataPointTime => {
+                            let newDataPointTime = dataPointTime - dataPointTime % (20 * 60 * 1000)
+                            if (!timeArray.includes(newDataPointTime)) timeArray.push(newDataPointTime)
+                        })
+                    })
+                }
+            })
+            timeArray.sort(); startT = timeArray[0]; endT = timeArray[timeArray.length - 1] + 19 * 60 * 1000; timeArray = [];
+            let timeU = startT; do { timeArray.push(timeU); timeU += 20 * 60 * 1000 } while (endT >= timeU);
+
+            Object.keys(xdiffs).forEach(courseCode => {
+                if (typeof cacheData[courseCode] != "undefined") {
+                    let data = cacheData[courseCode]
+
+                    Object.keys(data).forEach(lesson => {
+                        Object.keys(data[lesson]).forEach(dataPointTime => {
+                            let newDataPointTime = dataPointTime - dataPointTime % (20 * 60 * 1000)
+                            data[lesson][newDataPointTime] = data[lesson][dataPointTime]
+                            delete data[lesson][dataPointTime]
+                        })
+                    })
+
+                    xdiffs[courseCode] = []
+                    //xdiffs[courseCode] = { lec: [], lab: [], tut: [], rsh: [], otr: [] }
+
+                    let datasets = {}
+                    Object.keys(data).forEach(key => {
+                        let keys = Object.keys(data[key])
+                        keys.sort()
+
+                        let time = startT, value = data[key][keys[0]], keys_pos = -1, newDB = []
+                        do {
+                            if (keys[keys_pos + 1] < time + 20 * 60 * 1000) {
+                                keys_pos++
+                                value = data[key][keys[keys_pos]]
+                            } else {
+                                value = null
+                            }
+                            newDB.push(value)
+                            time += 20 * 60 * 1000
+                        } while (keys_pos < keys.length && endT >= time)
+
+                        if (typeof datasets[lessonToType(key)] == "undefined") datasets[lessonToType(key)] = {}
+                        datasets[lessonToType(key)][key] = newDB
+                    });
+
+                    let maxLessonNum = 1;
+                    ["lec", "lab", "tut", "rsh", "otr"].forEach((lessonType, index) => {
+                        if (typeof datasets[lessonType] != "undefined" && Object.keys(datasets[lessonType]).length) {
+                            let maxThisLessonNum = 0
+                            Object.keys(datasets[lessonType]).forEach(lesson => {
+
+                                let thisLessonNum = lesson.split(" ")[0].replace(/^\D+|\D+$/g, "")
+                                if (!thisLessonNum) thisLessonNum = "1"
+                                thisLessonNum = parseInt(thisLessonNum)
+                                //console.log(lesson, thisLessonNum)
+                                if (maxThisLessonNum < thisLessonNum) maxThisLessonNum = thisLessonNum
+
+                            })
+                            //console.log(lessonType, maxThisLessonNum)
+                            if (maxLessonNum < maxThisLessonNum) maxLessonNum = maxThisLessonNum
+                        }
+                    });
+                    //console.log(courseCode, maxLessonNum);
+
+                    ["lec", "lab", "tut", "rsh", "otr"].forEach((lessonType, index) => {
+                        let pS = ["rect", "triangle", "circle", "rectRot", "crossRot"][index]
+                        let pR = [5, 5, 4, 5, 5][index]
+                        let pHR = [8, 8, 7, 8, 8][index]
+                        let pCB = ["90", "60", "60", "90", "30"][index]
+                        let pBD = [[], [3, 3], [8, 8], [], []][index]
+                        if (typeof datasets[lessonType] != "undefined" && Object.keys(datasets[lessonType]).length) {
+                            Object.keys(datasets[lessonType]).forEach(lesson => {
+
+                                let thisLessonNum = lesson.split(" ")[0].replace(/^\D+|\D+$/g, "")
+                                if (!thisLessonNum) thisLessonNum = "1"
+                                thisLessonNum = parseInt(thisLessonNum)
+
+                                //console.log("#" + sharedfx.zeroPad((Math.round(thisLessonNum / maxLessonNum * 256) - 1).toString(16), 2) + "0000")
+
+                                //xdiffs[courseCode][lessonType].push({label: lesson, data: datasets[lessonType][lesson], pointStyle: px})
+                                xdiffs[courseCode].push({ label: lesson, data: datasets[lessonType][lesson], pointStyle: pS, pointRadius: 0, pointHoverRadius: pHR, borderDash: pBD, borderColor: "hsl(" + ((60 - Math.round((thisLessonNum - 1) * 100 / maxLessonNum)) / 100) + "turn, " + pCB + "%, 60%)", backgroundColor: "hsl(" + ((60 - Math.round((thisLessonNum - 1) * 100 / maxLessonNum)) / 100) + "turn, " + pCB + "%, 85%)" })
+
+                            })
+                        } else { delete xdiffs[courseCode][lessonType] }
+                    })
+
+                } else { delete xdiffs[courseCode] }
+
+            })
+            xdiffs["_times"] = timeArray
+
+            let willmodifyextraattr = false
+            if (false) {
+                if (firstBoot) {
+                    willmodifyextraattr = true
+                    let kcourseids = Object.keys(xcourseids).sort().reverse()
+                    kcourseids.reverse().forEach(courseid => {
+                        let xcourseName = ""
+                        for (const fullCourseName of Object.keys(xcourses[courseid.substring(0, 4)][xcourseids[courseid].SEM])) {
+                            if (fullCourseName.startsWith(courseid.substring(0, 4) + " " + courseid.substring(4) + " - ")) {
+                                xcourseName = fullCourseName
+                                break
+                            }
+                        }
+                        let rx = JSON.parse(JSON.stringify(xcourses[courseid.substring(0, 4)][xcourseids[courseid].SEM][xcourseName])), condiA = false, condiB = false
+                        kcourseids.forEach(xcourseid => {
+                            ["PRE-REQUISITE", "EXCLUSION"].forEach(a => {
+                                if (typeof rx.attr[a] != "undefined") {
+                                    condiA = rx.attr[a].includes(xcourseid.substring(0, 4) + " " + xcourseid.substring(4))
+                                    //TODO: think about how to handle cases like ( exclude CORE1403 -> exclude CORE1403A & CORE1403S & CORE1403I ) with current looping approach
+                                    //current bug: ( exclude CORE1403I will be treated as exclude CORE1403A & CORE1403S & CORE1403I when CORE1403 does not exist )
+                                    //condiB = (condiA) ? true : (!kcourseids.includes(xcourseid.substring(0, 8)) && rx.attr[a].includes(xcourseid.substring(0, 4) + " " + xcourseid.substring(4, 8)))
+                                    if (courseid != xcourseid && (condiA || condiB)) {
+                                        if (typeof xextraattr[xcourseid] === "undefined") xextraattr[xcourseid] = {}
+                                        if (typeof xextraattr[xcourseid]["" + a + "-BY"] === "undefined") xextraattr[xcourseid]["" + a + "-BY"] = []
+                                        xextraattr[xcourseid]["" + a + "-BY"].push(courseid.substring(0, 4) + " " + courseid.substring(4))
+                                        if (condiA) rx.attr[a] = rx.attr[a].replaceAll(xcourseid.substring(0, 4) + " " + xcourseid.substring(4), " . ")
+                                    }
+                                }
+                            })
+                        })
+                    })
+                }
             }
+
+            pkgx["insems"] = xinsems
+            pkgx["diffs"] = xdiffs
+            if (willmodifyextraattr) pkgx["extraattr"] = xextraattr
+
+            post("http://127.0.0.1:7002/!setvar/", JSON.stringify(pkgx)).then(r => r.json()).then(r => {
+                console.log('[courses_cache] cacheing to nodejs server done, used ' + ((new Date()).getTime() - cctm.getTime()) + 'ms')
+                post("http://127.0.0.1:7002/!setflag/", JSON.stringify({ course_cache_ongoing: 0 }))
+
+                if (!no7z && servar.course_backup_path) {
+                    setTimeout(exec, 100, `"C:\\Program Files\\7-Zip\\7z.exe" a ` + servar.course_backup_path + ` "` + servar.course_path + `*"`, err => { })
+                }
+            })
         })
+
     })
 
 } catch (error) {
     sharedfx.deathDump("course_cache_node", "Unrecoverable global crash", error)
+    post("http://127.0.0.1:7002/!setflag/", JSON.stringify({ course_cache_ongoing: 2 }))
 }
