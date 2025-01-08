@@ -127,13 +127,13 @@ try {
             return
         }
 
-        if ((new Date).getTime() > new Date(startTime).getTime()) {
+        if ((new Date).getTime() > new Date(autofetcher[sem].startTime).getTime()) {
             setTimeout(courses_fetch, 50, false, false, sem)
         }
 
         setTimeout(course_fetch_looper, course_fetch_interval(), sem)
     }
-    autofetcher.keys().forEach(sem => {
+    Object.keys(autofetcher).forEach(sem => {
         setTimeout(course_fetch_looper, course_fetch_interval(), sem)
     })
     setInterval(() => {
